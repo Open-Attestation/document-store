@@ -1,3 +1,4 @@
 node_modules
 set_config_folder_dir
 yarn.lock
+build

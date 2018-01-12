@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-contract Merkle {
+library Merkle {
   function verifyMerkleTreeProof(
     bytes32[] _proof,
     bytes32 _hash,
