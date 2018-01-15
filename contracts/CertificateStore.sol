@@ -3,13 +3,15 @@ pragma solidity ^0.4.4;
 import "zeppelin-solidity/contracts/MerkleProof.sol";
 
 contract CertificateStore {
-  address public owner;
-  bytes32[] public certificates;
+  address public issuer;
   string public verificationUrl;
   string public name;
 
-  modifier onlyOwner {
-    require(msg.sender == owner);
+  // certificateIssued[certificateRoot] shows if the certificate is issued
+  mapping(bytes32 => bool) certificateIssued;
+
+  modifier onlyIssuer {
+    require(msg.sender == issuer);
     _;
   }
 
@@ -17,33 +19,30 @@ contract CertificateStore {
     string _verificationUrl,
     string _name
   ) public{
-    owner = msg.sender;
+    issuer = msg.sender;
     verificationUrl = _verificationUrl;
     name = _name;
   }
 
   function issueCertificate(
     bytes32 certificateRoot
-  ) public onlyOwner returns (uint) {
-    certificates.push(certificateRoot);
-    return(certificates.length - 1);
+  ) public onlyIssuer returns (bool) {
+    certificateIssued[certificateRoot] = true;
+    return true;
   }
 
-  function certificateIndex(
-    bytes32 hash
-  ) public view returns (uint) {
-    for(uint i=0; i<certificates.length; i++){
-      if(certificates[i] == hash) return i;
-    }
-    revert();
+  function isIssued(
+    bytes32 certificateRoot
+  ) public view returns (bool) {
+    return (certificateIssued[certificateRoot] == true);
   }
 
   function checkProof(
-    uint index,
+    bytes32 certificateRoot,
     bytes32 claim,
     bytes proof
   ) public view returns (bool) {
-    if(index > certificates.length - 1 ){ revert(); }
-    return MerkleProof.verifyProof(proof, certificates[index], claim);
+    if(!isIssued(certificateRoot)){ return false; }
+    return MerkleProof.verifyProof(proof, certificateRoot, claim);
   }
 }
