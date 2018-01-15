@@ -1,6 +1,6 @@
 pragma solidity ^0.4.4;
 
-import "./Merkle.sol";
+import "zeppelin-solidity/contracts/MerkleProof.sol";
 
 contract CertificateStore {
   address public owner;
@@ -41,9 +41,9 @@ contract CertificateStore {
   function checkProof(
     uint index,
     bytes32 claim,
-    bytes32[] proof
+    bytes proof
   ) public view returns (bool) {
     if(index > certificates.length - 1 ){ revert(); }
-    return Merkle.verifyMerkleTreeProof(proof, claim, certificates[index]);
+    return MerkleProof.verifyProof(proof, certificates[index], claim);
   }
 }
