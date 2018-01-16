@@ -5,7 +5,6 @@ contract CertificateStore {
   string public verificationUrl;
   string public name;
 
-  // certificateIssued[certificateRoot] shows if the certificate is issued
   mapping(bytes32 => bool) certificateIssued;
   mapping(bytes32 => bool) certificateInvalidated;
 
@@ -46,36 +45,27 @@ contract CertificateStore {
   function checkProof(
     bytes32 certificateRoot,
     bytes32 claim,
-    bytes proof
+    bytes32[] proof
   ) public view returns (bool) {
     if(!isIssued(certificateRoot)){ return false; }
     return merkleProofInvalidated(proof, certificateRoot, claim);
   }
 
+  // Modified implementation of MerkleProof from zepplin-solidity
   function merkleProofInvalidated(
-    bytes _proof,
+    bytes32[] _proof,
     bytes32 _root,
     bytes32 _leaf
-  ) public view returns (bool) {
-    // Check if proof length is a multiple of 32
-    if (_proof.length % 32 != 0) {
-      return false;
-    }
-
+  ) private view returns (bool) {
     bytes32 proofElement;
     bytes32 computedHash = _leaf;
 
-    for (uint256 i = 32; i <= _proof.length; i += 32) {
-      assembly {
-        // Load the current element of the proof
-        proofElement := mload(add(_proof, i))
-      }
+    for (uint256 i = 0; i < _proof.length; i ++) {
+      proofElement = _proof[i];
 
       if (computedHash < proofElement) {
-        // Hash(current computed hash + current element of the proof)
         computedHash = keccak256(computedHash, proofElement);
       } else {
-        // Hash(current element of the proof + current computed hash)
         computedHash = keccak256(proofElement, computedHash);
       }
     }
@@ -84,7 +74,6 @@ contract CertificateStore {
       return false;
     }
 
-    // Check if the computed hash (root) is equal to the provided root
     return computedHash == _root;
   }
 }
