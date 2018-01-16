@@ -102,4 +102,34 @@ contract('CertificateStore', function(accounts) {
       done();
     })
   });
+
+  it('should allow invalidation of certificate/claim', (done) => {
+    const certificateRoot = '0x458a80232eda8a816972be8ac731feb50727149aff6287d70142821ae160caf7';
+    const hash = "0x70989559c3d2c14f391d6281ae148f6a4e850d17ad3b566e6588488b011e02a1";
+    const proof = 
+      "0x7128e3b540c4c41a4bc0bbf5df566240d976b0484b19d563374f14eaaea48a02"
+      + "da8e1a0d000a19aa3a87ace8432b05ee533ae174ddd3fd2deedb2f2a89b22857"
+      + "66a10abb3faced650f4321c13d85b28912d805aed94f90fbc55fb957745e4d30"
+      + "f7212ee32acad60fd5463b64b0598e6f213153dbc85567397da254b273a20d52"
+      + "35414d4dd3c0cd275bfec92cc7ba0cd28b3dbcf40e8074f8672d5bc6195067ef"
+      + "90de2449c8102ed2ab6334b5fa09b4cb604ca444ddfe77100694d84b09df4bfb"
+    ;
+
+    instance.issueCertificate(certificateRoot)
+    .then(receipt => {
+      return instance.checkProof.call(certificateRoot, hash, proof);
+    })
+    .then(isValid => {
+      assert.equal(isValid, true, "Certificate is not properly issued");
+      return instance.invalidateCertificate(certificateRoot);
+    })
+    .then(receipt => {
+      return instance.checkProof.call(certificateRoot, hash, proof);
+    })
+    .then(isValid => {
+      assert.equal(isValid, false, "Certificate is not invalidated");
+      done();
+    });
+
+  });
 });
