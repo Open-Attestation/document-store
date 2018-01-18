@@ -8,8 +8,16 @@ contract CertificateStore {
   mapping(bytes32 => bool) certificateIssued;
   mapping(bytes32 => bool) certificateInvalidated;
 
+  address[] public publishTo;
+  mapping(address => bool) allowedPublishers;
+
   modifier onlyIssuer {
     require(msg.sender == issuer);
+    _;
+  }
+
+  modifier onlyWhitelisted {
+    require(msg.sender == issuer || allowedPublishers[msg.sender] == true);
     _;
   }
 
@@ -24,15 +32,23 @@ contract CertificateStore {
 
   function issueCertificate(
     bytes32 certificateRoot
-  ) public onlyIssuer returns (bool) {
+  ) public onlyWhitelisted returns (bool) {
     certificateIssued[certificateRoot] = true;
+    for(uint i = 0; i<publishTo.length; i++){
+      CertificateStore subscriber = CertificateStore(publishTo[i]);
+      subscriber.issueCertificate(certificateRoot);
+    }
     return true;
   }
 
   function invalidateCertificate(
     bytes32 certificateRoot
-  ) public onlyIssuer returns (bool) {
+  ) public onlyWhitelisted returns (bool) {
     certificateInvalidated[certificateRoot] = true;
+    for(uint i = 0; i<publishTo.length; i++){
+      CertificateStore subscriber = CertificateStore(publishTo[i]);
+      subscriber.invalidateCertificate(certificateRoot);
+    }
     return true;
   }
 
@@ -49,6 +65,20 @@ contract CertificateStore {
   ) public view returns (bool) {
     if(!isIssued(certificateRoot)){ return false; }
     return merkleProofInvalidated(proof, certificateRoot, claim);
+  }
+
+  function whitelistAddress (
+    address _address
+  ) public onlyIssuer returns (bool) {
+    allowedPublishers[_address] = true;
+    return true;
+  }
+
+  function addSubscriber (
+    address _address
+  ) public onlyIssuer returns (bool) {
+    publishTo.push(_address);
+    return true;
   }
 
   // Modified implementation of MerkleProof from zepplin-solidity

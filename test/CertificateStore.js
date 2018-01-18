@@ -2,17 +2,23 @@ const CertificateStore = artifacts.require("./CertificateStore.sol");
 const config = require('../config.js');
 
 contract('CertificateStore', function(accounts) {
-  let instance = null;
+  let store1 = null;
+  let store2 = null;
 
   before((done) => {
-    CertificateStore.deployed().then(deployed => {
-      instance = deployed;
+    CertificateStore.deployed()
+    .then(deployed => {
+      store1 = deployed;
+      return CertificateStore.new(config.VERIFICATION_URL, config.INSTITUTE_NAME)
+    })
+    .then(deployed => {
+      store2 = deployed;
       done();
     });
   })
 
   it('should have correct name', (done) => {
-    instance.name.call()
+    store1.name.call()
     .then(name => {
       assert.equal(name, config.INSTITUTE_NAME, 'Name of institute does not match');
       done();
@@ -20,7 +26,7 @@ contract('CertificateStore', function(accounts) {
   });
 
   it('should have correct verification url', (done) => {
-    instance.verificationUrl.call()
+    store1.verificationUrl.call()
     .then(url => {
       assert.equal(url, config.VERIFICATION_URL, 'Verification url of institute does not match');
       done();
@@ -29,9 +35,9 @@ contract('CertificateStore', function(accounts) {
 
   it('should be able to issue a certificate and check that it is issued', (done) => {
     const certMerkleRoot = '0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330';
-    instance.issueCertificate(certMerkleRoot)
+    store1.issueCertificate(certMerkleRoot)
     .then(receipt => {
-      return instance.isIssued.call(certMerkleRoot);
+      return store1.isIssued.call(certMerkleRoot);
     })
     .then(issued => {
       assert.equal(issued, true, 'Certificate is not issued');
@@ -41,7 +47,7 @@ contract('CertificateStore', function(accounts) {
 
   it('should return false for certificate not issued', (done) => {
     const certMerkleRoot = '0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6331';
-    instance.isIssued.call(certMerkleRoot)
+    store1.isIssued.call(certMerkleRoot)
     .then(issued => {
       assert.equal(issued, false, 'Certificate is issued in error');
       done();
@@ -59,7 +65,7 @@ contract('CertificateStore', function(accounts) {
       "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof)
+    store1.checkProof(certificateRoot, hash, proof)
     .then(valid => {
       assert.equal(valid, true);
       done();
@@ -78,7 +84,7 @@ contract('CertificateStore', function(accounts) {
       "0xa4571199578e394188ea9f40f22cb3f63b2c3bcdf225e6f7389f8b0e6c926253"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof)
+    store1.checkProof(certificateRoot, hash, proof)
     .then(valid => {
       assert.equal(valid, false);
       done();
@@ -96,7 +102,7 @@ contract('CertificateStore', function(accounts) {
       "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof)
+    store1.checkProof(certificateRoot, hash, proof)
     .then(valid => {
       assert.equal(valid, false);
       done();
@@ -115,21 +121,39 @@ contract('CertificateStore', function(accounts) {
       "0x90de2449c8102ed2ab6334b5fa09b4cb604ca444ddfe77100694d84b09df4bfb"
     ];
 
-    instance.issueCertificate(certificateRoot)
+    store1.issueCertificate(certificateRoot)
     .then(receipt => {
-      return instance.checkProof.call(certificateRoot, hash, proof);
+      return store1.checkProof.call(certificateRoot, hash, proof);
     })
     .then(isValid => {
       assert.equal(isValid, true, "Certificate is not properly issued");
-      return instance.invalidateCertificate(certificateRoot);
+      return store1.invalidateCertificate(certificateRoot);
     })
     .then(receipt => {
-      return instance.checkProof.call(certificateRoot, hash, proof);
+      return store1.checkProof.call(certificateRoot, hash, proof);
     })
     .then(isValid => {
       assert.equal(isValid, false, "Certificate is not invalidated");
       done();
     });
-
   });
+
+  it('should allow a store to publish to parent', (done) => {
+    const certMerkleRoot = '0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6350';
+
+    store1.whitelistAddress(store2.address)
+    .then(tx => {
+      return store2.addSubscriber(store1.address);
+    })
+    .then(tx => {
+      return store2.issueCertificate(certMerkleRoot);
+    })
+    .then(tx => {
+      return store1.isIssued.call(certMerkleRoot);
+    })
+    .then(isIssued => {
+      assert.equal(isIssued, true, "Certificate cannot be validated in parent store");
+      done();
+    })
+  })
 });
