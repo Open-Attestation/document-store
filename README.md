@@ -1,6 +1,6 @@
 # certificate-contract
 
-[![Build Status](https://travis-ci.org/gyng/ditherer.svg?branch=master)](https://travis-ci.org/gyng/ditherer)
+[![Build Status](https://travis-ci.org/GovTechSG/certificate-contract.svg?branch=master)](https://travis-ci.org/GovTechSG/certificate-contract)
 
 ## Setup
 

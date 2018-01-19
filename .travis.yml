@@ -12,3 +12,6 @@ before_install:
 
 script:
   - docker-compose exec truffle yarn run test:docker
+
+notifications:
+  slack: hive-ida:MXjYRdIBifAJ85SMx5uGWrMu
