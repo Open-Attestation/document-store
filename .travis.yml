@@ -1,17 +1,15 @@
 sudo: required
-
 language: generic
-
 services:
-  - docker
-
+- docker
 before_install:
-  - docker-compose up -d
-  - docker-compose ps
-  - docker ps -a
-
+- docker-compose up -d
+- docker-compose ps
+- docker ps -a
 script:
-  - docker-compose exec truffle yarn run test:ci
-
+- docker-compose exec truffle yarn run test:ci
 notifications:
-  slack: hive-ida:MXjYRdIBifAJ85SMx5uGWrMu
+  slack:
+    rooms:
+      secure: sxY5T7Yot2yz6Wouiw9fisTipT/GtB/YnX31uinKKIHsnGGObMqY1c+4xI/jRq7TjU71xVg17SU/bBygocSFdNkiASgPzGk8INLbFOFewWKae7hcEcJr1Hhe56WYcV5A4g/mP/q2iqXcW61UwUQDstl8m+66Tk79pdZrqsg9lqsgRIxSBcuszz8N8NyJS61jNxPhLlGwlosEhY1QCsXtz+K0NlZbDxXcqMxQW4IxzP2zRHwYXgl8XdQd2qgWwRublHnPdXkyLqRRUe2cHoMo1SeapZA4SW2d3v4rn+tTWF/tTc2j32San0gDznJuADe8Ry4qMqvTUQCMEGE3rd8wGVUHYTaHO9Tk5Px5q2LXSLMRD95LHDm5h6zpZegFrPIUFxYHs+Fjd4XBBcZf8xYPZYF3NTPxRLDSfl/yXO5QNv/5DxShUSacRhRuCIWUCTTygFMLIecKYndUDwwtwmV7DwmND6d6IjKvPIvcD1f5wjH5IVGvggI0FnosZvpU/ZrmSUYHh1wzZl9xywKADxGNVrIdO0TbUqIj/eUp0DKEIF0rbRe64lRkeSU0RFnD+yOgYKv4yjHXfT1YV6J8FPVrtAJolIY8LZ6/ViDn+EJ+W4vTG0SAmXTJA+RVV0Ekh5brQQ5MABlfpKiaqh4IPjETgXvKoYsoDlhWZJdejHMU3kQ=
+    on_success: always
