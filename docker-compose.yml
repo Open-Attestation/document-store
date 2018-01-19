@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"
+    networks:
+      - ganache
+    command: ganache-cli -h 0.0.0.0 -p 8545 -i 1337
+
+  truffle:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.truffle
+    networks:
+      - ganache
+
+networks:
+  ganache:

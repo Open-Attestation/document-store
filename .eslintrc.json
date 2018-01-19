@@ -1,0 +1,20 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+
+  "env": {
+    "mocha": true
+  },
+
+  "plugins": ["prettier"],
+
+  "globals": {
+    "artifacts": false,
+    "contract": false,
+    "assert": false,
+    "web3": false
+  },
+
+  "rules": {
+    "prettier/prettier": "error"
+  }
+}

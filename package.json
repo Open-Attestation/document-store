@@ -4,10 +4,31 @@
   "main": "index.js",
   "repository": "git@github.com:GovTechSG/certificate-contract.git",
   "author": "GovTech",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
+  "scripts": {
+    "eslint:fix": "eslint . --ext .js --fix",
+    "eslint": "eslint . --ext .js",
+    "lint:fix": "solium:fix && eslint:fix",
+    "lint": "yarn solium && yarn eslint",
+    "solium:fix": "solium -d contracts --fix",
+    "solium": "solium -d contracts",
+    "test:docker": "truffle test --network docker",
+    "test:ci": "yarn lint && yarn test:docker",
+    "test": "truffle test",
+    "truffle": "truffle"
+  },
   "dependencies": {
     "ganache-cli": "^6.0.3",
     "truffle": "^4.0.4",
     "zeppelin-solidity": "^1.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-prettier": "^2.5.0",
+    "prettier": "^1.10.2",
+    "solium": "^1.1.2"
   }
 }
