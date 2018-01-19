@@ -7,7 +7,7 @@ services:
       - "8545:8545"
     networks:
       - ganache
-    command: ganache-cli -h 0.0.0.0 -p 8545 -i 1337
+    command: ganache-cli -h 0.0.0.0 -p 8545 -i 1337 -s foobar -e 1000000000000000000000000
 
   truffle:
     build:
