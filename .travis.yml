@@ -1,0 +1,18 @@
+sudo: required
+
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - docker-compose up -d
+  - docker-compose ps
+  - docker ps -a
+
+script:
+  - docker-compose exec truffle yarn run test:ci
+
+notifications:
+  slack:
+    secure: kB9fIuKAub6Dpkc/k2O15c0xoUeHhQFaoVVQ6oo87nvfW/Oamb7oxnMcygiVPXNynx/0ARDrxuT6PSN1yQbhC+NgdOPRNpJnwbk6s8SEGMd4Mg3RKjaL6MtQrSn8wgvkjrQkXVyw9YgYDdQo2HhkmX2Oyeprlalmuw2zzeaTjDCnDPKcr7RkHDFNeO62jymoZoXtx95/akOaW07a1cwF193tnUdO8gAVH0QZGOm/Loh843I7pXUxLAl0bSYlooiRldSwkLBHXx+TIMj1cizxFrJyuf8m7QOLZEedWBzlu6OUB6Lizc9K64cSyGjzzTAx6cZikZh7JLw0VUOSRqXhQ1U58XIyX4p1jcQZp3hKHhFqwzJN6EOH64WkxkAZAvK4CH+Pv+AJeTfh2WLblsfny521Iezxd5oOG0H8geMeNfb460Gx6uxzNvNg7h15UzBc4rvOz6/XzM15Wj8PB5Eaf3andR86m4PrpgZtMjqxtBZjxPhvny1Zu4jvlSAyhQ+0k+PNIU9vx/FN18qV120RvQPA6QoO18itp+hCe1bgmBxyVd7OF2IiUTUh0stAi+ka7Xhv/YoBbPjp4lADuavS6qrxHsAu8S3lFlWRsKUpJ6dlQl/cWhBLfY2XvY1YKg7TgM6VodP/vmtayZJLjBvRjreWur5U9SJ3EYYFy15l9dY=
