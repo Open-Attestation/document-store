@@ -1,5 +1,6 @@
 pragma solidity ^0.4.4;
 
+
 contract CertificateStore {
   address public issuer;
   string public verificationUrl;
@@ -16,7 +17,8 @@ contract CertificateStore {
   function CertificateStore(
     string _verificationUrl,
     string _name
-  ) public{
+  ) public
+  {
     issuer = msg.sender;
     verificationUrl = _verificationUrl;
     name = _name;
@@ -24,21 +26,24 @@ contract CertificateStore {
 
   function issueCertificate(
     bytes32 certificateRoot
-  ) public onlyIssuer returns (bool) {
+  ) public onlyIssuer returns (bool)
+  {
     certificateIssued[certificateRoot] = true;
     return true;
   }
 
   function invalidateCertificate(
     bytes32 certificateRoot
-  ) public onlyIssuer returns (bool) {
+  ) public onlyIssuer returns (bool)
+  {
     certificateInvalidated[certificateRoot] = true;
     return true;
   }
 
   function isIssued(
     bytes32 certificateRoot
-  ) public view returns (bool) {
+  ) public view returns (bool)
+  {
     return (certificateIssued[certificateRoot] == true);
   }
 
@@ -46,8 +51,11 @@ contract CertificateStore {
     bytes32 certificateRoot,
     bytes32 claim,
     bytes32[] proof
-  ) public view returns (bool) {
-    if(!isIssued(certificateRoot)){ return false; }
+  ) public view returns (bool)
+  {
+    if (!isIssued(certificateRoot)) {
+      return false;
+    }
     return merkleProofInvalidated(proof, certificateRoot, claim);
   }
 
@@ -56,7 +64,8 @@ contract CertificateStore {
     bytes32[] _proof,
     bytes32 _root,
     bytes32 _leaf
-  ) private view returns (bool) {
+  ) private view returns (bool)
+  {
     bytes32 proofElement;
     bytes32 computedHash = _leaf;
 
@@ -70,7 +79,7 @@ contract CertificateStore {
       }
     }
 
-    if(certificateInvalidated[computedHash] == true) {
+    if (certificateInvalidated[computedHash]) {
       return false;
     }
 

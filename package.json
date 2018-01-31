@@ -8,7 +8,7 @@
   "scripts": {
     "eslint:fix": "eslint . --ext .js --fix",
     "eslint": "eslint . --ext .js",
-    "lint:fix": "solium:fix && eslint:fix",
+    "lint:fix": "yarn solium:fix && yarn eslint:fix",
     "lint": "yarn solium && yarn eslint",
     "solium:fix": "solium -d contracts --fix",
     "solium": "solium -d contracts",
