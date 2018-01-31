@@ -20,7 +20,7 @@
   "dependencies": {
     "ganache-cli": "^6.0.3",
     "truffle": "^4.0.4",
-    "zeppelin-solidity": "^1.5.0"
+    "zeppelin-solidity": "^1.6.0"
   },
   "devDependencies": {
     "eslint": "^4.15.0",
