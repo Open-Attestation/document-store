@@ -1,60 +1,67 @@
 const CertificateStore = artifacts.require("./CertificateStore.sol");
 const config = require("../config.js");
+const chai = require("chai");
+const chaiAsPromised = require("chai-as-promised");
+
+chai.use(chaiAsPromised);
+const { assert } = chai;
 
 contract("CertificateStore", _accounts => {
   let instance = null;
 
-  before(done => {
-    CertificateStore.deployed().then(deployed => {
-      instance = deployed;
-      done();
-    });
+  before(async () => {
+    instance = await CertificateStore.deployed();
   });
 
-  it("should have correct name", done => {
-    instance.name.call().then(name => {
-      assert.equal(
-        name,
-        config.INSTITUTE_NAME,
-        "Name of institute does not match"
-      );
-      done();
-    });
+  it("should have correct name", async () => {
+    const name = await instance.name.call();
+    assert.equal(
+      name,
+      config.INSTITUTE_NAME,
+      "Name of institute does not match"
+    );
   });
 
-  it("should have correct verification url", done => {
-    instance.verificationUrl.call().then(url => {
-      assert.equal(
-        url,
-        config.VERIFICATION_URL,
-        "Verification url of institute does not match"
-      );
-      done();
-    });
+  it("should have correct verification url", async () => {
+    const url = await instance.verificationUrl.call();
+    assert.equal(
+      url,
+      config.VERIFICATION_URL,
+      "Verification url of institute does not match"
+    );
   });
 
-  it("should be able to issue a certificate and check that it is issued", done => {
-    const certMerkleRoot =
+  it("should be able to issue a certificate batch and check that it is issued", async () => {
+    const batchMerkleRoot =
       "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-    instance
-      .issueCertificate(certMerkleRoot)
-      .then(_receipt => instance.isIssued.call(certMerkleRoot))
-      .then(issued => {
-        assert.equal(issued, true, "Certificate is not issued");
-        done();
-      });
+    const receipt = await instance.issueBatch(batchMerkleRoot);
+
+    // FIXME: Use a utility helper to watch for event
+    assert.equal(
+      receipt.logs[0].event,
+      "BatchIssued",
+      "Batch issued event not emitted."
+    );
+
+    const issued = await instance.isBatchIssued.call(batchMerkleRoot);
+    assert.equal(issued, true, "Certificate batch is not issued");
+
+    // Check that reissue is rejected
+    await assert.isRejected(
+      instance.issueBatch(batchMerkleRoot),
+      /revert/,
+      "Duplicate issue was not rejected"
+    );
   });
 
-  it("should return false for certificate not issued", done => {
-    const certMerkleRoot =
+  it("should return false for certificate batch not issued", async () => {
+    const batchMerkleRoot =
       "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6331";
-    instance.isIssued.call(certMerkleRoot).then(issued => {
-      assert.equal(issued, false, "Certificate is issued in error");
-      done();
-    });
+    const issued = await instance.isBatchIssued.call(batchMerkleRoot);
+    assert.equal(issued, false, "Certificate batch is issued in error");
   });
 
-  it("should return true for issued certificate with valid claim", done => {
+  it("should return true for issued certificate with valid claim", async () => {
     const certificateRoot =
       "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
     const hash =
@@ -67,13 +74,11 @@ contract("CertificateStore", _accounts => {
       "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof).then(valid => {
-      assert.equal(valid, true);
-      done();
-    });
+    const valid = await instance.checkProof(certificateRoot, hash, proof);
+    assert.equal(valid, true);
   });
 
-  it("should return false for unissued certificate with valid claim", done => {
+  it("should return false for unissued certificate with valid claim", async () => {
     const certificateRoot =
       "0x458a80232eda8a816972be8ac731feb50727149aff6287d70142821ae160caf7";
     const hash =
@@ -87,13 +92,11 @@ contract("CertificateStore", _accounts => {
       "0xa4571199578e394188ea9f40f22cb3f63b2c3bcdf225e6f7389f8b0e6c926253"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof).then(valid => {
-      assert.equal(valid, false);
-      done();
-    });
+    const valid = await instance.checkProof(certificateRoot, hash, proof);
+    assert.equal(valid, false);
   });
 
-  it("should return false for proof with invalid claim", done => {
+  it("should return false for proof with invalid claim", async () => {
     const certificateRoot =
       "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
     const hash =
@@ -106,13 +109,11 @@ contract("CertificateStore", _accounts => {
       "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510"
     ];
 
-    instance.checkProof(certificateRoot, hash, proof).then(valid => {
-      assert.equal(valid, false);
-      done();
-    });
+    const valid = await instance.checkProof(certificateRoot, hash, proof);
+    assert.equal(valid, false);
   });
 
-  it("should allow invalidation of certificate/claim", done => {
+  it("should allow invalidation of certificate/claim", async () => {
     const certificateRoot =
       "0x458a80232eda8a816972be8ac731feb50727149aff6287d70142821ae160caf7";
     const hash =
@@ -126,17 +127,16 @@ contract("CertificateStore", _accounts => {
       "0x90de2449c8102ed2ab6334b5fa09b4cb604ca444ddfe77100694d84b09df4bfb"
     ];
 
-    instance
-      .issueCertificate(certificateRoot)
-      .then(_receipt => instance.checkProof.call(certificateRoot, hash, proof))
-      .then(isValid => {
-        assert.equal(isValid, true, "Certificate is not properly issued");
-        return instance.invalidateCertificate(certificateRoot);
-      })
-      .then(_receipt => instance.checkProof.call(certificateRoot, hash, proof))
-      .then(isValid => {
-        assert.equal(isValid, false, "Certificate is not invalidated");
-        done();
-      });
+    // Issue the certificate and check it has been issued and is valid
+    let isValid = await instance
+      .issueBatch(certificateRoot)
+      .then(_receipt => instance.checkProof.call(certificateRoot, hash, proof));
+    assert.equal(isValid, true, "Certificate is not properly issued");
+
+    isValid = await instance
+      .revokeCertificate(certificateRoot)
+      .then(_receipt => instance.checkProof.call(certificateRoot, hash, proof));
+
+    assert.equal(isValid, false, "Certificate is not invalidated");
   });
 });

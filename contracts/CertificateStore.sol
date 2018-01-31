@@ -1,18 +1,36 @@
-pragma solidity ^0.4.4;
+pragma solidity ^0.4.17;
+
+import "zeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
 
-contract CertificateStore {
+contract CertificateStore is HasNoEther {
   address public issuer;
   string public verificationUrl;
   string public name;
 
-  mapping(bytes32 => bool) certificateIssued;
-  mapping(bytes32 => bool) certificateInvalidated;
+  event BatchIssued(bytes32 indexed batchRoot);
 
-  modifier onlyIssuer {
-    require(msg.sender == issuer);
-    _;
+  /// A recovation
+  ///
+  /// See https://www.imsglobal.org/sites/default/files/Badges/OBv2p0/index.html#RevocationList
+  /// for the details needed
+  struct Revocation {
+    // Merkle root of the batch
+    bytes32 batchMerkleRoot;
+    /// Block number of revocation
+    uint blockNumber;
+    uint revocationReason;
   }
+
+  /// A mapping of the certificate batch merkle root to the block number that was issued
+  mapping(bytes32 => uint) batchIssued;
+  /// A mapping of the hash of the certificate being revoked to a revocation struct
+  // mapping(bytes32 => Revocation) certificateRevoked;
+  mapping(bytes32 => bool) certificateRevoked;
+
+  // modifier onlyBatchIssued(bytes32 merkleRoot) {
+  //   Batch storage batch = batchIssued[merkleRoot]
+  // }
 
   function CertificateStore(
     string _verificationUrl,
@@ -24,39 +42,39 @@ contract CertificateStore {
     name = _name;
   }
 
-  function issueCertificate(
-    bytes32 certificateRoot
-  ) public onlyIssuer returns (bool)
+  function issueBatch(
+    bytes32 batchRoot
+  ) public onlyOwner onlyNotIssuedBatch(batchRoot)
   {
-    certificateIssued[certificateRoot] = true;
+    batchIssued[batchRoot] = block.number;
+    BatchIssued(batchRoot);
+  }
+
+  function revokeCertificate(
+    bytes32 certificateHash
+  ) public onlyOwner returns (bool)
+  {
+    certificateRevoked[certificateHash] = true;
     return true;
   }
 
-  function invalidateCertificate(
-    bytes32 certificateRoot
-  ) public onlyIssuer returns (bool)
-  {
-    certificateInvalidated[certificateRoot] = true;
-    return true;
-  }
-
-  function isIssued(
-    bytes32 certificateRoot
+  function isBatchIssued(
+    bytes32 batchRoot
   ) public view returns (bool)
   {
-    return (certificateIssued[certificateRoot] == true);
+    return (batchIssued[batchRoot] != 0);
   }
 
   function checkProof(
-    bytes32 certificateRoot,
+    bytes32 batchRoot,
     bytes32 claim,
     bytes32[] proof
   ) public view returns (bool)
   {
-    if (!isIssued(certificateRoot)) {
+    if (!isBatchIssued(batchRoot)) {
       return false;
     }
-    return merkleProofInvalidated(proof, certificateRoot, claim);
+    return merkleProofInvalidated(proof, batchRoot, claim);
   }
 
   // Modified implementation of MerkleProof from zepplin-solidity
@@ -79,10 +97,20 @@ contract CertificateStore {
       }
     }
 
-    if (certificateInvalidated[computedHash]) {
+    if (certificateRevoked[computedHash]) {
       return false;
     }
 
     return computedHash == _root;
+  }
+
+  modifier onlyIssuedBatch(bytes32 batchRoot) {
+    require(isBatchIssued(batchRoot));
+    _;
+  }
+
+  modifier onlyNotIssuedBatch(bytes32 batchRoot) {
+    require(!isBatchIssued(batchRoot));
+    _;
   }
 }
