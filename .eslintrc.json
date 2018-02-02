@@ -5,7 +5,11 @@
     "mocha": true
   },
 
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier",
+    "chai-friendly",
+    "chai-expect"
+  ],
 
   "globals": {
     "artifacts": false,
@@ -21,6 +25,11 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-unused-expressions": "off",
+    "chai-friendly/no-unused-expressions": "error",
+    "chai-expect/no-inner-compare": "error",
+    "chai-expect/missing-assertion": "error",
+    "chai-expect/terminating-properties": "error"
   }
 }
