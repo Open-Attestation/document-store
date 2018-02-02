@@ -4,7 +4,7 @@ const web3 = require("web3");
 const BigNumber = require("bignumber.js");
 
 // FIXME: Remove assert usage
-const { assert, expect } = require("chai")
+const { expect } = require("chai")
   .use(require("chai-as-promised"))
   .use(require("chai-bignumber")(BigNumber));
 
@@ -24,8 +24,7 @@ contract("CertificateStore", accounts => {
   describe("constructor", () => {
     it("should have correct name", async () => {
       const name = await instance.name();
-      assert.equal(
-        name,
+      expect(name).to.be.equal(
         config.INSTITUTE_NAME,
         "Name of institute does not match"
       );
@@ -33,8 +32,7 @@ contract("CertificateStore", accounts => {
 
     it("should have correct verification url", async () => {
       const url = await instance.verificationUrl();
-      assert.equal(
-        url,
+      expect(url).to.be.equal(
         config.VERIFICATION_URL,
         "Verification url of institute does not match"
       );
@@ -53,19 +51,18 @@ contract("CertificateStore", accounts => {
       const receipt = await issueBatch(batchMerkleRoot);
 
       // FIXME: Use a utility helper to watch for event
-      assert.equal(
-        receipt.logs[0].event,
+      expect(receipt.logs[0].event).to.be.equal(
         "BatchIssued",
         "Batch issued event not emitted."
       );
-      assert.equal(
-        receipt.logs[0].args.batchRoot,
+      expect(
+        receipt.logs[0].args.batchRoot).to.be.equal(
         batchMerkleRoot,
         "Incorrect event arguments emitted"
       );
 
       const issued = await instance.isBatchIssued(batchMerkleRoot);
-      assert.equal(issued, true, "Certificate batch is not issued");
+      expect(issued, true, "Certificate batch is not issued");
     });
 
     it("should not allow duplicate issues", async () => {
@@ -121,7 +118,7 @@ contract("CertificateStore", accounts => {
       await issueBatch(batchMerkleRoot);
 
       const issued = await instance.isBatchIssued(batchMerkleRoot);
-      assert.equal(issued, true, "Certificate batch is not issued");
+      expect(issued, "Certificate batch is not issued").to.be.true;
     });
 
     it("should return false for certificate batch not issued", async () => {
@@ -129,7 +126,7 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
       const issued = await instance.isBatchIssued(batchMerkleRoot);
-      assert.equal(issued, false, "Certificate batch is issued in error");
+      expect(issued, "Certificate batch is issued in error").to.be.false;
     });
   });
 
@@ -262,26 +259,22 @@ contract("CertificateStore", accounts => {
       ];
 
       await issueBatch(batchMerkleRoot);
-      await instance.revokeClaim(
-        batchMerkleRoot,
-        certificateHash,
-        proof,
-        1337
-      );
+      await instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337);
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.true;
     });
 
     it("returns true for non-revoked claims", async () => {
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+      "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.false;
     });
-  })
+  });
 
   describe("verifyClaim", () => {
     it("should return true for issued certificate with valid claim", async () => {
@@ -303,7 +296,7 @@ contract("CertificateStore", accounts => {
         certificateHash,
         proof
       );
-      assert.equal(valid, true);
+      expect(valid, true);
     });
 
     it("should return false for unissued certificate with valid claim", async () => {
@@ -325,7 +318,7 @@ contract("CertificateStore", accounts => {
         certificateHash,
         proof
       );
-      assert.equal(valid, false);
+      expect(valid, false);
     });
 
     it("should return false for proof with invalid claim", async () => {
@@ -347,7 +340,7 @@ contract("CertificateStore", accounts => {
         claimHash,
         proof
       );
-      assert.equal(valid, false);
+      expect(valid, false);
     });
 
     it("should return false for revoked leaf", async () => {
@@ -445,7 +438,8 @@ contract("CertificateStore", accounts => {
       // Value should be
       // 0xaf6e73229ae8dcb4d2313d7e6c9e0802481e0c65fd2e1d525dd74be6c64256ce
       const combinedHash = web3.utils.sha3([
-        ...web3.utils.hexToBytes(proof[0]), ...web3.utils.hexToBytes(claimHash)
+        ...web3.utils.hexToBytes(proof[0]),
+        ...web3.utils.hexToBytes(claimHash)
       ]);
 
       await instance.revokeClaim(
