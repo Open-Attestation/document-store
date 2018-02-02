@@ -55,14 +55,13 @@ contract("CertificateStore", accounts => {
         "BatchIssued",
         "Batch issued event not emitted."
       );
-      expect(
-        receipt.logs[0].args.batchRoot).to.be.equal(
+      expect(receipt.logs[0].args.batchRoot).to.be.equal(
         batchMerkleRoot,
         "Incorrect event arguments emitted"
       );
 
       const issued = await instance.isBatchIssued(batchMerkleRoot);
-      expect(issued, true, "Certificate batch is not issued");
+      expect(issued, "Certificate batch is not issued").to.be.true;
     });
 
     it("should not allow duplicate issues", async () => {
@@ -296,7 +295,7 @@ contract("CertificateStore", accounts => {
         certificateHash,
         proof
       );
-      expect(valid, true);
+      expect(valid).to.be.true;
     });
 
     it("should return false for unissued certificate with valid claim", async () => {
@@ -318,7 +317,7 @@ contract("CertificateStore", accounts => {
         certificateHash,
         proof
       );
-      expect(valid, false);
+      expect(valid).to.be.false;
     });
 
     it("should return false for proof with invalid claim", async () => {
@@ -340,7 +339,7 @@ contract("CertificateStore", accounts => {
         claimHash,
         proof
       );
-      expect(valid, false);
+      expect(valid).to.be.false;
     });
 
     it("should return false for revoked leaf", async () => {
