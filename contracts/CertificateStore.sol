@@ -1,12 +1,16 @@
 pragma solidity ^0.4.17;
 
-import "zeppelin-solidity/contracts/ownership/HasNoEther.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-contract CertificateStore is HasNoEther {
-  address public issuer;
+contract CertificateStore is Ownable {
   string public verificationUrl;
   string public name;
+
+  /// A mapping of the certificate batch merkle root to the block number that was issued
+  mapping(bytes32 => uint) batchIssued;
+  /// A mapping of the hash of the claim being revoked to a revocation struct
+  mapping(bytes32 => Revocation) claimRevoked;
 
   event BatchIssued(bytes32 indexed batchRoot);
   event ClaimRevoked(
@@ -27,21 +31,11 @@ contract CertificateStore is HasNoEther {
     uint revocationReason;
   }
 
-  /// A mapping of the certificate batch merkle root to the block number that was issued
-  mapping(bytes32 => uint) batchIssued;
-  /// A mapping of the hash of the claim being revoked to a revocation struct
-  mapping(bytes32 => Revocation) claimRevoked;
-
-  // modifier onlyBatchIssued(bytes32 merkleRoot) {
-  //   Batch storage batch = batchIssued[merkleRoot]
-  // }
-
   function CertificateStore(
     string _verificationUrl,
     string _name
   ) public
   {
-    issuer = msg.sender;
     verificationUrl = _verificationUrl;
     name = _name;
   }
@@ -73,11 +67,10 @@ contract CertificateStore is HasNoEther {
     bytes32 claim,
     bytes32[] proof,
     uint reason
-  ) public onlyOwner onlyIssuedBatch(batchRoot) onlyNotRevoked(claim) returns (bool)
+  ) public onlyOwner onlyIssuedBatch(batchRoot) returns (bool)
   {
     require(verifyMerkleProof(proof, batchRoot, claim));
-    Revocation memory revocation = Revocation(batchRoot, block.number, reason);
-    claimRevoked[claim] = revocation;
+    claimRevoked[claim] = Revocation(batchRoot, block.number, reason);
     ClaimRevoked(claim, batchRoot, reason);
   }
 
