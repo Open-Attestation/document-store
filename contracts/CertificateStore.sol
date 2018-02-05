@@ -65,11 +65,9 @@ contract CertificateStore is Ownable {
   function revokeClaim(
     bytes32 batchRoot,
     bytes32 claim,
-    bytes32[] proof,
     uint reason
-  ) public onlyOwner onlyIssuedBatch(batchRoot) returns (bool)
+  ) public onlyOwner onlyIssuedBatch(batchRoot) onlyNotRevoked(claim) returns (bool)
   {
-    require(verifyMerkleProof(proof, batchRoot, claim));
     claimRevoked[claim] = Revocation(batchRoot, block.number, reason);
     ClaimRevoked(claim, batchRoot, reason);
   }
@@ -79,55 +77,6 @@ contract CertificateStore is Ownable {
   ) public view returns (bool)
   {
     return claimRevoked[claim].blockNumber != 0;
-  }
-
-  function verifyClaim(
-    bytes32 batchRoot,
-    bytes32 claim,
-    bytes32[] proof
-  ) public view returns (bool)
-  {
-    if (!isBatchIssued(batchRoot)) {
-      return false;
-    }
-    return verifyMerkleProof(proof, batchRoot, claim);
-  }
-
-  /// Modified implementation of MerkleProof from zepplin-solidity
-  /// Also checks that along the entire path, nothing has been revoked
-  function verifyMerkleProof(
-    bytes32[] _proof,
-    bytes32 _root,
-    bytes32 _leaf
-  ) private view returns (bool)
-  {
-
-    if (isRevoked(_root) || isRevoked(_leaf)) {
-      return false;
-    }
-
-    bytes32 proofElement;
-    bytes32 computedHash = _leaf;
-
-    for (uint256 i = 0; i < _proof.length; i ++) {
-      proofElement = _proof[i];
-
-      if (isRevoked(proofElement)) {
-        return false;
-      }
-
-      if (computedHash < proofElement) {
-        computedHash = keccak256(computedHash, proofElement);
-      } else {
-        computedHash = keccak256(proofElement, computedHash);
-      }
-
-      if (isRevoked(computedHash)) {
-        return false;
-      }
-    }
-
-    return computedHash == _root;
   }
 
   modifier onlyIssuedBatch(bytes32 batchRoot) {
