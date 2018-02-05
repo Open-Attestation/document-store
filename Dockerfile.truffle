@@ -5,7 +5,13 @@ RUN npm install -g "yarn@${YARN_VERSION}"
 
 RUN apk update \
     && apk upgrade \
-    && apk add --no-cache git bash
+    && apk add --no-cache --update \
+    git \
+    bash \
+    python \
+    python-dev \
+    py-pip \
+    build-base
 
 WORKDIR /usr/src/app
 
