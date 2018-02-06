@@ -1,6 +1,5 @@
 const CertificateStore = artifacts.require("./CertificateStore.sol");
 const config = require("../config.js");
-const web3 = require("web3");
 const BigNumber = require("bignumber.js");
 
 // FIXME: Remove assert usage
@@ -135,20 +134,12 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
 
       await issueBatch(batchMerkleRoot);
 
       const receipt = await instance.revokeClaim(
         batchMerkleRoot,
         certificateHash,
-        proof,
         1337
       );
 
@@ -163,14 +154,12 @@ contract("CertificateStore", accounts => {
       const batchMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const certificateHash = batchMerkleRoot;
-      const proof = [];
 
       await issueBatch(batchMerkleRoot);
 
       const receipt = await instance.revokeClaim(
         batchMerkleRoot,
         certificateHash,
-        proof,
         1337
       );
 
@@ -186,41 +175,13 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
 
       await issueBatch(batchMerkleRoot);
 
-      await instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337);
+      await instance.revokeClaim(batchMerkleRoot, certificateHash, 1337);
 
       expect(
-        instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337)
-      ).to.be.rejectedWith(/revert/);
-    });
-
-    it("should not allow revocation of an invalid claim", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      // First proof is wrong
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec0",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
-
-      await issueBatch(batchMerkleRoot);
-
-      expect(
-        instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337)
+        instance.revokeClaim(batchMerkleRoot, certificateHash, 1337)
       ).to.be.rejectedWith(/revert/);
     });
 
@@ -229,16 +190,9 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
 
       expect(
-        instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337)
+        instance.revokeClaim(batchMerkleRoot, certificateHash, 1337)
       ).to.be.rejectedWith(/revert/);
     });
   });
@@ -249,16 +203,9 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
 
       await issueBatch(batchMerkleRoot);
-      await instance.revokeClaim(batchMerkleRoot, certificateHash, proof, 1337);
+      await instance.revokeClaim(batchMerkleRoot, certificateHash, 1337);
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.true;
@@ -272,188 +219,6 @@ contract("CertificateStore", accounts => {
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.false;
-    });
-  });
-
-  describe("verifyClaim", () => {
-    it("should return true for issued certificate with valid claim", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
-      await issueBatch(batchMerkleRoot);
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        certificateHash,
-        proof
-      );
-      expect(valid).to.be.true;
-    });
-
-    it("should return false for unissued certificate with valid claim", async () => {
-      const batchMerkleRoot =
-        "0x458a80232eda8a816972be8ac731feb50727149aff6287d70142821ae160caf7";
-      const certificateHash =
-        "0xe7919f28927ec109fc76e6c23b9d765636dc5c394330defc1da4ceef3d092802";
-      const proof = [
-        "0xde85e4611e82b19345a9b8c97fd9956df8c21b6c2111b29ab5b79ee4e72db2b5",
-        "0x316f8b7894f51f48add5929ff6b05ee141de763ca4f579799c6c2bf46e190ed1",
-        "0x61dad5f5e72ab727a4c2f150e6a3eec8dba8693626e8a71285f78a797c79f682",
-        "0xc31d781d0dafd0498177b173dda215f599a12cee58b33ff548f04c46c3106cf1",
-        "0x58a3f9b304ead7f11b202760a327cc7d81d233a0535207cbcde43684765255b6",
-        "0xa4571199578e394188ea9f40f22cb3f63b2c3bcdf225e6f7389f8b0e6c926253"
-      ];
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        certificateHash,
-        proof
-      );
-      expect(valid).to.be.false;
-    });
-
-    it("should return false for proof with invalid claim", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const claimHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510"
-      ];
-      await issueBatch(batchMerkleRoot);
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        claimHash,
-        proof
-      );
-      expect(valid).to.be.false;
-    });
-
-    it("should return false for revoked leaf", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const claimHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
-
-      await issueBatch(batchMerkleRoot);
-
-      await instance.revokeClaim(batchMerkleRoot, claimHash, proof, 1337);
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        claimHash,
-        proof
-      );
-
-      expect(valid).to.be.false;
-    });
-
-    it("should return false for revoked root", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const claimHash = batchMerkleRoot;
-      const proof = [];
-
-      await issueBatch(batchMerkleRoot);
-
-      // Revoke the root
-      await instance.revokeClaim(batchMerkleRoot, claimHash, proof, 1337);
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        claimHash,
-        proof
-      );
-      expect(valid).to.be.false;
-    });
-
-    it("should return false for revoked proof", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const claimHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
-
-      await issueBatch(batchMerkleRoot);
-
-      // We revoke proof[0]
-      await instance.revokeClaim(
-        batchMerkleRoot,
-        proof[0],
-        [claimHash, ...proof.slice(1)],
-        1337
-      );
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        claimHash,
-        proof
-      );
-      expect(valid).to.be.false;
-    });
-
-    it("should return false for revoked computed hash", async () => {
-      const batchMerkleRoot =
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const claimHash =
-        "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
-      const proof = [
-        "0x04d147f4920441b9f92da6a1bf0dc5331663b6d823eea8316a3ac8c97206bec9",
-        "0xcd9b445f1db7f12b66a272c35848fea1a4e74b77cd8fbe98c55326dcfa92d748",
-        "0x92928abcc6add620b8c513027ab880213977d216ae3a35c3519849bab3276660",
-        "0xafd499678500bf4be85d0ad9270988027a9c7ebc13679b4cce2d9b230fe54330",
-        "0xf85f3f3f370cf06bbf27dfec0999c038f04f4003687f7b165992b0bb03f3510b"
-      ];
-
-      await issueBatch(batchMerkleRoot);
-
-      // We want to revoke the combined hash of claimHash and proof[0]
-      // Value should be
-      // 0xaf6e73229ae8dcb4d2313d7e6c9e0802481e0c65fd2e1d525dd74be6c64256ce
-      const combinedHash = web3.utils.sha3([
-        ...web3.utils.hexToBytes(proof[0]),
-        ...web3.utils.hexToBytes(claimHash)
-      ]);
-
-      await instance.revokeClaim(
-        batchMerkleRoot,
-        combinedHash,
-        proof.slice(1),
-        1337
-      );
-
-      const valid = await instance.verifyClaim(
-        batchMerkleRoot,
-        claimHash,
-        proof
-      );
-      expect(valid).to.be.false;
     });
   });
 });
