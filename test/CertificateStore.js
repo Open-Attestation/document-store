@@ -70,7 +70,7 @@ contract("CertificateStore", accounts => {
       await issueCertificate(certificateMerkleRoot);
 
       // Check that reissue is rejected
-      return expect(
+      await expect(
         instance.issueCertificate(certificateMerkleRoot)
       ).to.be.rejectedWith(/revert/, "Duplicate issue was not rejected");
     });
@@ -83,7 +83,7 @@ contract("CertificateStore", accounts => {
       const certificateMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
-      return expect(
+      await expect(
         instance.issueCertificate(certificateMerkleRoot, { from: nonOwner })
       ).to.be.rejectedWith(/revert/);
     });
@@ -104,7 +104,7 @@ contract("CertificateStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
       // This test may fail on ganache-ui (works for ganache-cli)
-      return expect(
+      await expect(
         instance.getIssuedBlock(certificateMerkleRoot)
       ).to.be.rejectedWith(/revert/);
     });
@@ -171,7 +171,7 @@ contract("CertificateStore", accounts => {
 
       await instance.revokeCertificate(certificateHash, 1337);
 
-      return expect(
+      await expect(
         instance.revokeCertificate(certificateHash, 1337)
       ).to.be.rejectedWith(/revert/);
     });

@@ -7,7 +7,7 @@ contract CertificateStore is Ownable {
   string public verificationUrl;
   string public name;
 
-  /// A mapping of the certificate batch merkle root to the block number that was issued
+  /// A mapping of the certificate hash to the block number that was issued
   mapping(bytes32 => uint) certificateIssued;
   /// A mapping of the hash of the claim being revoked to a revocation struct
   mapping(bytes32 => Revocation) certificateRevoked;
@@ -23,7 +23,7 @@ contract CertificateStore is Ownable {
   /// See https://www.imsglobal.org/sites/default/files/Badges/OBv2p0/index.html#RevocationList
   /// for the details needed
   struct Revocation {
-    // Merkle root of the batch
+    // Hash of the certificate
     bytes32 certificate;
     /// Block number of revocation
     uint blockNumber;
@@ -41,7 +41,7 @@ contract CertificateStore is Ownable {
 
   function issueCertificate(
     bytes32 certificate
-  ) public onlyOwner onlyNotIssuedBatch(certificate)
+  ) public onlyOwner onlyNotIssuedCertificate(certificate)
   {
     certificateIssued[certificate] = block.number;
     CertificateIssued(certificate);
@@ -49,7 +49,7 @@ contract CertificateStore is Ownable {
 
   function getIssuedBlock(
     bytes32 certificate
-  ) public onlyIssuedBatch(certificate) view returns (uint)
+  ) public onlyIssuedCertificate(certificate) view returns (uint)
   {
     return certificateIssued[certificate];
   }
@@ -77,12 +77,12 @@ contract CertificateStore is Ownable {
     return certificateRevoked[certificate].blockNumber != 0;
   }
 
-  modifier onlyIssuedBatch(bytes32 certificate) {
+  modifier onlyIssuedCertificate(bytes32 certificate) {
     require(isCertificateIssued(certificate));
     _;
   }
 
-  modifier onlyNotIssuedBatch(bytes32 certificate) {
+  modifier onlyNotIssuedCertificate(bytes32 certificate) {
     require(!isCertificateIssued(certificate));
     _;
   }
