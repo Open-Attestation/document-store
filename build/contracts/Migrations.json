@@ -824,14 +824,19 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xcb152a2aa90055a0d255ca7dbaeb85edfdc86096"
+      "address": "0x8cdaf0cd259887258bc13a92c0a6da92698644c0"
     },
     "1518078352808": {
       "events": {},
       "links": {},
       "address": "0x1d08f2d4de702c6ac11e65a3c87102e2618beb2c"
+    },
+    "1519007080775": {
+      "events": {},
+      "links": {},
+      "address": "0xf88d9572de7f998ef368b5fe930b4f112d53607e"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-02-08T08:26:00.367Z"
+  "updatedAt": "2018-02-19T02:24:59.334Z"
 }

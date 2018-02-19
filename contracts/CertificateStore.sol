@@ -8,24 +8,23 @@ contract CertificateStore is Ownable {
   string public name;
 
   /// A mapping of the certificate batch merkle root to the block number that was issued
-  mapping(bytes32 => uint) batchIssued;
+  mapping(bytes32 => uint) certificateIssued;
   /// A mapping of the hash of the claim being revoked to a revocation struct
-  mapping(bytes32 => Revocation) claimRevoked;
+  mapping(bytes32 => Revocation) certificateRevoked;
 
-  event BatchIssued(bytes32 indexed batchRoot);
-  event ClaimRevoked(
-    bytes32 indexed claim,
-    bytes32 indexed batchRoot,
+  event CertificateIssued(bytes32 indexed certificate);
+  event CertificateRevoked(
+    bytes32 indexed certificate,
     uint indexed revocationReason
   );
 
-  /// A recovation
+  /// A revocation
   ///
   /// See https://www.imsglobal.org/sites/default/files/Badges/OBv2p0/index.html#RevocationList
   /// for the details needed
   struct Revocation {
     // Merkle root of the batch
-    bytes32 batchRoot;
+    bytes32 certificate;
     /// Block number of revocation
     uint blockNumber;
     uint revocationReason;
@@ -40,52 +39,51 @@ contract CertificateStore is Ownable {
     name = _name;
   }
 
-  function issueBatch(
-    bytes32 batchRoot
-  ) public onlyOwner onlyNotIssuedBatch(batchRoot)
+  function issueCertificate(
+    bytes32 certificate
+  ) public onlyOwner onlyNotIssuedBatch(certificate)
   {
-    batchIssued[batchRoot] = block.number;
-    BatchIssued(batchRoot);
+    certificateIssued[certificate] = block.number;
+    CertificateIssued(certificate);
   }
 
   function getIssuedBlock(
-    bytes32 batchRoot
-  ) public onlyIssuedBatch(batchRoot) view returns (uint)
+    bytes32 certificate
+  ) public onlyIssuedBatch(certificate) view returns (uint)
   {
-    return batchIssued[batchRoot];
+    return certificateIssued[certificate];
   }
 
-  function isBatchIssued(
-    bytes32 batchRoot
+  function isCertificateIssued(
+    bytes32 certificate
   ) public view returns (bool)
   {
-    return (batchIssued[batchRoot] != 0);
+    return (certificateIssued[certificate] != 0);
   }
 
-  function revokeClaim(
-    bytes32 batchRoot,
-    bytes32 claim,
+  function revokeCertificate(
+    bytes32 certificate,
     uint reason
-  ) public onlyOwner onlyIssuedBatch(batchRoot) onlyNotRevoked(claim) returns (bool)
+  ) public onlyOwner onlyNotRevoked(certificate) returns (bool)
   {
-    claimRevoked[claim] = Revocation(batchRoot, block.number, reason);
-    ClaimRevoked(claim, batchRoot, reason);
+    certificateRevoked[certificate] = Revocation(certificate, block.number, reason);
+    CertificateRevoked(certificate, reason);
   }
 
   function isRevoked(
-    bytes32 claim
+    bytes32 certificate
   ) public view returns (bool)
   {
-    return claimRevoked[claim].blockNumber != 0;
+    return certificateRevoked[certificate].blockNumber != 0;
   }
 
-  modifier onlyIssuedBatch(bytes32 batchRoot) {
-    require(isBatchIssued(batchRoot));
+  modifier onlyIssuedBatch(bytes32 certificate) {
+    require(isCertificateIssued(certificate));
     _;
   }
 
-  modifier onlyNotIssuedBatch(bytes32 batchRoot) {
-    require(!isBatchIssued(batchRoot));
+  modifier onlyNotIssuedBatch(bytes32 certificate) {
+    require(!isCertificateIssued(certificate));
     _;
   }
 
