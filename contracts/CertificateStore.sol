@@ -4,38 +4,22 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 contract CertificateStore is Ownable {
-  string public verificationUrl;
   string public name;
 
   /// A mapping of the certificate hash to the block number that was issued
   mapping(bytes32 => uint) certificateIssued;
-  /// A mapping of the hash of the claim being revoked to a revocation struct
-  mapping(bytes32 => Revocation) certificateRevoked;
+  /// A mapping of the hash of the claim being revoked to the revocation block number
+  mapping(bytes32 => uint) certificateRevoked;
 
   event CertificateIssued(bytes32 indexed certificate);
   event CertificateRevoked(
-    bytes32 indexed certificate,
-    uint indexed revocationReason
+    bytes32 indexed certificate
   );
 
-  /// A revocation
-  ///
-  /// See https://www.imsglobal.org/sites/default/files/Badges/OBv2p0/index.html#RevocationList
-  /// for the details needed
-  struct Revocation {
-    // Hash of the certificate
-    bytes32 certificate;
-    /// Block number of revocation
-    uint blockNumber;
-    uint revocationReason;
-  }
-
   function CertificateStore(
-    string _verificationUrl,
     string _name
   ) public
   {
-    verificationUrl = _verificationUrl;
     name = _name;
   }
 
@@ -62,19 +46,18 @@ contract CertificateStore is Ownable {
   }
 
   function revokeCertificate(
-    bytes32 certificate,
-    uint reason
+    bytes32 certificate
   ) public onlyOwner onlyNotRevoked(certificate) returns (bool)
   {
-    certificateRevoked[certificate] = Revocation(certificate, block.number, reason);
-    CertificateRevoked(certificate, reason);
+    certificateRevoked[certificate] = block.number;
+    CertificateRevoked(certificate);
   }
 
   function isRevoked(
     bytes32 certificate
   ) public view returns (bool)
   {
-    return certificateRevoked[certificate].blockNumber != 0;
+    return certificateRevoked[certificate] != 0;
   }
 
   modifier onlyIssuedCertificate(bytes32 certificate) {
