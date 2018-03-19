@@ -12,10 +12,7 @@ contract("CertificateStore", accounts => {
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await CertificateStore.new(
-      config.VERIFICATION_URL,
-      config.INSTITUTE_NAME
-    );
+    instance = await CertificateStore.new(config.INSTITUTE_NAME);
   });
 
   const issueCertificate = certificateMerkleRoot =>
@@ -27,14 +24,6 @@ contract("CertificateStore", accounts => {
       expect(name).to.be.equal(
         config.INSTITUTE_NAME,
         "Name of institute does not match"
-      );
-    });
-
-    it("should have correct verification url", async () => {
-      const url = await instance.verificationUrl();
-      expect(url).to.be.equal(
-        config.VERIFICATION_URL,
-        "Verification url of institute does not match"
       );
     });
 
@@ -138,12 +127,11 @@ contract("CertificateStore", accounts => {
 
       await issueCertificate(certificateMerkleRoot);
 
-      const receipt = await instance.revokeCertificate(certificateHash, 1337);
+      const receipt = await instance.revokeCertificate(certificateHash);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
       expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
-      expect(receipt.logs[0].args.revocationReason).bignumber.to.be.equal(1337);
     });
 
     it("should allow the revocation of an issued root", async () => {
@@ -153,12 +141,11 @@ contract("CertificateStore", accounts => {
 
       await issueCertificate(certificateMerkleRoot);
 
-      const receipt = await instance.revokeCertificate(certificateHash, 1337);
+      const receipt = await instance.revokeCertificate(certificateHash);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
       expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
-      expect(receipt.logs[0].args.revocationReason).bignumber.to.be.equal(1337);
     });
 
     it("should not allow repeated revocation of a valid and issued certificate", async () => {
@@ -169,10 +156,10 @@ contract("CertificateStore", accounts => {
 
       await issueCertificate(certificateMerkleRoot);
 
-      await instance.revokeCertificate(certificateHash, 1337);
+      await instance.revokeCertificate(certificateHash);
 
       await expect(
-        instance.revokeCertificate(certificateHash, 1337)
+        instance.revokeCertificate(certificateHash)
       ).to.be.rejectedWith(/revert/);
     });
 
@@ -180,12 +167,11 @@ contract("CertificateStore", accounts => {
       const certificateHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      const receipt = await instance.revokeCertificate(certificateHash, 1337);
+      const receipt = await instance.revokeCertificate(certificateHash);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
       expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
-      expect(receipt.logs[0].args.revocationReason).bignumber.to.be.equal(1337);
     });
   });
 
@@ -197,7 +183,7 @@ contract("CertificateStore", accounts => {
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
       await issueCertificate(certificateMerkleRoot);
-      await instance.revokeCertificate(certificateHash, 1337);
+      await instance.revokeCertificate(certificateHash);
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.true;
