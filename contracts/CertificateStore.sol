@@ -45,6 +45,14 @@ contract CertificateStore is Ownable {
     return (certificateIssued[certificate] != 0);
   }
 
+  function isCertificateIssuedBefore(
+    bytes32 certificate,
+    uint timestamp
+  ) public view returns (bool)
+  {
+    return certificateIssued[certificate] != 0 && certificateIssued[certificate] <= timestamp;
+  }
+
   function revokeCertificate(
     bytes32 certificate
   ) public onlyOwner onlyNotRevoked(certificate) returns (bool)
@@ -58,6 +66,14 @@ contract CertificateStore is Ownable {
   ) public view returns (bool)
   {
     return certificateRevoked[certificate] != 0;
+  }
+
+  function isRevokedBefore(
+    bytes32 certificate,
+    uint timestamp
+  ) public view returns (bool)
+  {
+    return certificateRevoked[certificate] <= timestamp && certificateRevoked[certificate] != 0;
   }
 
   modifier onlyIssuedCertificate(bytes32 certificate) {

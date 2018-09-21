@@ -1,8 +1,8 @@
 const CertificateStore = artifacts.require("./CertificateStore.sol");
+const { get } = require("lodash");
 const config = require("../config.js");
 const BigNumber = require("bignumber.js");
 
-// FIXME: Remove assert usage
 const { expect } = require("chai")
   .use(require("chai-as-promised"))
   .use(require("chai-bignumber")(BigNumber));
@@ -197,6 +197,102 @@ contract("CertificateStore", accounts => {
 
       const revoked = await instance.isRevoked(certificateHash);
       expect(revoked).to.be.false;
+    });
+  });
+
+  describe("isRevokedBefore", () => {
+    const certificateHash =
+      "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
+
+    it("returns false for certificate revoked after the timestamp", async () => {
+      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+      const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
+      const revoked = await instance.isRevokedBefore(
+        certificateHash,
+        revokedBlock - 1
+      );
+      expect(revoked).to.be.false;
+    });
+
+    it("returns true for certificate revoked at the timestamp", async () => {
+      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+      const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
+      const revoked = await instance.isRevokedBefore(
+        certificateHash,
+        revokedBlock
+      );
+      expect(revoked).to.be.true;
+    });
+
+    it("returns true for certificate revoked before the timestamp", async () => {
+      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+      const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
+      const revoked = await instance.isRevokedBefore(
+        certificateHash,
+        revokedBlock + 1
+      );
+      expect(revoked).to.be.true;
+    });
+
+    it("returns false for certificate not revoked, for arbitary timestamp", async () => {
+      const revoked = await instance.isRevokedBefore(certificateHash, 1000);
+      expect(revoked).to.be.false;
+    });
+
+    it("returns false for certificate not revoked, for block 0", async () => {
+      const revoked = await instance.isRevokedBefore(certificateHash, 0);
+      expect(revoked).to.be.false;
+    });
+  });
+
+  describe("isCertificateIssuedBefore", () => {
+    const certificateHash =
+      "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
+
+    it("returns false for certificate issued after the timestamp", async () => {
+      const issueReceipt = await instance.issueCertificate(certificateHash);
+      const issuedBlock = get(issueReceipt, "receipt.blockNumber");
+      const issued = await instance.isCertificateIssuedBefore(
+        certificateHash,
+        issuedBlock - 1
+      );
+      expect(issued).to.be.false;
+    });
+
+    it("returns true for certificate issued at the timestamp", async () => {
+      const issueReceipt = await instance.issueCertificate(certificateHash);
+      const issuedBlock = get(issueReceipt, "receipt.blockNumber");
+      const issued = await instance.isCertificateIssuedBefore(
+        certificateHash,
+        issuedBlock
+      );
+      expect(issued).to.be.true;
+    });
+
+    it("returns true for certificate issued before the timestamp", async () => {
+      const issueReceipt = await instance.issueCertificate(certificateHash);
+      const issuedBlock = get(issueReceipt, "receipt.blockNumber");
+      const issued = await instance.isCertificateIssuedBefore(
+        certificateHash,
+        issuedBlock + 1
+      );
+      expect(issued).to.be.true;
+    });
+
+    it("returns false for certificate not issued, for arbitary timestamp", async () => {
+      const issued = await instance.isCertificateIssuedBefore(
+        certificateHash,
+        1000
+      );
+      expect(issued).to.be.false;
+    });
+
+    it("returns false for certificate not issued, for block 0", async () => {
+      const issued = await instance.isCertificateIssuedBefore(
+        certificateHash,
+        0
+      );
+      expect(issued).to.be.false;
     });
   });
 });
