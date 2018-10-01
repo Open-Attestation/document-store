@@ -1,11 +1,11 @@
 const CertificateStore = artifacts.require("./CertificateStore.sol");
 const { get } = require("lodash");
-const config = require("../config.js");
 const BigNumber = require("bignumber.js");
 
 const { expect } = require("chai")
   .use(require("chai-as-promised"))
   .use(require("chai-bignumber")(BigNumber));
+const config = require("../config.js");
 
 contract("CertificateStore", accounts => {
   let instance = null;
