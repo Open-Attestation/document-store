@@ -1,4 +1,4 @@
-FROM node:9.4.0-alpine
+FROM node:10-alpine
 
 ARG YARN_VERSION=1.2.1
 RUN npm install -g "yarn@${YARN_VERSION}"

@@ -1,6 +1,6 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.24;
 
-import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 contract CertificateStore is Ownable {
@@ -16,7 +16,7 @@ contract CertificateStore is Ownable {
     bytes32 indexed certificate
   );
 
-  function CertificateStore(
+  constructor(
     string _name
   ) public
   {
@@ -28,7 +28,7 @@ contract CertificateStore is Ownable {
   ) public onlyOwner onlyNotIssuedCertificate(certificate)
   {
     certificateIssued[certificate] = block.number;
-    CertificateIssued(certificate);
+    emit CertificateIssued(certificate);
   }
 
   function getIssuedBlock(
@@ -45,12 +45,20 @@ contract CertificateStore is Ownable {
     return (certificateIssued[certificate] != 0);
   }
 
+  function isCertificateIssuedBefore(
+    bytes32 certificate,
+    uint timestamp
+  ) public view returns (bool)
+  {
+    return certificateIssued[certificate] != 0 && certificateIssued[certificate] <= timestamp;
+  }
+
   function revokeCertificate(
     bytes32 certificate
   ) public onlyOwner onlyNotRevoked(certificate) returns (bool)
   {
     certificateRevoked[certificate] = block.number;
-    CertificateRevoked(certificate);
+    emit CertificateRevoked(certificate);
   }
 
   function isRevoked(
@@ -60,18 +68,26 @@ contract CertificateStore is Ownable {
     return certificateRevoked[certificate] != 0;
   }
 
+  function isRevokedBefore(
+    bytes32 certificate,
+    uint timestamp
+  ) public view returns (bool)
+  {
+    return certificateRevoked[certificate] <= timestamp && certificateRevoked[certificate] != 0;
+  }
+
   modifier onlyIssuedCertificate(bytes32 certificate) {
-    require(isCertificateIssued(certificate));
+    require(isCertificateIssued(certificate), "Error: Only issued certificate hashes can be revoked");
     _;
   }
 
   modifier onlyNotIssuedCertificate(bytes32 certificate) {
-    require(!isCertificateIssued(certificate));
+    require(!isCertificateIssued(certificate), "Error: Only hashes that have not been issued can be issued");
     _;
   }
 
   modifier onlyNotRevoked(bytes32 claim) {
-    require(!isRevoked(claim));
+    require(!isRevoked(claim), "Error: Hash has been revoked previously");
     _;
   }
 }
