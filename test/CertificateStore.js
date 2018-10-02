@@ -204,7 +204,7 @@ contract("CertificateStore", accounts => {
     const certificateHash =
       "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-    it("returns false for certificate revoked after the timestamp", async () => {
+    it("returns false for certificate revoked after the block number", async () => {
       const revokeReceipt = await instance.revokeCertificate(certificateHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
@@ -214,7 +214,7 @@ contract("CertificateStore", accounts => {
       expect(revoked).to.be.false;
     });
 
-    it("returns true for certificate revoked at the timestamp", async () => {
+    it("returns true for certificate revoked at the block number", async () => {
       const revokeReceipt = await instance.revokeCertificate(certificateHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
@@ -224,7 +224,7 @@ contract("CertificateStore", accounts => {
       expect(revoked).to.be.true;
     });
 
-    it("returns true for certificate revoked before the timestamp", async () => {
+    it("returns true for certificate revoked before the block number", async () => {
       const revokeReceipt = await instance.revokeCertificate(certificateHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
@@ -234,7 +234,7 @@ contract("CertificateStore", accounts => {
       expect(revoked).to.be.true;
     });
 
-    it("returns false for certificate not revoked, for arbitary timestamp", async () => {
+    it("returns false for certificate not revoked, for arbitary block number", async () => {
       const revoked = await instance.isRevokedBefore(certificateHash, 1000);
       expect(revoked).to.be.false;
     });
@@ -249,7 +249,7 @@ contract("CertificateStore", accounts => {
     const certificateHash =
       "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-    it("returns false for certificate issued after the timestamp", async () => {
+    it("returns false for certificate issued after the block number", async () => {
       const issueReceipt = await instance.issueCertificate(certificateHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
       const issued = await instance.isCertificateIssuedBefore(
@@ -259,7 +259,7 @@ contract("CertificateStore", accounts => {
       expect(issued).to.be.false;
     });
 
-    it("returns true for certificate issued at the timestamp", async () => {
+    it("returns true for certificate issued at the block number", async () => {
       const issueReceipt = await instance.issueCertificate(certificateHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
       const issued = await instance.isCertificateIssuedBefore(
@@ -269,7 +269,7 @@ contract("CertificateStore", accounts => {
       expect(issued).to.be.true;
     });
 
-    it("returns true for certificate issued before the timestamp", async () => {
+    it("returns true for certificate issued before the block number", async () => {
       const issueReceipt = await instance.issueCertificate(certificateHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
       const issued = await instance.isCertificateIssuedBefore(
@@ -279,7 +279,7 @@ contract("CertificateStore", accounts => {
       expect(issued).to.be.true;
     });
 
-    it("returns false for certificate not issued, for arbitary timestamp", async () => {
+    it("returns false for certificate not issued, for arbitary block number", async () => {
       const issued = await instance.isCertificateIssuedBefore(
         certificateHash,
         1000
