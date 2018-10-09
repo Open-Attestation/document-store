@@ -1,8 +1,8 @@
-const CertificateStore = artifacts.require("./CertificateStore.sol");
+const DocumentStore = artifacts.require("./DocumentStore.sol");
 
 module.exports = deployer => {
   deployer.deploy(
-    CertificateStore,
+    DocumentStore,
     "Government Technology Agency of Singapore (GovTech)"
   );
 };
