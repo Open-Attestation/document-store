@@ -1,4 +1,4 @@
-const CertificateStore = artifacts.require("./CertificateStore.sol");
+const DocumentStore = artifacts.require("./DocumentStore.sol");
 const { get } = require("lodash");
 const BigNumber = require("bignumber.js");
 
@@ -7,16 +7,15 @@ const { expect } = require("chai")
   .use(require("chai-bignumber")(BigNumber));
 const config = require("../config.js");
 
-contract("CertificateStore", accounts => {
+contract("DocumentStore", accounts => {
   let instance = null;
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await CertificateStore.new(config.INSTITUTE_NAME);
+    instance = await DocumentStore.new(config.INSTITUTE_NAME);
   });
 
-  const issueCertificate = certificateMerkleRoot =>
-    instance.issueCertificate(certificateMerkleRoot);
+  const issue = documentMerkleRoot => instance.issue(documentMerkleRoot);
 
   describe("constructor", () => {
     it("should have correct name", async () => {
@@ -33,35 +32,36 @@ contract("CertificateStore", accounts => {
     });
   });
 
-  describe("issueCertificate", () => {
-    it("should be able to issue a certificate", async () => {
-      const certificateMerkleRoot =
+  describe("issue", () => {
+    it("should be able to issue a document", async () => {
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const receipt = await issueCertificate(certificateMerkleRoot);
+      const receipt = await issue(documentMerkleRoot);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[0].event).to.be.equal(
-        "CertificateIssued",
-        "Certificate issued event not emitted."
+        "DocumentIssued",
+        "Document issued event not emitted."
       );
-      expect(receipt.logs[0].args.certificate).to.be.equal(
-        certificateMerkleRoot,
+      expect(receipt.logs[0].args.document).to.be.equal(
+        documentMerkleRoot,
         "Incorrect event arguments emitted"
       );
 
-      const issued = await instance.isCertificateIssued(certificateMerkleRoot);
-      expect(issued, "Certificate is not issued").to.be.true;
+      const issued = await instance.isIssued(documentMerkleRoot);
+      expect(issued, "Document is not issued").to.be.true;
     });
 
     it("should not allow duplicate issues", async () => {
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
       // Check that reissue is rejected
-      await expect(
-        instance.issueCertificate(certificateMerkleRoot)
-      ).to.be.rejectedWith(/revert/, "Duplicate issue was not rejected");
+      await expect(instance.issue(documentMerkleRoot)).to.be.rejectedWith(
+        /revert/,
+        "Duplicate issue was not rejected"
+      );
     });
 
     it("only allows the owner to issue", async () => {
@@ -69,229 +69,218 @@ contract("CertificateStore", accounts => {
       const owner = await instance.owner();
       expect(nonOwner).to.not.be.equal(owner);
 
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
       await expect(
-        instance.issueCertificate(certificateMerkleRoot, { from: nonOwner })
+        instance.issue(documentMerkleRoot, { from: nonOwner })
       ).to.be.rejectedWith(/revert/);
     });
   });
 
   describe("getIssuedBlock", () => {
     it("returns the block number of issued batches", async () => {
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
-      const blockNumber = await instance.getIssuedBlock(certificateMerkleRoot);
+      const blockNumber = await instance.getIssuedBlock(documentMerkleRoot);
       expect(blockNumber).to.be.bignumber.greaterThan(0);
     });
 
     it("errors on unissued batch", async () => {
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
       // This test may fail on ganache-ui (works for ganache-cli)
       await expect(
-        instance.getIssuedBlock(certificateMerkleRoot)
+        instance.getIssuedBlock(documentMerkleRoot)
       ).to.be.rejectedWith(/revert/);
     });
   });
 
-  describe("isCertificateIssued", () => {
+  describe("isIssued", () => {
     it("should return true for issued batch", async () => {
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
-      const issued = await instance.isCertificateIssued(certificateMerkleRoot);
-      expect(issued, "Certificate batch is not issued").to.be.true;
+      const issued = await instance.isIssued(documentMerkleRoot);
+      expect(issued, "Document batch is not issued").to.be.true;
     });
 
-    it("should return false for certificate batch not issued", async () => {
-      const certificateMerkleRoot =
+    it("should return false for document batch not issued", async () => {
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
-      const issued = await instance.isCertificateIssued(certificateMerkleRoot);
-      expect(issued, "Certificate batch is issued in error").to.be.false;
+      const issued = await instance.isIssued(documentMerkleRoot);
+      expect(issued, "Document batch is issued in error").to.be.false;
     });
   });
 
-  describe("revokeCertificate", () => {
-    it("should allow the revocation of a valid and issued certificate", async () => {
-      const certificateMerkleRoot =
+  describe("revoke", () => {
+    it("should allow the revocation of a valid and issued document", async () => {
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash =
+      const documentHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
-      const receipt = await instance.revokeCertificate(certificateHash);
+      const receipt = await instance.revoke(documentHash);
 
       // FIXME: Use a utility helper to watch for event
-      expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
-      expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
+      expect(receipt.logs[0].event).to.be.equal("DocumentRevoked");
+      expect(receipt.logs[0].args.document).to.be.equal(documentHash);
     });
 
     it("should allow the revocation of an issued root", async () => {
-      const certificateMerkleRoot =
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash = certificateMerkleRoot;
+      const documentHash = documentMerkleRoot;
 
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
-      const receipt = await instance.revokeCertificate(certificateHash);
+      const receipt = await instance.revoke(documentHash);
 
       // FIXME: Use a utility helper to watch for event
-      expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
-      expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
+      expect(receipt.logs[0].event).to.be.equal("DocumentRevoked");
+      expect(receipt.logs[0].args.document).to.be.equal(documentHash);
     });
 
-    it("should not allow repeated revocation of a valid and issued certificate", async () => {
-      const certificateMerkleRoot =
+    it("should not allow repeated revocation of a valid and issued document", async () => {
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash =
+      const documentHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      await issueCertificate(certificateMerkleRoot);
+      await issue(documentMerkleRoot);
 
-      await instance.revokeCertificate(certificateHash);
+      await instance.revoke(documentHash);
 
-      await expect(
-        instance.revokeCertificate(certificateHash)
-      ).to.be.rejectedWith(/revert/);
+      await expect(instance.revoke(documentHash)).to.be.rejectedWith(/revert/);
     });
 
-    it("should allow revocation of an unissued certificate", async () => {
-      const certificateHash =
+    it("should allow revocation of an unissued document", async () => {
+      const documentHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      const receipt = await instance.revokeCertificate(certificateHash);
+      const receipt = await instance.revoke(documentHash);
 
       // FIXME: Use a utility helper to watch for event
-      expect(receipt.logs[0].event).to.be.equal("CertificateRevoked");
-      expect(receipt.logs[0].args.certificate).to.be.equal(certificateHash);
+      expect(receipt.logs[0].event).to.be.equal("DocumentRevoked");
+      expect(receipt.logs[0].args.document).to.be.equal(documentHash);
     });
   });
 
   describe("isRevoked", () => {
-    it("returns true for revoked certificates", async () => {
-      const certificateMerkleRoot =
+    it("returns true for revoked documents", async () => {
+      const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const certificateHash =
+      const documentHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      await issueCertificate(certificateMerkleRoot);
-      await instance.revokeCertificate(certificateHash);
+      await issue(documentMerkleRoot);
+      await instance.revoke(documentHash);
 
-      const revoked = await instance.isRevoked(certificateHash);
+      const revoked = await instance.isRevoked(documentHash);
       expect(revoked).to.be.true;
     });
 
-    it("returns true for non-revoked certificates", async () => {
+    it("returns true for non-revoked documents", async () => {
       "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
-      const certificateHash =
+      const documentHash =
         "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-      const revoked = await instance.isRevoked(certificateHash);
+      const revoked = await instance.isRevoked(documentHash);
       expect(revoked).to.be.false;
     });
   });
 
   describe("isRevokedBefore", () => {
-    const certificateHash =
+    const documentHash =
       "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-    it("returns false for certificate revoked after the block number", async () => {
-      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+    it("returns false for document revoked after the block number", async () => {
+      const revokeReceipt = await instance.revoke(documentHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
-        certificateHash,
+        documentHash,
         revokedBlock - 1
       );
       expect(revoked).to.be.false;
     });
 
-    it("returns true for certificate revoked at the block number", async () => {
-      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+    it("returns true for document revoked at the block number", async () => {
+      const revokeReceipt = await instance.revoke(documentHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
-        certificateHash,
+        documentHash,
         revokedBlock
       );
       expect(revoked).to.be.true;
     });
 
-    it("returns true for certificate revoked before the block number", async () => {
-      const revokeReceipt = await instance.revokeCertificate(certificateHash);
+    it("returns true for document revoked before the block number", async () => {
+      const revokeReceipt = await instance.revoke(documentHash);
       const revokedBlock = get(revokeReceipt, "receipt.blockNumber");
       const revoked = await instance.isRevokedBefore(
-        certificateHash,
+        documentHash,
         revokedBlock + 1
       );
       expect(revoked).to.be.true;
     });
 
-    it("returns false for certificate not revoked, for arbitary block number", async () => {
-      const revoked = await instance.isRevokedBefore(certificateHash, 1000);
+    it("returns false for document not revoked, for arbitary block number", async () => {
+      const revoked = await instance.isRevokedBefore(documentHash, 1000);
       expect(revoked).to.be.false;
     });
 
-    it("returns false for certificate not revoked, for block 0", async () => {
-      const revoked = await instance.isRevokedBefore(certificateHash, 0);
+    it("returns false for document not revoked, for block 0", async () => {
+      const revoked = await instance.isRevokedBefore(documentHash, 0);
       expect(revoked).to.be.false;
     });
   });
 
-  describe("isCertificateIssuedBefore", () => {
-    const certificateHash =
+  describe("isIssuedBefore", () => {
+    const documentHash =
       "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
-    it("returns false for certificate issued after the block number", async () => {
-      const issueReceipt = await instance.issueCertificate(certificateHash);
+    it("returns false for document issued after the block number", async () => {
+      const issueReceipt = await instance.issue(documentHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
-      const issued = await instance.isCertificateIssuedBefore(
-        certificateHash,
+      const issued = await instance.isIssuedBefore(
+        documentHash,
         issuedBlock - 1
       );
       expect(issued).to.be.false;
     });
 
-    it("returns true for certificate issued at the block number", async () => {
-      const issueReceipt = await instance.issueCertificate(certificateHash);
+    it("returns true for document issued at the block number", async () => {
+      const issueReceipt = await instance.issue(documentHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
-      const issued = await instance.isCertificateIssuedBefore(
-        certificateHash,
-        issuedBlock
-      );
+      const issued = await instance.isIssuedBefore(documentHash, issuedBlock);
       expect(issued).to.be.true;
     });
 
-    it("returns true for certificate issued before the block number", async () => {
-      const issueReceipt = await instance.issueCertificate(certificateHash);
+    it("returns true for document issued before the block number", async () => {
+      const issueReceipt = await instance.issue(documentHash);
       const issuedBlock = get(issueReceipt, "receipt.blockNumber");
-      const issued = await instance.isCertificateIssuedBefore(
-        certificateHash,
+      const issued = await instance.isIssuedBefore(
+        documentHash,
         issuedBlock + 1
       );
       expect(issued).to.be.true;
     });
 
-    it("returns false for certificate not issued, for arbitary block number", async () => {
-      const issued = await instance.isCertificateIssuedBefore(
-        certificateHash,
-        1000
-      );
+    it("returns false for document not issued, for arbitary block number", async () => {
+      const issued = await instance.isIssuedBefore(documentHash, 1000);
       expect(issued).to.be.false;
     });
 
-    it("returns false for certificate not issued, for block 0", async () => {
-      const issued = await instance.isCertificateIssuedBefore(
-        certificateHash,
-        0
-      );
+    it("returns false for document not issued, for block 0", async () => {
+      const issued = await instance.isIssuedBefore(documentHash, 0);
       expect(issued).to.be.false;
     });
   });

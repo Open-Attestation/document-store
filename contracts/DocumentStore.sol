@@ -3,17 +3,17 @@ pragma solidity ^0.4.24;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
-contract CertificateStore is Ownable {
+contract DocumentStore is Ownable {
   string public name;
 
-  /// A mapping of the certificate hash to the block number that was issued
-  mapping(bytes32 => uint) certificateIssued;
+  /// A mapping of the document hash to the block number that was issued
+  mapping(bytes32 => uint) documentIssued;
   /// A mapping of the hash of the claim being revoked to the revocation block number
-  mapping(bytes32 => uint) certificateRevoked;
+  mapping(bytes32 => uint) documentRevoked;
 
-  event CertificateIssued(bytes32 indexed certificate);
-  event CertificateRevoked(
-    bytes32 indexed certificate
+  event DocumentIssued(bytes32 indexed document);
+  event DocumentRevoked(
+    bytes32 indexed document
   );
 
   constructor(
@@ -23,66 +23,66 @@ contract CertificateStore is Ownable {
     name = _name;
   }
 
-  function issueCertificate(
-    bytes32 certificate
-  ) public onlyOwner onlyNotIssuedCertificate(certificate)
+  function issue(
+    bytes32 document
+  ) public onlyOwner onlyNotIssued(document)
   {
-    certificateIssued[certificate] = block.number;
-    emit CertificateIssued(certificate);
+    documentIssued[document] = block.number;
+    emit DocumentIssued(document);
   }
 
   function getIssuedBlock(
-    bytes32 certificate
-  ) public onlyIssuedCertificate(certificate) view returns (uint)
+    bytes32 document
+  ) public onlyIssued(document) view returns (uint)
   {
-    return certificateIssued[certificate];
+    return documentIssued[document];
   }
 
-  function isCertificateIssued(
-    bytes32 certificate
+  function isIssued(
+    bytes32 document
   ) public view returns (bool)
   {
-    return (certificateIssued[certificate] != 0);
+    return (documentIssued[document] != 0);
   }
 
-  function isCertificateIssuedBefore(
-    bytes32 certificate,
+  function isIssuedBefore(
+    bytes32 document,
     uint blockNumber
   ) public view returns (bool)
   {
-    return certificateIssued[certificate] != 0 && certificateIssued[certificate] <= blockNumber;
+    return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
-  function revokeCertificate(
-    bytes32 certificate
-  ) public onlyOwner onlyNotRevoked(certificate) returns (bool)
+  function revoke(
+    bytes32 document
+  ) public onlyOwner onlyNotRevoked(document) returns (bool)
   {
-    certificateRevoked[certificate] = block.number;
-    emit CertificateRevoked(certificate);
+    documentRevoked[document] = block.number;
+    emit DocumentRevoked(document);
   }
 
   function isRevoked(
-    bytes32 certificate
+    bytes32 document
   ) public view returns (bool)
   {
-    return certificateRevoked[certificate] != 0;
+    return documentRevoked[document] != 0;
   }
 
   function isRevokedBefore(
-    bytes32 certificate,
+    bytes32 document,
     uint blockNumber
   ) public view returns (bool)
   {
-    return certificateRevoked[certificate] <= blockNumber && certificateRevoked[certificate] != 0;
+    return documentRevoked[document] <= blockNumber && documentRevoked[document] != 0;
   }
 
-  modifier onlyIssuedCertificate(bytes32 certificate) {
-    require(isCertificateIssued(certificate), "Error: Only issued certificate hashes can be revoked");
+  modifier onlyIssued(bytes32 document) {
+    require(isIssued(document), "Error: Only issued document hashes can be revoked");
     _;
   }
 
-  modifier onlyNotIssuedCertificate(bytes32 certificate) {
-    require(!isCertificateIssued(certificate), "Error: Only hashes that have not been issued can be issued");
+  modifier onlyNotIssued(bytes32 document) {
+    require(!isIssued(document), "Error: Only hashes that have not been issued can be issued");
     _;
   }
 
