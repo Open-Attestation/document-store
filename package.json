@@ -1,5 +1,5 @@
 {
-  "name": "certificate-contract",
+  "name": "document-store-contract",
   "version": "2.0.1",
   "main": "index.js",
   "repository": "git@github.com:GovTechSG/certificate-contract.git",
