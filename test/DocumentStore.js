@@ -6,6 +6,7 @@ const { expect } = require("chai")
   .use(require("chai-as-promised"))
   .use(require("chai-bignumber")(BigNumber));
 const config = require("../config.js");
+const { version: versionFromPackageJson } = require("../package.json");
 
 contract("DocumentStore", accounts => {
   let instance = null;
@@ -29,6 +30,13 @@ contract("DocumentStore", accounts => {
     it("sets the owner properly", async () => {
       const owner = await instance.owner();
       expect(owner).to.be.equal(accounts[0]);
+    });
+  });
+
+  describe("version", () => {
+    it("should have a version field value that is the same as in package.json", async () => {
+      const versionFromSolidity = await instance.version();
+      expect(versionFromSolidity).to.be.equal(versionFromPackageJson);
     });
   });
 
