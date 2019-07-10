@@ -20,7 +20,7 @@
   "dependencies": {
     "bignumber.js": "^7.2.1",
     "ganache-cli": "^6.0.3",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "openzeppelin-solidity": "^1.12.0",
     "truffle": "^4.1.14",
     "web3": "1.0.0-beta.36"
