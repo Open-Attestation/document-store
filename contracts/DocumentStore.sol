@@ -2,10 +2,9 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-
 contract DocumentStore is Ownable {
   string public name;
-  string public version = "2.2.0";
+  string public version = "2.2.1";
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint) documentIssued;
@@ -30,6 +29,14 @@ contract DocumentStore is Ownable {
   {
     documentIssued[document] = block.number;
     emit DocumentIssued(document);
+  }
+
+  function bulkIssue(
+    bytes32[] documents
+  ) public {
+    for (uint i = 0; i < documents.length; i++) {
+      issue(documents[i]);
+    }
   }
 
   function getIssuedBlock(
@@ -60,6 +67,14 @@ contract DocumentStore is Ownable {
   {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
+  }
+
+  function bulkRevoke(
+    bytes32[] documents
+  ) public {
+    for (uint i = 0; i < documents.length; i++) {
+      revoke(documents[i]);
+    }
   }
 
   function isRevoked(

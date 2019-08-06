@@ -1,6 +1,6 @@
 {
   "name": "document-store-contract",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "main": "index.js",
   "repository": "git@github.com:GovTechSG/certificate-contract.git",
   "author": "GovTech",
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "bignumber.js": "^7.2.1",
+    "ethlint": "^1.2.4",
     "ganache-cli": "^6.0.3",
     "lodash": "^4.17.11",
     "openzeppelin-solidity": "^1.12.0",
