@@ -21,9 +21,9 @@
     "bignumber.js": "^7.2.1",
     "ethlint": "^1.2.4",
     "ganache-cli": "^6.0.3",
-    "lodash": "^4.17.11",
-    "openzeppelin-solidity": "^1.12.0",
+    "lodash": "^4.17.15",
     "truffle": "^4.1.14",
+    "truffle-hdwallet-provider-privkey": "^0.3.0",
     "web3": "1.0.0-beta.36"
   },
   "devDependencies": {
