@@ -5,8 +5,8 @@ const privateKeys = [
 module.exports = {
   solc: {
     optimizer: {
-      enabled: true,
-      runs: 1000000
+      enabled: false,
+      runs: 200
     }
   },
   networks: {
