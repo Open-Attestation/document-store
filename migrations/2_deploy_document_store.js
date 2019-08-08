@@ -1,9 +1,9 @@
 const DocumentStore = artifacts.require("./DocumentStore.sol");
-const { generateHashes } = require("../test/generateHashes");
+const {generateHashes} = require("../scripts/generateHashes");
 
 let contract;
 const startingHash =
-  "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6329";
+  "0x2a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6329";
 let lastIssuedHash = startingHash;
 const txList = [];
 
@@ -72,5 +72,6 @@ module.exports = deployer =>
     })
     .then(txReceipt => {
       txList.push(txReceipt.tx);
+      // eslint-disable-next-line no-console
       console.log(txList);
     });

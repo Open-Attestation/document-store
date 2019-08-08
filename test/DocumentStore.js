@@ -1,12 +1,10 @@
 const DocumentStore = artifacts.require("./DocumentStore.sol");
-const { get } = require("lodash");
-const BigNumber = require("bignumber.js");
+DocumentStore.numberFormat = "String";
+const {get} = require("lodash");
 
-const { expect } = require("chai")
-  .use(require("chai-as-promised"))
-  .use(require("chai-bignumber")(BigNumber));
+const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
-const { version: versionFromPackageJson } = require("../package.json");
+const {version: versionFromPackageJson} = require("../package.json");
 
 contract("DocumentStore", accounts => {
   let instance = null;
@@ -81,7 +79,7 @@ contract("DocumentStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
       await expect(
-        instance.issue(documentMerkleRoot, { from: nonOwner })
+        instance.issue(documentMerkleRoot, {from: nonOwner})
       ).to.be.rejectedWith(/revert/);
     });
   });
@@ -158,7 +156,7 @@ contract("DocumentStore", accounts => {
       ];
 
       await expect(
-        instance.bulkIssue(documentMerkleRoots, { from: nonOwner })
+        instance.bulkIssue(documentMerkleRoots, {from: nonOwner})
       ).to.be.rejectedWith(/revert/);
     });
   });
@@ -170,7 +168,10 @@ contract("DocumentStore", accounts => {
       await issue(documentMerkleRoot);
 
       const blockNumber = await instance.getIssuedBlock(documentMerkleRoot);
-      expect(blockNumber).to.be.bignumber.greaterThan(0);
+
+      // chai can't handle BigInts
+      // eslint-disable-next-line chai-expect/no-inner-compare
+      expect(BigInt(blockNumber) > 1).to.be.true;
     });
 
     it("errors on unissued batch", async () => {
@@ -330,7 +331,7 @@ contract("DocumentStore", accounts => {
       ];
 
       await expect(
-        instance.bulkRevoke(documentMerkleRoots, { from: nonOwner })
+        instance.bulkRevoke(documentMerkleRoots, {from: nonOwner})
       ).to.be.rejectedWith(/revert/);
     });
   });
