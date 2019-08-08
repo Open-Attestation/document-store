@@ -1,27 +1,39 @@
-const HDWalletProvider = require("truffle-hdwallet-provider-privkey");
-const privateKeys = [
-  "22D451659A9749E2233BF1E7E0ADD8AA93D97141CAC9AC2B871F49DF434FED1E"
-];
+const HDWalletProvider = require("truffle-hdwallet-provider");
+require("dotenv").config();
+
+const ropstenPrivateKey = process.env.ROPSTEN_KEY;
 module.exports = {
-  solc: {
-    optimizer: {
-      enabled: false,
-      runs: 200
+  compilers: {
+    solc: {
+      version: "0.5.10",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
     }
   },
   networks: {
     development: {
       host: "localhost",
       port: 8545,
-      gas: 4712388,
+      gas: 6721975,
+      network_id: "*" // Match any network id
+    },
+    docker: {
+      host: "ganache",
+      port: 8545,
+      gas: 6721975,
       network_id: "*" // Match any network id
     },
     ropsten: {
       network_id: 3,
+      skipDryRun: true,
       provider: () =>
         new HDWalletProvider(
-          privateKeys,
-          "https://ropsten.infura.io/v3/1f1ff2b3fca04f8d99f67d465c59e4ef"
+          ropstenPrivateKey,
+          `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`
         )
     }
   }
