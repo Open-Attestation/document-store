@@ -11,7 +11,7 @@ before_install:
   - docker ps -a
 
 script:
-  - docker-compose exec truffle yarn run test:ci
+  - docker-compose exec truffle npm run test:ci
 
 notifications:
   slack:

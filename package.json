@@ -1,6 +1,6 @@
 {
   "name": "document-store-contract",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "main": "index.js",
   "repository": "git@github.com:GovTechSG/certificate-contract.git",
   "author": "GovTech",
@@ -8,27 +8,27 @@
   "scripts": {
     "eslint:fix": "eslint . --ext .js --fix",
     "eslint": "eslint . --ext .js",
-    "lint:fix": "yarn solium:fix && yarn eslint:fix",
-    "lint": "yarn solium && yarn eslint",
+    "lint:fix": "npm run solium:fix && npm run eslint:fix",
+    "lint": "npm run solium && npm run eslint",
     "solium:fix": "solium -d contracts --fix",
     "solium": "solium -d contracts",
     "test:docker": "truffle test --network docker",
-    "test:ci": "yarn lint && yarn test:docker",
+    "test:ci": "npm run lint && npm run test:docker",
     "test": "truffle test",
     "truffle": "truffle"
   },
   "dependencies": {
-    "bignumber.js": "^7.2.1",
+    "dotenv": "^8.0.0",
+    "ethlint": "^1.2.4",
     "ganache-cli": "^6.0.3",
-    "lodash": "^4.17.11",
-    "openzeppelin-solidity": "^1.12.0",
-    "truffle": "^4.1.14",
-    "web3": "1.0.0-beta.36"
+    "lodash": "^4.17.15",
+    "truffle": "5.0.30",
+    "truffle-hdwallet-provider": "1.0.15",
+    "web3": "1.2.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "chai-bignumber": "^2.0.2",
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^3.1.0",
@@ -36,7 +36,7 @@
     "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^3.0.0",
-    "prettier": "^1.10.2",
-    "solium": "^1.1.8"
+    "prettier": "^1.18.2",
+    "prettier-plugin-solidity": "^1.0.0-alpha.30"
   }
 }
