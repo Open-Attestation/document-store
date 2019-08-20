@@ -165,13 +165,15 @@ contract("DocumentStore", accounts => {
     it("returns the block number of issued batches", async () => {
       const documentMerkleRoot =
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await issue(documentMerkleRoot);
+      const issueReceipt = await issue(documentMerkleRoot);
+
+      const issuedBlockNumber = issueReceipt.receipt.blockNumber;
 
       const blockNumber = await instance.getIssuedBlock(documentMerkleRoot);
 
       // chai can't handle BigInts
       // eslint-disable-next-line chai-expect/no-inner-compare
-      expect(BigInt(blockNumber) > 1).to.be.true;
+      expect(BigInt(blockNumber) === BigInt(issuedBlockNumber)).to.be.true;
     });
 
     it("errors on unissued batch", async () => {
@@ -181,6 +183,34 @@ contract("DocumentStore", accounts => {
       // This test may fail on ganache-ui (works for ganache-cli)
       await expect(
         instance.getIssuedBlock(documentMerkleRoot)
+      ).to.be.rejectedWith(/revert/);
+    });
+  });
+
+  describe("getRevokedBlock", () => {
+    it("returns the block number of revoked batches", async () => {
+      const documentMerkleRoot =
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+      await issue(documentMerkleRoot);
+
+      const revokeReceipt = await instance.revoke(documentMerkleRoot);
+      const revokedBlockNumber = revokeReceipt.receipt.blockNumber;
+
+      const blockNumber = await instance.getRevokedBlock(documentMerkleRoot);
+
+      // chai can't handle BigInts
+      // eslint-disable-next-line chai-expect/no-inner-compare
+      expect(BigInt(blockNumber) === BigInt(revokedBlockNumber)).to.be.true;
+    });
+
+    it("errors on unrevoked batch", async () => {
+      const documentMerkleRoot =
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+      await issue(documentMerkleRoot);
+
+      // This test may fail on ganache-ui (works for ganache-cli)
+      await expect(
+        instance.getRevokedBlock(documentMerkleRoot)
       ).to.be.rejectedWith(/revert/);
     });
   });

@@ -1,6 +1,6 @@
 {
   "name": "document-store-contract",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "main": "index.js",
   "repository": "git@github.com:GovTechSG/certificate-contract.git",
   "author": "GovTech",

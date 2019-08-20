@@ -4,7 +4,7 @@ import "./Ownable.sol";
 
 contract DocumentStore is Ownable {
     string public name;
-    string public version = "2.3.0";
+    string public version = "2.4.0";
 
     /// A mapping of the document hash to the block number that was issued
     mapping(bytes32 => uint256) documentIssued;
@@ -80,10 +80,27 @@ contract DocumentStore is Ownable {
             documentRevoked[document] <= blockNumber && documentRevoked[document] != 0;
     }
 
+    function getRevokedBlock(bytes32 document)
+        public
+        view
+        onlyRevoked(document)
+        returns (uint256)
+    {
+        return documentRevoked[document];
+    }
+
     modifier onlyIssued(bytes32 document) {
         require(
             isIssued(document),
-            "Error: Only issued document hashes can be revoked"
+            "Error: Document hash has not been issued"
+        );
+        _;
+    }
+
+    modifier onlyRevoked(bytes32 document) {
+        require(
+            isRevoked(document),
+            "Error: Document hash has not been revoked"
         );
         _;
     }
