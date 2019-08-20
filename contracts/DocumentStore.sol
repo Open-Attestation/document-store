@@ -4,7 +4,7 @@ import "./Ownable.sol";
 
 contract DocumentStore is Ownable {
     string public name;
-    string public version = "2.2.1";
+    string public version = "2.3.0";
 
     /// A mapping of the document hash to the block number that was issued
     mapping(bytes32 => uint256) documentIssued;
