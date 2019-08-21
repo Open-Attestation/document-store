@@ -18,7 +18,7 @@
     "truffle": "truffle"
   },
   "dependencies": {
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.1.0",
     "ethlint": "^1.2.4",
     "ganache-cli": "^6.6.0",
     "lodash": "^4.17.15",
