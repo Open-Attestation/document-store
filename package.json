@@ -22,7 +22,7 @@
     "ethlint": "^1.2.4",
     "ganache-cli": "^6.6.0",
     "lodash": "^4.17.15",
-    "truffle": "5.0.32",
+    "truffle": "5.0.34",
     "truffle-hdwallet-provider": "1.0.15",
     "web3": "1.2.1"
   },
