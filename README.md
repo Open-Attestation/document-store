@@ -5,17 +5,9 @@
 ## Setup
 
 ```
-$ yarn install
-$ yarn lint
-$ yarn test
-$ yarn truffle <command>
-```
-
-## Docker
-
-Starts a test network and then runs lints and tests from the `truffle` container.
-
-```
-$ docker-compose up -d
-$ docker-compose exec truffle yarn run test:ci
+$ npm install
+$ npm lint
+$ npx ganache-cli -h 0.0.0.0 -p 8545 -i 1337 -s foobar -e 100000000000000000000
+$ npm test
+$ npm truffle <command>
 ```
