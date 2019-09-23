@@ -6,6 +6,8 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
+    "commit": "git-cz",
+    "commit:retry": "npm run commit -- --retry",
     "eslint:fix": "eslint . --ext .js --fix",
     "eslint": "eslint . --ext .js",
     "lint:fix": "npm run solium:fix && npm run eslint:fix",
@@ -25,8 +27,13 @@
     "web3": "1.2.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
+    "@commitlint/prompt": "8.2.0",
+    "@ls-age/commitlint-circle": "1.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "commitizen": "4.0.3",
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.1.0",
@@ -34,7 +41,13 @@
     "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^3.0.0",
+    "git-cz": "3.2.1",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/@commitlint/prompt"
+    }
   }
 }
