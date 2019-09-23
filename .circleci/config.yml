@@ -12,6 +12,9 @@ jobs:
           name: install
           command: npm install
       - run:
+          name: commitlint
+          command: npx --no-install commitlint-circle
+      - run:
           name: lint
           command: npm run lint
       - run:
