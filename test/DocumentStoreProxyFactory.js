@@ -119,7 +119,7 @@ contract("DocumentStore (Proxied)", accounts => {
     });
 
     it("should be upgradable to DocumentStoreWithRevokeReason", async () => {
-      // Using adming account to upgrade contract implementation
+      // Using admin account to upgrade contract implementation
       const proxyInstance = await BaseAdminUpgradeabilityProxy.at(proxyAddress);
       const upgradeReceipt = await proxyInstance.upgradeTo(documentStoreWithRevokeInstance.address, {
         from: accounts[1]
@@ -158,5 +158,3 @@ contract("DocumentStore (Proxied)", accounts => {
     });
   });
 });
-
-// SEE https://github.com/trufflesuite/truffle/issues/1230

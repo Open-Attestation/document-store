@@ -14,12 +14,4 @@ $ npm truffle <command>
 
 ## Notes
 
-https://forum.openzeppelin.com/t/source-openzeppelin-not-found-file-import-callback-not-supported/1812
-https://github.com/juanfranblanco/vscode-solidity#openzeppelin
-
-
-Absolutely minimal contract: https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/
-Create 2 for ProxyFactory: https://blog.openzeppelin.com/getting-the-most-out-of-create2/
-
-
-Stupid owner contract in upgrades is wrong!
+If you are using vscode, you may need to link the openzeppelin libraries. See https://github.com/juanfranblanco/vscode-solidity#openzeppelin
