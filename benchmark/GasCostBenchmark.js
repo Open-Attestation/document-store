@@ -5,6 +5,7 @@ const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilit
 
 DocumentStore.numberFormat = "String";
 const {generateHashes} = require("../scripts/generateHashes");
+const {groupBy, mapValues} = require("lodash");
 
 const initializeAbi = {
   constant: false,
@@ -46,8 +47,15 @@ describe("Gas Cost Benchmarks", () => {
     });
   };
   after(() => {
+    const groupedRecords = groupBy(gasRecords, record => record.context);
+    const records = mapValues(groupedRecords, contextualisedRecords =>
+      contextualisedRecords.reduce((state, current) => {
+        state[current.contract] = current.gas;
+        return state;
+      }, {})
+    );
     // eslint-disable-next-line no-console
-    console.table(gasRecords);
+    console.table(records);
   });
 
   let staticDocumentStoreInstance;
@@ -62,20 +70,22 @@ describe("Gas Cost Benchmarks", () => {
 
   contract("DocumentStore", accounts => {
     let documentStoreInstance;
-    it("deploy", async () => {
+    it("deploy & initialize", async () => {
       const deployment = await DocumentStore.new();
       documentStoreInstance = deployment;
-      const receipt = await web3.eth.getTransactionReceipt(deployment.transactionHash);
-      recordGasCost("DocumentStore", "deployment", receipt.cumulativeGasUsed);
-    });
-    it("initialize", async () => {
-      const {receipt} = await documentStoreInstance.initialize(STORE_NAME, accounts[0]);
-      recordGasCost("DocumentStore", "initialize", receipt.cumulativeGasUsed);
+      const deploymentReceipt = await web3.eth.getTransactionReceipt(deployment.transactionHash);
+      const initializeReceipt = await documentStoreInstance.initialize(STORE_NAME, accounts[0]);
+      recordGasCost(
+        "DocumentStore",
+        "deployment & initialize",
+        deploymentReceipt.cumulativeGasUsed + initializeReceipt.receipt.cumulativeGasUsed
+      );
     });
     it("transferOwnership", async () => {
-      const {receipt} = await documentStoreInstance.transferOwnership(accounts[1]);
+      const newDocumentStoreInstance = await DocumentStore.new();
+      await newDocumentStoreInstance.initialize(STORE_NAME, accounts[0]);
+      const {receipt} = await newDocumentStoreInstance.transferOwnership(accounts[1]);
       recordGasCost("DocumentStore", "transferOwnership", receipt.cumulativeGasUsed);
-      await documentStoreInstance.transferOwnership(accounts[0], {from: accounts[1]});
     });
     it("issue", async () => {
       const {receipt} = await documentStoreInstance.issue(randomHash());
@@ -219,7 +229,7 @@ describe("Gas Cost Benchmarks", () => {
         encodedInitilizeCall
       );
       adminUpgradableProxyAddress = logs[0].args.proxy;
-      recordGasCost("DocumentStore (AdminUpgradableProxy)", "deployment  & initialize", receipt.cumulativeGasUsed);
+      recordGasCost("DocumentStore (AdminUpgradableProxy)", "deployment & initialize", receipt.cumulativeGasUsed);
     });
     it("transferOwnership", async () => {
       const proxiedDocumentStoreInstance = await DocumentStore.at(adminUpgradableProxyAddress);
