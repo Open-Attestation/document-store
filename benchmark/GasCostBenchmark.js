@@ -1,3 +1,5 @@
+const {groupBy, mapValues} = require("lodash");
+
 const DocumentStore = artifacts.require("./DocumentStore.sol");
 const DocumentStoreWithRevokeReasons = artifacts.require("./DocumentStoreWithRevokeReasons.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
@@ -5,7 +7,6 @@ const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilit
 
 DocumentStore.numberFormat = "String";
 const {generateHashes} = require("../scripts/generateHashes");
-const {groupBy, mapValues} = require("lodash");
 
 const initializeAbi = {
   constant: false,
@@ -49,10 +50,13 @@ describe("Gas Cost Benchmarks", () => {
   after(() => {
     const groupedRecords = groupBy(gasRecords, record => record.context);
     const records = mapValues(groupedRecords, contextualisedRecords =>
-      contextualisedRecords.reduce((state, current) => {
-        state[current.contract] = current.gas;
-        return state;
-      }, {})
+      contextualisedRecords.reduce(
+        (state, current) => ({
+          ...state,
+          [current.contract]: current.gas
+        }),
+        {}
+      )
     );
     // eslint-disable-next-line no-console
     console.table(records);

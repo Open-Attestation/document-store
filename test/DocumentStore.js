@@ -248,7 +248,7 @@ contract("DocumentStore", accounts => {
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"
       ];
 
-      // Check that rerevoke is rejected
+      // Check that revoke is rejected
       await expect(instance.bulkRevoke(documentMerkleRoots)).to.be.rejectedWith(
         /revert/,
         "Duplicate revoke was not rejected"
