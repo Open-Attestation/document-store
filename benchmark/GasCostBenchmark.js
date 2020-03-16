@@ -47,10 +47,71 @@ describe("Gas Cost Benchmarks", () => {
       gas
     });
   };
+
+  const benchmarkBulkIssue = async (contractName, contractInstance) => {
+    const issue1 = await contractInstance.bulkIssue(randomHashes(1));
+    recordGasCost(contractName, "bulkIssue - 1 hash", issue1.receipt.cumulativeGasUsed);
+    const issue2 = await contractInstance.bulkIssue(randomHashes(2));
+    recordGasCost(contractName, "bulkIssue - 2 hash", issue2.receipt.cumulativeGasUsed);
+    const issue4 = await contractInstance.bulkIssue(randomHashes(4));
+    recordGasCost(contractName, "bulkIssue - 4 hash", issue4.receipt.cumulativeGasUsed);
+    const issue8 = await contractInstance.bulkIssue(randomHashes(8));
+    recordGasCost(contractName, "bulkIssue - 8 hash", issue8.receipt.cumulativeGasUsed);
+    const issue16 = await contractInstance.bulkIssue(randomHashes(16));
+    recordGasCost(contractName, "bulkIssue - 16 hash", issue16.receipt.cumulativeGasUsed);
+    const issue32 = await contractInstance.bulkIssue(randomHashes(32));
+    recordGasCost(contractName, "bulkIssue - 32 hash", issue32.receipt.cumulativeGasUsed);
+    const issue64 = await contractInstance.bulkIssue(randomHashes(64));
+    recordGasCost(contractName, "bulkIssue - 64 hash", issue64.receipt.cumulativeGasUsed);
+    const issue128 = await contractInstance.bulkIssue(randomHashes(128));
+    recordGasCost(contractName, "bulkIssue - 128 hash", issue128.receipt.cumulativeGasUsed);
+    const issue256 = await contractInstance.bulkIssue(randomHashes(256));
+    recordGasCost(contractName, "bulkIssue - 256 hash", issue256.receipt.cumulativeGasUsed);
+  };
+
+  const benchmarkBulkRevoke = async (contractName, contractInstance) => {
+    const revoke1 = await contractInstance.bulkRevoke(randomHashes(1));
+    recordGasCost(contractName, "bulkRevoke - 1 hash", revoke1.receipt.cumulativeGasUsed);
+    const revoke2 = await contractInstance.bulkRevoke(randomHashes(2));
+    recordGasCost(contractName, "bulkRevoke - 2 hash", revoke2.receipt.cumulativeGasUsed);
+    const revoke4 = await contractInstance.bulkRevoke(randomHashes(4));
+    recordGasCost(contractName, "bulkRevoke - 4 hash", revoke4.receipt.cumulativeGasUsed);
+    const revoke8 = await contractInstance.bulkRevoke(randomHashes(8));
+    recordGasCost(contractName, "bulkRevoke - 8 hash", revoke8.receipt.cumulativeGasUsed);
+    const revoke16 = await contractInstance.bulkRevoke(randomHashes(16));
+    recordGasCost(contractName, "bulkRevoke - 16 hash", revoke16.receipt.cumulativeGasUsed);
+    const revoke32 = await contractInstance.bulkRevoke(randomHashes(32));
+    recordGasCost(contractName, "bulkRevoke - 32 hash", revoke32.receipt.cumulativeGasUsed);
+    const revoke64 = await contractInstance.bulkRevoke(randomHashes(64));
+    recordGasCost(contractName, "bulkRevoke - 64 hash", revoke64.receipt.cumulativeGasUsed);
+    const revoke128 = await contractInstance.bulkRevoke(randomHashes(128));
+    recordGasCost(contractName, "bulkRevoke - 128 hash", revoke128.receipt.cumulativeGasUsed);
+    const revoke256 = await contractInstance.bulkRevoke(randomHashes(256));
+    recordGasCost(contractName, "bulkRevoke - 256 hash", revoke256.receipt.cumulativeGasUsed);
+  };
+
+  const benchmarkRevoke = async (contractName, contractInstance) => {
+    const revokeTx = await contractInstance.revoke(randomHash());
+    recordGasCost(contractName, "revoke", revokeTx.receipt.cumulativeGasUsed);
+  };
+
+  const benchmarkIssue = async (contractName, contractInstance) => {
+    const issueTx = await contractInstance.issue(randomHash());
+    recordGasCost(contractName, "issue", issueTx.receipt.cumulativeGasUsed);
+  };
+
+  const benchmarkTransfer = async (contractName, contractInstance, accounts) => {
+    const transferTx = await contractInstance.transferOwnership(accounts[2]);
+    recordGasCost(contractName, "transferOwnership", transferTx.receipt.cumulativeGasUsed);
+
+    // Revert the owner by transferring back
+    await contractInstance.transferOwnership(accounts[0], {from: accounts[2]});
+  };
+
   after(() => {
     const groupedRecords = groupBy(gasRecords, record => record.context);
-    const records = mapValues(groupedRecords, contextualisedRecords =>
-      contextualisedRecords.reduce(
+    const records = mapValues(groupedRecords, contextualizedRecords =>
+      contextualizedRecords.reduce(
         (state, current) => ({
           ...state,
           [current.contract]: current.gas
@@ -75,70 +136,24 @@ describe("Gas Cost Benchmarks", () => {
   contract(
     "DocumentStore",
     accounts => {
+      const contractName = "DocumentStore";
+
       it("runs benchmark", async () => {
-        // deploy & initialize
+        // Deploy & initialize document store contract
         const documentStoreInstance = await DocumentStore.new();
         const deploymentReceipt = await web3.eth.getTransactionReceipt(documentStoreInstance.transactionHash);
         const initializeReceipt = await documentStoreInstance.initialize(STORE_NAME, accounts[0]);
         recordGasCost(
-          "DocumentStore",
+          contractName,
           "deployment & initialize",
           deploymentReceipt.cumulativeGasUsed + initializeReceipt.receipt.cumulativeGasUsed
         );
 
-        // transferOwnership
-        const newDocumentStoreInstance = await DocumentStore.new();
-        await newDocumentStoreInstance.initialize(STORE_NAME, accounts[0]);
-        const transferTx = await newDocumentStoreInstance.transferOwnership(accounts[1]);
-        recordGasCost("DocumentStore", "transferOwnership", transferTx.receipt.cumulativeGasUsed);
-
-        // issue
-        const issueTx = await documentStoreInstance.issue(randomHash());
-        recordGasCost("DocumentStore", "issue", issueTx.receipt.cumulativeGasUsed);
-
-        // bulkIssue
-        const issue1 = await documentStoreInstance.bulkIssue(randomHashes(1));
-        recordGasCost("DocumentStore", "bulkIssue - 1 hash", issue1.receipt.cumulativeGasUsed);
-        const issue2 = await documentStoreInstance.bulkIssue(randomHashes(2));
-        recordGasCost("DocumentStore", "bulkIssue - 2 hash", issue2.receipt.cumulativeGasUsed);
-        const issue4 = await documentStoreInstance.bulkIssue(randomHashes(4));
-        recordGasCost("DocumentStore", "bulkIssue - 4 hash", issue4.receipt.cumulativeGasUsed);
-        const issue8 = await documentStoreInstance.bulkIssue(randomHashes(8));
-        recordGasCost("DocumentStore", "bulkIssue - 8 hash", issue8.receipt.cumulativeGasUsed);
-        const issue16 = await documentStoreInstance.bulkIssue(randomHashes(16));
-        recordGasCost("DocumentStore", "bulkIssue - 16 hash", issue16.receipt.cumulativeGasUsed);
-        const issue32 = await documentStoreInstance.bulkIssue(randomHashes(32));
-        recordGasCost("DocumentStore", "bulkIssue - 32 hash", issue32.receipt.cumulativeGasUsed);
-        const issue64 = await documentStoreInstance.bulkIssue(randomHashes(64));
-        recordGasCost("DocumentStore", "bulkIssue - 64 hash", issue64.receipt.cumulativeGasUsed);
-        const issue128 = await documentStoreInstance.bulkIssue(randomHashes(128));
-        recordGasCost("DocumentStore", "bulkIssue - 128 hash", issue128.receipt.cumulativeGasUsed);
-        const issue256 = await documentStoreInstance.bulkIssue(randomHashes(256));
-        recordGasCost("DocumentStore", "bulkIssue - 256 hash", issue256.receipt.cumulativeGasUsed);
-
-        // revoke
-        const revokeTx = await documentStoreInstance.revoke(randomHash());
-        recordGasCost("DocumentStore", "revoke", revokeTx.receipt.cumulativeGasUsed);
-
-        // bulkRevoke
-        const revoke1 = await documentStoreInstance.bulkRevoke(randomHashes(1));
-        recordGasCost("DocumentStore", "bulkRevoke - 1 hash", revoke1.receipt.cumulativeGasUsed);
-        const revoke2 = await documentStoreInstance.bulkRevoke(randomHashes(2));
-        recordGasCost("DocumentStore", "bulkRevoke - 2 hash", revoke2.receipt.cumulativeGasUsed);
-        const revoke4 = await documentStoreInstance.bulkRevoke(randomHashes(4));
-        recordGasCost("DocumentStore", "bulkRevoke - 4 hash", revoke4.receipt.cumulativeGasUsed);
-        const revoke8 = await documentStoreInstance.bulkRevoke(randomHashes(8));
-        recordGasCost("DocumentStore", "bulkRevoke - 8 hash", revoke8.receipt.cumulativeGasUsed);
-        const revoke16 = await documentStoreInstance.bulkRevoke(randomHashes(16));
-        recordGasCost("DocumentStore", "bulkRevoke - 16 hash", revoke16.receipt.cumulativeGasUsed);
-        const revoke32 = await documentStoreInstance.bulkRevoke(randomHashes(32));
-        recordGasCost("DocumentStore", "bulkRevoke - 32 hash", revoke32.receipt.cumulativeGasUsed);
-        const revoke64 = await documentStoreInstance.bulkRevoke(randomHashes(64));
-        recordGasCost("DocumentStore", "bulkRevoke - 64 hash", revoke64.receipt.cumulativeGasUsed);
-        const revoke128 = await documentStoreInstance.bulkRevoke(randomHashes(128));
-        recordGasCost("DocumentStore", "bulkRevoke - 128 hash", revoke128.receipt.cumulativeGasUsed);
-        const revoke256 = await documentStoreInstance.bulkRevoke(randomHashes(256));
-        recordGasCost("DocumentStore", "bulkRevoke - 256 hash", revoke256.receipt.cumulativeGasUsed);
+        await benchmarkTransfer(contractName, documentStoreInstance, accounts);
+        await benchmarkIssue(contractName, documentStoreInstance);
+        await benchmarkBulkIssue(contractName, documentStoreInstance);
+        await benchmarkRevoke(contractName, documentStoreInstance);
+        await benchmarkBulkRevoke(contractName, documentStoreInstance);
       });
     },
     20000
@@ -155,69 +170,25 @@ describe("Gas Cost Benchmarks", () => {
   contract(
     "DocumentStore (Minimal Proxy)",
     accounts => {
+      const contractName = "DocumentStore (Minimal Proxy)";
+
       it("runs benchmark", async () => {
-        // deploy
+        // Deploy & initialize document store contract in one transaction
         const encodedInitializeCall = web3.eth.abi.encodeFunctionCall(initializeAbi, [STORE_NAME, accounts[0]]);
         const deployTx = await staticProxyFactoryInstance.deployMinimal(
           staticDocumentStoreInstance.address,
           encodedInitializeCall
         );
         const minimalProxyAddress = deployTx.logs[0].args.proxy;
-        recordGasCost("DocumentStore (Minimal Proxy)", "deployment & initialize", deployTx.receipt.cumulativeGasUsed);
+        recordGasCost(contractName, "deployment & initialize", deployTx.receipt.cumulativeGasUsed);
 
-        // transferOwnership
         const proxiedDocumentStoreInstance = await DocumentStore.at(minimalProxyAddress);
-        const transferTx = await proxiedDocumentStoreInstance.transferOwnership(accounts[1]);
-        recordGasCost("DocumentStore (Minimal Proxy)", "transferOwnership", transferTx.receipt.cumulativeGasUsed);
-        await proxiedDocumentStoreInstance.transferOwnership(accounts[0], {from: accounts[1]});
 
-        // issue
-        const issueTx = await proxiedDocumentStoreInstance.issue(randomHash());
-        recordGasCost("DocumentStore (Minimal Proxy)", "issue", issueTx.receipt.cumulativeGasUsed);
-
-        // bulkIssue
-        const issue1 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(1));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 1 hash", issue1.receipt.cumulativeGasUsed);
-        const issue2 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(2));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 2 hash", issue2.receipt.cumulativeGasUsed);
-        const issue4 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(4));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 4 hash", issue4.receipt.cumulativeGasUsed);
-        const issue8 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(8));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 8 hash", issue8.receipt.cumulativeGasUsed);
-        const issue16 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(16));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 16 hash", issue16.receipt.cumulativeGasUsed);
-        const issue32 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(32));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 32 hash", issue32.receipt.cumulativeGasUsed);
-        const issue64 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(64));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 64 hash", issue64.receipt.cumulativeGasUsed);
-        const issue128 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(128));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 128 hash", issue128.receipt.cumulativeGasUsed);
-        const issue256 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(256));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkIssue - 256 hash", issue256.receipt.cumulativeGasUsed);
-
-        // revoke
-        const revokeTx = await proxiedDocumentStoreInstance.revoke(randomHash());
-        recordGasCost("DocumentStore (Minimal Proxy)", "revoke", revokeTx.receipt.cumulativeGasUsed);
-
-        // bulkRevoke
-        const revoke1 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(1));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 1 hash", revoke1.receipt.cumulativeGasUsed);
-        const revoke2 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(2));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 2 hash", revoke2.receipt.cumulativeGasUsed);
-        const revoke4 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(4));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 4 hash", revoke4.receipt.cumulativeGasUsed);
-        const revoke8 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(8));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 8 hash", revoke8.receipt.cumulativeGasUsed);
-        const revoke16 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(16));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 16 hash", revoke16.receipt.cumulativeGasUsed);
-        const revoke32 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(32));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 32 hash", revoke32.receipt.cumulativeGasUsed);
-        const revoke64 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(64));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 64 hash", revoke64.receipt.cumulativeGasUsed);
-        const revoke128 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(128));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 128 hash", revoke128.receipt.cumulativeGasUsed);
-        const revoke256 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(256));
-        recordGasCost("DocumentStore (Minimal Proxy)", "bulkRevoke - 256 hash", revoke256.receipt.cumulativeGasUsed);
+        await benchmarkTransfer(contractName, proxiedDocumentStoreInstance, accounts);
+        await benchmarkIssue(contractName, proxiedDocumentStoreInstance);
+        await benchmarkBulkIssue(contractName, proxiedDocumentStoreInstance);
+        await benchmarkRevoke(contractName, proxiedDocumentStoreInstance);
+        await benchmarkBulkRevoke(contractName, proxiedDocumentStoreInstance);
       });
     },
     20000
@@ -226,8 +197,10 @@ describe("Gas Cost Benchmarks", () => {
   contract(
     "DocumentStore (AdminUpgradableProxy)",
     accounts => {
+      const contractName = "DocumentStore (AdminUpgradableProxy)";
+
       it("runs benchmark", async () => {
-        // deploy
+        // Deploy & initialize document store contract
         const encodedInitializeCall = web3.eth.abi.encodeFunctionCall(initializeAbi, [STORE_NAME, accounts[0]]);
         const salt = 1337;
         const deployTx = await staticProxyFactoryInstance.deploy(
@@ -236,106 +209,23 @@ describe("Gas Cost Benchmarks", () => {
           accounts[1], // Must use separate account for proxy admin
           encodedInitializeCall
         );
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "deployment & initialize",
-          deployTx.receipt.cumulativeGasUsed
-        );
+        recordGasCost(contractName, "deployment & initialize", deployTx.receipt.cumulativeGasUsed);
 
         const adminUpgradableProxyAddress = deployTx.logs[0].args.proxy;
         const proxiedDocumentStoreInstance = await DocumentStore.at(adminUpgradableProxyAddress);
 
-        // transferOwnership
-        const transferTx = await proxiedDocumentStoreInstance.transferOwnership(accounts[2]);
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "transferOwnership",
-          transferTx.receipt.cumulativeGasUsed
-        );
-        await proxiedDocumentStoreInstance.transferOwnership(accounts[0], {from: accounts[2]});
-
-        // issue
-        const issueTx = await proxiedDocumentStoreInstance.issue(randomHash());
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "issue", issueTx.receipt.cumulativeGasUsed);
-
-        // bulkIssue
-        const issue1 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(1));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 1 hash", issue1.receipt.cumulativeGasUsed);
-        const issue2 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(2));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 2 hash", issue2.receipt.cumulativeGasUsed);
-        const issue4 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(4));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 4 hash", issue4.receipt.cumulativeGasUsed);
-        const issue8 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(8));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 8 hash", issue8.receipt.cumulativeGasUsed);
-        const issue16 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(16));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 16 hash", issue16.receipt.cumulativeGasUsed);
-        const issue32 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(32));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 32 hash", issue32.receipt.cumulativeGasUsed);
-        const issue64 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(64));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkIssue - 64 hash", issue64.receipt.cumulativeGasUsed);
-        const issue128 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(128));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkIssue - 128 hash",
-          issue128.receipt.cumulativeGasUsed
-        );
-        const issue256 = await proxiedDocumentStoreInstance.bulkIssue(randomHashes(256));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkIssue - 256 hash",
-          issue256.receipt.cumulativeGasUsed
-        );
-
-        // revoke
-        const revokeTx = await proxiedDocumentStoreInstance.revoke(randomHash());
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "revoke", revokeTx.receipt.cumulativeGasUsed);
-
-        // bulkRevoke
-        const revoke1 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(1));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkRevoke - 1 hash", revoke1.receipt.cumulativeGasUsed);
-        const revoke2 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(2));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkRevoke - 2 hash", revoke2.receipt.cumulativeGasUsed);
-        const revoke4 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(4));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkRevoke - 4 hash", revoke4.receipt.cumulativeGasUsed);
-        const revoke8 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(8));
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "bulkRevoke - 8 hash", revoke8.receipt.cumulativeGasUsed);
-        const revoke16 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(16));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkRevoke - 16 hash",
-          revoke16.receipt.cumulativeGasUsed
-        );
-        const revoke32 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(32));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkRevoke - 32 hash",
-          revoke32.receipt.cumulativeGasUsed
-        );
-        const revoke64 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(64));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkRevoke - 64 hash",
-          revoke64.receipt.cumulativeGasUsed
-        );
-        const revoke128 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(128));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkRevoke - 128 hash",
-          revoke128.receipt.cumulativeGasUsed
-        );
-        const revoke256 = await proxiedDocumentStoreInstance.bulkRevoke(randomHashes(256));
-        recordGasCost(
-          "DocumentStore (AdminUpgradableProxy)",
-          "bulkRevoke - 256 hash",
-          revoke256.receipt.cumulativeGasUsed
-        );
+        await benchmarkTransfer(contractName, proxiedDocumentStoreInstance, accounts);
+        await benchmarkIssue(contractName, proxiedDocumentStoreInstance);
+        await benchmarkBulkIssue(contractName, proxiedDocumentStoreInstance);
+        await benchmarkRevoke(contractName, proxiedDocumentStoreInstance);
+        await benchmarkBulkRevoke(contractName, proxiedDocumentStoreInstance);
 
         // update
         const proxyInstance = await BaseAdminUpgradeabilityProxy.at(adminUpgradableProxyAddress);
         const {receipt} = await proxyInstance.upgradeTo(staticDocumentStoreWithRevokeReasons.address, {
           from: accounts[1]
         });
-        recordGasCost("DocumentStore (AdminUpgradableProxy)", "upgrade", receipt.cumulativeGasUsed);
+        recordGasCost(contractName, "upgrade", receipt.cumulativeGasUsed);
       });
     },
     20000

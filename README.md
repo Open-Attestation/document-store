@@ -1,16 +1,25 @@
-# certificate-contract
+# Document Store Contract
 
 [![Build Status](https://travis-ci.org/GovTechSG/certificate-contract.svg?branch=master)](https://travis-ci.org/GovTechSG/certificate-contract)
 
 ## Setup
 
+```sh
+npm install
+npm lint
+npm test
+npm truffle <command>
 ```
-$ npm install
-$ npm lint
-$ npx ganache-cli -h 0.0.0.0 -p 8545 -i 1337 -s foobar -e 100000000000000000000
-$ npm test
-$ npm truffle <command>
+
+## Benchmark
+
+A benchmark is provided to show the different transaction cost of the different variants of the document store.
+
+```sh
+npm run benchmark
 ```
+
+![Benchmark Results](./docs/benchmark.png)
 
 ## Notes
 
