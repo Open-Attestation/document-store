@@ -3,7 +3,7 @@ const {groupBy, mapValues} = require("lodash");
 const DocumentStore = artifacts.require("./DocumentStore.sol");
 const DocumentStoreWithRevokeReasons = artifacts.require("./DocumentStoreWithRevokeReasons.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
-const DocumentStoreFactory = artifacts.require("./DocumentStoreFactory.sol");
+const DocumentStoreCreator = artifacts.require("./DocumentStoreCreator.sol");
 const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilityProxy.sol");
 
 DocumentStore.numberFormat = "String";
@@ -168,11 +168,11 @@ describe("Gas Cost Benchmarks", () => {
     });
   });
 
-  contract("DocumentStoreFactory", () => {
+  contract("DocumentStoreCreator", () => {
     it("runs benchmark", async () => {
-      const deployment = await DocumentStoreFactory.new();
+      const deployment = await DocumentStoreCreator.new();
       const receipt = await web3.eth.getTransactionReceipt(deployment.transactionHash);
-      recordGasCost("DocumentStoreFactory", "deployment", receipt.cumulativeGasUsed);
+      recordGasCost("DocumentStoreCreator", "deployment", receipt.cumulativeGasUsed);
     });
   });
 

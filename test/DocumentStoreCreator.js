@@ -1,16 +1,16 @@
 const DocumentStore = artifacts.require("./DocumentStore.sol");
-const DocumentStoreFactory = artifacts.require("./DocumentStoreFactory.sol");
+const DocumentStoreCreator = artifacts.require("./DocumentStoreCreator.sol");
 
 const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
-contract("DocumentStoreFactory", accounts => {
+contract("DocumentStoreCreator", accounts => {
   describe("deploy", () => {
     it("should deploy new instance of DocumentStore correctly", async () => {
-      const documentStoreFactoryInstance = await DocumentStoreFactory.new();
+      const documentStoreCreatorInstance = await DocumentStoreCreator.new();
 
       // Test for events emitted by factory
-      const deployReceipt = await documentStoreFactoryInstance.deploy(config.INSTITUTE_NAME, {from: accounts[1]});
+      const deployReceipt = await documentStoreCreatorInstance.deploy(config.INSTITUTE_NAME, {from: accounts[1]});
       expect(deployReceipt.logs[0].args.creator).to.be.equal(accounts[1], "Emitted contract creator does not match");
 
       // Test correctness of deployed DocumentStore
