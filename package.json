@@ -16,7 +16,9 @@
     "lint": "npm run lint:sol && npm run eslint",
     "test": "truffle test",
     "truffle": "truffle",
-    "benchmark": "truffle test ./benchmark/*"
+    "benchmark": "truffle test ./benchmark/*",
+    "typechain": "typechain --target ethers \"build/contracts/*.json\"",
+    "postinstall": "npm run typechain"
   },
   "dependencies": {
     "@openzeppelin/contracts-ethereum-package": "^2.4.0",
@@ -45,7 +47,9 @@
     "prettier-plugin-solidity": "^1.0.0-alpha.36",
     "solhint": "^2.3.0",
     "solhint-plugin-prettier": "0.0.3",
-    "solium": "^1.2.5"
+    "solium": "^1.2.5",
+    "typechain": "^1.0.5",
+    "typechain-target-ethers": "^1.0.3"
   },
   "config": {
     "commitizen": {
