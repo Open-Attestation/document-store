@@ -146,7 +146,7 @@ describe("Gas Cost Benchmarks", () => {
         const initializeReceipt = await documentStoreInstance.initialize(STORE_NAME, accounts[0]);
         recordGasCost(
           contractName,
-          "deployment & initialize",
+          "deployment",
           deploymentReceipt.cumulativeGasUsed + initializeReceipt.receipt.cumulativeGasUsed
         );
 
@@ -189,7 +189,7 @@ describe("Gas Cost Benchmarks", () => {
           encodedInitializeCall
         );
         const minimalProxyAddress = deployTx.logs[0].args.proxy;
-        recordGasCost(contractName, "deployment & initialize", deployTx.receipt.cumulativeGasUsed);
+        recordGasCost(contractName, "deployment", deployTx.receipt.cumulativeGasUsed);
 
         const proxiedDocumentStoreInstance = await DocumentStore.at(minimalProxyAddress);
 
@@ -218,7 +218,7 @@ describe("Gas Cost Benchmarks", () => {
           accounts[1], // Must use separate account for proxy admin
           encodedInitializeCall
         );
-        recordGasCost(contractName, "deployment & initialize", deployTx.receipt.cumulativeGasUsed);
+        recordGasCost(contractName, "deployment", deployTx.receipt.cumulativeGasUsed);
 
         const adminUpgradableProxyAddress = deployTx.logs[0].args.proxy;
         const proxiedDocumentStoreInstance = await DocumentStore.at(adminUpgradableProxyAddress);
