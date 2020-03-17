@@ -1,6 +1,6 @@
 {
   "name": "@govtechsg/document-store-contract",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "main": "index.js",
   "repository": "git@github.com:Open-Attestation/document-store-contract.git",
   "author": "GovTech",
@@ -10,21 +10,20 @@
     "commit:retry": "npm run commit -- --retry",
     "eslint:fix": "eslint . --ext .js --fix",
     "eslint": "eslint . --ext .js",
-    "lint:fix": "npm run solium:fix && npm run eslint:fix",
-    "lint": "npm run solium && npm run eslint",
-    "solium:fix": "solium -d contracts --fix",
-    "solium": "solium -d contracts",
+    "lint:sol": "./node_modules/.bin/solhint contracts/**/*.sol",
+    "lint:sol:fix": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "lint:fix": "npm run lint:sol:fix && npm run eslint:fix",
+    "lint": "npm run lint:sol && npm run eslint",
     "test": "truffle test",
-    "truffle": "truffle"
+    "truffle": "truffle",
+    "benchmark": "truffle test ./benchmark/*"
   },
   "dependencies": {
-    "dotenv": "^8.0.0",
-    "ethlint": "^1.2.4",
-    "ganache-cli": "^6.6.0",
+    "@openzeppelin/contracts-ethereum-package": "^2.4.0",
+    "@openzeppelin/upgrades": "2.6.0",
+    "dotenv": "^8.2.0",
     "lodash": "^4.17.15",
-    "truffle": "5.0.32",
-    "truffle-hdwallet-provider": "1.0.15",
-    "web3": "1.2.1"
+    "truffle": "5.1.3"
   },
   "devDependencies": {
     "@commitlint/cli": "8.2.0",
@@ -36,14 +35,17 @@
     "commitizen": "4.0.3",
     "eslint": "^5.6.1",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^6.1.0",
+    "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-chai-expect": "^1.1.1",
     "eslint-plugin-chai-friendly": "^0.4.1",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-prettier": "^3.0.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "git-cz": "3.2.1",
-    "prettier": "^1.18.2",
-    "prettier-plugin-solidity": "^1.0.0-alpha.30"
+    "prettier": "^1.19.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.36",
+    "solhint": "^2.3.0",
+    "solhint-plugin-prettier": "0.0.3",
+    "solium": "^1.2.5"
   },
   "config": {
     "commitizen": {
