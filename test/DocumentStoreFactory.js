@@ -5,16 +5,12 @@ const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
 contract("DocumentStoreFactory", accounts => {
-  let instance = null;
-
-  beforeEach(async () => {
-    instance = await DocumentStoreFactory.new();
-  });
-
   describe("deploy", () => {
     it("should deploy new instance of DocumentStore correctly", async () => {
-      // Test for events emitted
-      const deployReceipt = await instance.deploy(config.INSTITUTE_NAME, {from: accounts[1]});
+      const documentStoreFactoryInstance = await DocumentStoreFactory.new();
+
+      // Test for events emitted by factory
+      const deployReceipt = await documentStoreFactoryInstance.deploy(config.INSTITUTE_NAME, {from: accounts[1]});
       expect(deployReceipt.logs[0].args.creator).to.be.equal(accounts[1], "Emitted contract creator does not match");
 
       // Test correctness of deployed DocumentStore
