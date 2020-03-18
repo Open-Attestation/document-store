@@ -74,6 +74,27 @@ isRevoked
 isRevokedBefore
 ```
 
+## Provider & Signer
+
+Different ways to get provider or signer:
+
+```ts
+import {Wallet, providers, getDefaultProvider} from "ethers";
+
+// Providers
+const mainnetProvider = getDefaultProvider();
+const ropstenProvider = getDefaultProvider("ropsten");
+const metamaskProvider = new providers.Web3Provider(web3.currentProvider); // Will change network automatically
+
+// Signer
+const signerFromPrivateKey = new Wallet("YOUR-PRIVATE-KEY-HERE", provider);
+const signerFromEncryptedJson = Wallet.fromEncryptedJson(json, password);
+signerFromEncryptedJson.connect(provider);
+const signerFromMnemonic = Wallet.fromMnemonic("MNEMONIC-HERE");
+signerFromMnemonic.connect(provider);
+
+```
+
 ## Setup
 
 ```sh
