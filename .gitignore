@@ -6,3 +6,4 @@ yarn-error.log
 .idea
 types/ethers-contracts
 dist
+build

@@ -1,36 +1,50 @@
 {
-  "extends": ["airbnb-base", "prettier"],
-
+  "parser": "babel-eslint",
+  "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "env": {
-    "mocha": true
+    "jest": true
   },
-
-  "plugins": [
-    "prettier",
-    "chai-friendly",
-    "chai-expect"
-  ],
-
-  "globals": {
-    "artifacts": false,
-    "contract": false,
-    "assert": false,
-    "web3": false,
-    "BigInt": false
-  },
-
-  "rules": {
-    "no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_"
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
-    ],
-    "prettier/prettier": "error",
-    "no-unused-expressions": "off",
-    "chai-friendly/no-unused-expressions": "error",
-    "chai-expect/no-inner-compare": "error",
-    "chai-expect/missing-assertion": "error",
-    "chai-expect/terminating-properties": "error"
-  }
+    }
+  },
+  "globals": {
+    "artifacts": "readonly",
+    "contract": "readonly",
+    "assert": "readonly",
+    "web3": "writable"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "plugins": ["@typescript-eslint"],
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "no-restricted-globals": "off",
+        "import/prefer-default-export": "off",
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*"]}]
+      }
+    },
+    {
+      "files": ["test/*.js", "benchmark/*.js", "scripts/*.js"],
+      "plugins": ["chai-friendly", "chai-expect"],
+      "env": {
+        "mocha": true
+      },
+      "globals": {
+        "BigInt": "readonly"
+      },
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ]
 }

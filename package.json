@@ -6,6 +6,7 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
+    "build:sol": "truffle build",
     "build:js": "tsc --emitDeclarationOnly && babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
@@ -19,8 +20,8 @@
     "test:js": "jest --testPathPattern=src",
     "truffle": "truffle",
     "benchmark": "truffle test ./benchmark/*",
-    "typechain": "truffle build && typechain --target ethers \"build/contracts/*.json\"",
-    "postinstall": "npm run typechain"
+    "typechain": "typechain --target ethers \"build/contracts/*.json\"",
+    "postinstall": "npm run build:sol && npm run typechain"
   },
   "jest": {
     "globalSetup": "./jest/setup.ts",
