@@ -4,7 +4,8 @@ import {DocumentStoreCreatorFactory} from "../types/ethers-contracts/DocumentSto
 import {getDocumentStoreCreatorAddress} from "./config";
 
 export const deploy = async (name: string, signer: Signer): Promise<ContractTransaction> => {
-  const factory = DocumentStoreCreatorFactory.connect(getDocumentStoreCreatorAddress(), signer);
+  const chainId = (await signer.provider?.getNetwork())?.chainId || 1;
+  const factory = DocumentStoreCreatorFactory.connect(getDocumentStoreCreatorAddress(chainId), signer);
   return factory.deploy(name);
 };
 

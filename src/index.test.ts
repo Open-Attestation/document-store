@@ -1,5 +1,5 @@
 import {providers} from "ethers";
-import {deployAndWait, connect} from "./index";
+import {deploy, deployAndWait, connect} from "./index";
 import {DocumentStoreCreatorFactory} from "../types/ethers-contracts/DocumentStoreCreatorFactory";
 import {overwriteDocumentStoreCreatorAddress} from "./config";
 
@@ -14,6 +14,13 @@ beforeAll(async () => {
   const factoryAddress = receipt.address;
   overwriteDocumentStoreCreatorAddress(factoryAddress);
   account = await signer.getAddress();
+});
+
+describe("deploy", () => {
+  it("deploys a new DocumentStore contract without waiting for confirmation", async () => {
+    const receipt = await deploy("My Store", signer);
+    expect(receipt.from).toBe(account);
+  });
 });
 
 describe("deployAndWait", () => {
