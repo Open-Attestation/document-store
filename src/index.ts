@@ -3,12 +3,12 @@ import {DocumentStoreFactory} from "../types/ethers-contracts/DocumentStoreFacto
 import {DocumentStoreCreatorFactory} from "../types/ethers-contracts/DocumentStoreCreatorFactory";
 import {getDocumentStoreCreatorAddress} from "./config";
 
-export const deploy = async (
-  name: string,
-  signer: Signer,
-  documentStoreCreatorAddressOverride?: string
-): Promise<ContractTransaction> => {
-  let documentStoreCreatorFactoryAddress = documentStoreCreatorAddressOverride;
+interface DeployOptions {
+  documentStoreCreatorAddressOverride?: string;
+}
+
+export const deploy = async (name: string, signer: Signer, options?: DeployOptions): Promise<ContractTransaction> => {
+  let documentStoreCreatorFactoryAddress = options?.documentStoreCreatorAddressOverride;
   if (!documentStoreCreatorFactoryAddress) {
     const chainId = (await signer.provider?.getNetwork())?.chainId;
     documentStoreCreatorFactoryAddress = getDocumentStoreCreatorAddress(chainId);
@@ -17,8 +17,8 @@ export const deploy = async (
   return factory.deploy(name);
 };
 
-export const deployAndWait = async (name: string, signer: Signer, documentStoreCreatorAddressOverride?: string) => {
-  const receipt = await (await deploy(name, signer, documentStoreCreatorAddressOverride)).wait();
+export const deployAndWait = async (name: string, signer: Signer, options?: DeployOptions) => {
+  const receipt = await (await deploy(name, signer, options)).wait();
   if (!receipt.logs || !receipt.logs[0].address) throw new Error("Fail to detect deployed contract address");
   return DocumentStoreFactory.connect(receipt.logs![0].address, signer);
 };
