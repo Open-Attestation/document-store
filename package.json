@@ -4,8 +4,7 @@
   "main": "dist/index.js",
   "files": [
     "dist",
-    "src",
-    "build"
+    "src"
   ],
   "types": "dist/ts/src",
   "repository": "git@github.com:Open-Attestation/document-store-contract.git",
@@ -14,8 +13,9 @@
   "scripts": {
     "build:sol": "truffle build",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-generated-types": "cp -r types/ethers-contracts/* dist/ts/types/ethers-contracts",
-    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-generated-types",
+    "build:js:copy-generated-types": "mkdir -p dist/ts/src/ethers-contracts && cp -r types/ethers-contracts/* dist/ts/src/ethers-contracts",
+    "build:js:copy-generated-contract": "mkdir -p dist/sol && cp -r build/contracts/* dist/sol",
+    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-generated-types && npm run build:js:copy-generated-contract",
     "build": "npm run build:sol && npm run build:js",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
