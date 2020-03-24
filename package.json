@@ -81,5 +81,8 @@
     "commitizen": {
       "path": "node_modules/@commitlint/prompt"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
