@@ -14,7 +14,7 @@
   "scripts": {
     "build:sol": "truffle build",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-generated-types": "babel types/ethers-contracts -d dist/ts/types/ethers-contracts -x .ts --copy-files",
+    "build:js:copy-generated-types": "cp -r types/ethers-contracts/* dist/ts/types/ethers-contracts",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-generated-types",
     "build": "npm run build:sol && npm run build:js",
     "commit": "git-cz",
