@@ -4,7 +4,6 @@ const {get} = require("lodash");
 
 const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
-const {version: versionFromPackageJson} = require("../package.json");
 
 contract("DocumentStore", accounts => {
   let instance = null;
@@ -30,9 +29,9 @@ contract("DocumentStore", accounts => {
   });
 
   describe("version", () => {
-    it("should have a version field value that is the same as in package.json", async () => {
+    it("should have a version field value that should be bumped on new versions of the contract", async () => {
       const versionFromSolidity = await instance.version();
-      expect(versionFromSolidity).to.be.equal(versionFromPackageJson);
+      expect(versionFromSolidity).to.be.equal("3.0.0");
     });
   });
 
