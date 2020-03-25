@@ -2,6 +2,8 @@ pragma solidity 0.5.12;
 
 import "./DocumentStore.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
 /**
  * @dev This contract enables meta-transactions to be sent and delegated to a third party.
@@ -34,10 +36,17 @@ import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.so
   *             const messageHash = web3.utils.soliditySha3(message, nonce, address); // 0x2bd7dce779d8d21e3266e847f21ce8160a53e6a78a65a5045f72b18081f7fc69
   *             const signature = await web3.eth.sign(messageHash, signer); // 0xf5731da089e7d9532aad446f9f92cabf3ce39c5cde8ba541cb26ed17b69ab8870a411a66ad8316d7b7478e1c1be05ca840ecfc8cc7468beb9c2832be4dc8fb1e1b
  */
-contract RelayedDocumentStore is DocumentStore {
+contract RelayedDocumentStore is Initializable, Ownable {
   using ECDSA for bytes32;
 
   address private trustedSigner; // Account that is signing *messages*
+  DocumentStore public documentStore;
+
+  mapping(address => uint256) public signerNonce;
+
+  event DocumentIssued(bytes32 indexed document);
+  event DocumentRevoked(bytes32 indexed document);
+  event RelayedMessage(address indexed relayer, address indexed trustedSigner, bytes4 functionIdentifier);
 
   function initialize(
     string memory _name,
@@ -47,66 +56,76 @@ contract RelayedDocumentStore is DocumentStore {
     public
     initializer
   {
-    super.initialize(_name, _relayer);
-    require(_trustedSigner != address(0), "RelayedDocumentStore: trusted signer is the zero address");
+    // Owner of this contract is the relayer
+    require(_relayer != address(0), "RelayedDocumentStore: relayer is the zero address");
+    super.initialize(_relayer);
+
+    require(_trustedSigner != address(0), "RelayedDocumentStore: trustedSigner is the zero address");
     trustedSigner = _trustedSigner;
+
+    // Owner of the DocumentStore is this contract enforcing trustedSigner sign-off
+    documentStore = new DocumentStore();
+    documentStore.initialize(_name, address(this));
   }
 
   function bulkIssueRelayed(
     bytes32[] memory documents,
     bytes32 documentsHash,
-    uint256 nonce,
     bytes memory signature
   )
     public
-    onlyTrustedSigner(documentsHash, nonce, signature)
+    onlyOwner
+    onlyTrustedSigner(documentsHash, signature)
   {
-    bulkIssue(documents);
+    documentStore.bulkIssue(documents);
   }
 
   function bulkRevokeRelayed(
     bytes32[] memory documents,
     bytes32 documentsHash,
-    uint256 nonce,
     bytes memory signature
   )
     public
-    onlyTrustedSigner(documentsHash, nonce, signature)
+    onlyOwner
+    onlyTrustedSigner(documentsHash, signature)
   {
-    bulkRevoke(documents);
+    documentStore.bulkRevoke(documents);
   }
 
   function issueRelayed(
     bytes32 document,
-    uint256 nonce,
     bytes memory signature
   )
     public
-    onlyTrustedSigner(document, nonce, signature)
+    onlyOwner
+    onlyTrustedSigner(document, signature)
   {
-    issue(document);
+    documentStore.issue(document);
   }
 
   function revokeRelayed(
     bytes32 document,
-    uint256 nonce,
     bytes memory signature
   )
     public
-    onlyTrustedSigner(document, nonce, signature)
+    onlyOwner
+    onlyTrustedSigner(document, signature)
   {
-    revoke(document);
+    documentStore.revoke(document);
   }
 
   /**
-   * @dev Throws if the message is not signed by the trusted signer.
+   * @dev Throws if the message is not signed by the trusted signer or nonce incorrect.
    */
-  modifier onlyTrustedSigner(bytes32 message, uint256 nonce, bytes memory signature) {
+  modifier onlyTrustedSigner(bytes32 message, bytes memory signature) {
+    uint256 nonce = signerNonce[trustedSigner];
     bytes memory blob = abi.encodePacked(message, nonce, address(this));
-    require(
-      keccak256(blob).toEthSignedMessageHash().recover(signature) == trustedSigner,
-      "RelayedDocumentStore: Signature does not match the trustedSigner"
-    );
+    address recoveredAddress = keccak256(blob).toEthSignedMessageHash().recover(signature);
+    require(recoveredAddress == trustedSigner, "RelayedDocumentStore: Signature does not match the trustedSigner");
+
+    ++signerNonce[trustedSigner];
+
+    emit RelayedMessage(msg.sender, recoveredAddress, msg.sig);
     _;
   }
 }
