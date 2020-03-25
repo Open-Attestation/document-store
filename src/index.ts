@@ -1,6 +1,6 @@
 import {Signer, providers, ContractTransaction} from "ethers";
-import {DocumentStoreFactory} from "../types/ethers-contracts/DocumentStoreFactory";
-import {DocumentStoreCreatorFactory} from "../types/ethers-contracts/DocumentStoreCreatorFactory";
+import {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
+import {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
 import {getDocumentStoreCreatorAddress} from "./config";
 
 interface DeployOptions {
@@ -27,4 +27,4 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
   return DocumentStoreFactory.connect(address, signerOrProvider);
 };
 
-export {DocumentStoreFactory} from "../types/ethers-contracts/DocumentStoreFactory";
+export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";

@@ -15,5 +15,6 @@
     "noUnusedParameters": true,
     "stripInternal": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": ["./src/contracts/**/*"]
 }

@@ -15,8 +15,7 @@
   "scripts": {
     "build:sol": "truffle build",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-generated-types": "cp -r types/ethers-contracts/* dist/ts/types/ethers-contracts",
-    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-generated-types",
+    "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src",
     "build": "npm run build:sol && npm run build:js",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
@@ -31,7 +30,7 @@
     "test": "npm run test:sol && npm run test:js",
     "truffle": "truffle",
     "benchmark": "truffle test ./benchmark/*",
-    "typechain": "typechain --target ethers \"build/contracts/*.json\"",
+    "typechain": "typechain --target ethers \"build/contracts/*.json\" --outDir src/contracts",
     "postinstall": "npm run build:sol && npm run typechain",
     "semantic-release": "semantic-release"
   },
