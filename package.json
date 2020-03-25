@@ -8,7 +8,7 @@
     "types",
     "truffle-config.js"
   ],
-  "types": "dist/ts/src",
+  "types": "dist/ts",
   "repository": "git@github.com:Open-Attestation/document-store-contract.git",
   "author": "GovTech",
   "license": "Apache-2.0",
