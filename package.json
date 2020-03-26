@@ -37,7 +37,21 @@
   },
   "jest": {
     "globalSetup": "./jest/setup.ts",
-    "globalTeardown": "./jest/teardown.ts"
+    "globalTeardown": "./jest/teardown.ts",
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "jsx",
+      "d.ts",
+      "ts",
+      "tsx",
+      "node"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules",
+      "/build",
+      "/dist"
+    ]
   },
   "dependencies": {
     "@openzeppelin/contracts-ethereum-package": "^2.4.0",
