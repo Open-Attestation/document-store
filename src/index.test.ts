@@ -35,6 +35,7 @@ describe("deployAndWait", () => {
 describe("connect", () => {
   it("connects to existing contract", async () => {
     const {address} = await deployAndWait("My Store", signer, {documentStoreCreatorAddressOverride});
+    console.log(address);
     const instance = await connect(address, signer);
     const owner = await instance.owner();
     expect(owner).toBe(account);
