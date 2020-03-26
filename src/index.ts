@@ -27,7 +27,5 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
   return DocumentStoreFactory.connect(address, signerOrProvider);
 };
 
-export {DocumentStore} from "./contracts/DocumentStore";
 export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
-export {DocumentStoreCreator} from "./contracts/DocumentStoreCreator";
 export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";

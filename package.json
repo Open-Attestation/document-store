@@ -15,7 +15,7 @@
   "scripts": {
     "build:sol": "truffle build",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-types": "cp src/contracts/*.d.ts dist/ts/contracts",
+    "build:js:copy-types": "mkdir -p types && cp src/contracts/*.d.ts types/",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
     "build": "npm run build:sol && npm run build:js",
     "commit": "git-cz",
@@ -38,15 +38,6 @@
   "jest": {
     "globalSetup": "./jest/setup.ts",
     "globalTeardown": "./jest/teardown.ts",
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "jsx",
-      "d.ts",
-      "ts",
-      "tsx",
-      "node"
-    ],
     "testPathIgnorePatterns": [
       "/node_modules",
       "/build",
