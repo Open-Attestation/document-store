@@ -7,10 +7,16 @@ const config = require("../config.js");
 
 let instance = null;
 let documentStore = null;
+const signedMethodSignatures = {
+  issueRelayed: null,
+  revokeRelayed: null,
+  bulkIssueRelayed: null,
+  bulkRevokeRelayed: null
+};
 
-const signMessage = async (message, nonce, signer) => {
+const signMessage = async (message, nonce, methodSignature, signer) => {
   const store = instance.address; // Replays on different stores
-  const messageHash = web3.utils.soliditySha3(message, nonce, store);
+  const messageHash = web3.utils.soliditySha3(message, nonce, methodSignature, store);
   const rawSignature = await web3.eth.sign(messageHash, signer);
 
   // see https://github.com/ethereum/go-ethereum/blob/v1.8.23/internal/ethapi/api.go#L465
@@ -27,15 +33,27 @@ contract("RelayedDocumentStore", accounts => {
   const relayer = accounts[0];
   const trustedSigner = accounts[1];
 
+  before(async () => {
+    // Required to have function sigs generated...
+    await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner, relayer, {from: relayer});
+    const {abi} = await RelayedDocumentStore.toJSON();
+
+    for (let i = 0; i < abi.length; i += 1) {
+      const {name, signature} = abi[i];
+      if (Object.keys(signedMethodSignatures).includes(name)) {
+        signedMethodSignatures[name] = signature;
+      }
+    }
+  });
+
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await RelayedDocumentStore.new();
-    await instance.initialize(config.INSTITUTE_NAME, trustedSigner, relayer, {from: relayer});
+    instance = await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner, relayer, {from: relayer});
     const documentStoreAddress = await instance.documentStore.call();
     documentStore = await DocumentStore.at(documentStoreAddress);
   });
 
-  describe("initializer", () => {
+  describe("constructor", () => {
     it("should have correct name", async () => {
       const name = await documentStore.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
@@ -58,7 +76,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should be able to issue a document signed by trusted signer and sent by relayer", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
       const receipt = await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       // FIXME: Use a utility helper to watch for event
@@ -73,7 +96,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should not be able to issue a document if the wrong nonce is used", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = 100 + (await instance.signerNonce(trustedSigner));
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
 
       await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: relayer})).to.be.rejectedWith(/revert/);
     });
@@ -81,7 +109,7 @@ contract("RelayedDocumentStore", accounts => {
     it("should not be able to issue a document not signed by the trusted signer", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentMerkleRoot, nonce, relayer);
+      const signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, relayer);
 
       await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: relayer})).to.be.rejectedWith(/revert/);
 
@@ -92,7 +120,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should not allow duplicate issues", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
       await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       // Check that reissue is rejected
@@ -109,7 +142,12 @@ contract("RelayedDocumentStore", accounts => {
 
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
 
       await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: nonOwner})).to.be.rejectedWith(/revert/);
     });
@@ -121,8 +159,8 @@ contract("RelayedDocumentStore", accounts => {
       // Using the has of the batch to then sign and broadcast on-chain limit data size
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
-      const receipt = await instance.bulkIssueRelayed(documentMerkleRoots, documentsHash, signature, {
+      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
+      const receipt = await instance.bulkIssueRelayed(documentMerkleRoots, signature, {
         from: relayer
       });
 
@@ -137,11 +175,11 @@ contract("RelayedDocumentStore", accounts => {
       // Using the has of the batch to then sign and broadcast on-chain limit data size
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, relayer); // singed by relayer instead of trustedSigner
+      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, relayer); // singed by relayer instead of trustedSigner
 
-      await expect(
-        instance.bulkIssueRelayed(documentMerkleRoots, documentsHash, signature, {from: relayer})
-      ).to.be.rejectedWith(/revert/);
+      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
+        /revert/
+      );
 
       const issued = await documentStore.isIssued(documentMerkleRoots[0]);
       expect(issued, "Document is not issued").to.be.false;
@@ -155,8 +193,8 @@ contract("RelayedDocumentStore", accounts => {
       ];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
-      const receipt = await instance.bulkIssueRelayed(documentMerkleRoots, documentsHash, signature, {
+      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
+      const receipt = await instance.bulkIssueRelayed(documentMerkleRoots, signature, {
         from: relayer
       });
 
@@ -180,11 +218,12 @@ contract("RelayedDocumentStore", accounts => {
       ];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
+      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
       // Check that reissue is rejected
-      await expect(
-        instance.bulkIssueRelayed(documentMerkleRoots, documentsHash, signature, {from: relayer})
-      ).to.be.rejectedWith(/revert/, "Duplicate issue was not rejected");
+      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
+        /revert/,
+        "Duplicate issue was not rejected"
+      );
     });
 
     it("only allows the owner to issue", async () => {
@@ -195,11 +234,11 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
+      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
 
-      await expect(
-        instance.bulkIssueRelayed(documentMerkleRoots, documentsHash, signature, {from: nonOwner})
-      ).to.be.rejectedWith(/revert/);
+      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: nonOwner})).to.be.rejectedWith(
+        /revert/
+      );
     });
   });
 
@@ -207,12 +246,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should allow the revocation of a valid and issued document", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
-      let signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
       await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       nonce = await instance.signerNonce(trustedSigner);
-      signature = await signMessage(documentHash, nonce, trustedSigner);
+      signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
       const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
 
       // FIXME: Use a utility helper to watch for event
@@ -226,12 +265,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should allow the revocation of an issued root", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
-      let signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
       await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       const documentHash = documentMerkleRoot;
       nonce = await instance.signerNonce(trustedSigner);
-      signature = await signMessage(documentHash, nonce, trustedSigner);
+      signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
       const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
 
       // FIXME: Use a utility helper to watch for event
@@ -245,12 +284,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should not allow repeated revocation of a valid and issued document", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
-      let signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
       await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       nonce = await instance.signerNonce(trustedSigner);
-      signature = await signMessage(documentHash, nonce, trustedSigner);
+      signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
       await instance.revokeRelayed(documentHash, signature, {from: relayer});
 
       await expect(instance.revokeRelayed(documentHash, signature, {from: relayer})).to.be.rejectedWith(/revert/);
@@ -259,7 +298,7 @@ contract("RelayedDocumentStore", accounts => {
     it("should allow revocation of an unissued document", async () => {
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentHash, nonce, trustedSigner);
+      const signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
       const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
 
       // FIXME: Use a utility helper to watch for event
@@ -273,8 +312,13 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
-      const receipt = await instance.bulkRevokeRelayed(documentMerkleRoots, documentsHash, signature, {
+      const signature = await signMessage(
+        documentsHash,
+        nonce,
+        signedMethodSignatures.bulkRevokeRelayed,
+        trustedSigner
+      );
+      const receipt = await instance.bulkRevokeRelayed(documentMerkleRoots, signature, {
         from: relayer
       });
 
@@ -292,8 +336,13 @@ contract("RelayedDocumentStore", accounts => {
       ];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
-      const receipt = await instance.bulkRevokeRelayed(documentMerkleRoots, documentsHash, signature, {
+      const signature = await signMessage(
+        documentsHash,
+        nonce,
+        signedMethodSignatures.bulkRevokeRelayed,
+        trustedSigner
+      );
+      const receipt = await instance.bulkRevokeRelayed(documentMerkleRoots, signature, {
         from: relayer
       });
 
@@ -318,12 +367,18 @@ contract("RelayedDocumentStore", accounts => {
 
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentsHash,
+        nonce,
+        signedMethodSignatures.bulkRevokeRelayed,
+        trustedSigner
+      );
 
       // Check that revoke is rejected
-      await expect(
-        instance.bulkRevokeRelayed(documentMerkleRoots, documentsHash, signature, {from: relayer})
-      ).to.be.rejectedWith(/revert/, "Duplicate revoke was not rejected");
+      await expect(instance.bulkRevokeRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
+        /revert/,
+        "Duplicate revoke was not rejected"
+      );
     });
 
     it("only allows the owner to revoke", async () => {
@@ -334,12 +389,17 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
       const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentsHash,
+        nonce,
+        signedMethodSignatures.bulkRevokeRelayed,
+        trustedSigner
+      );
 
       // Check that revoke is rejected
-      await expect(
-        instance.bulkRevokeRelayed(documentMerkleRoots, documentsHash, signature, {from: nonOwner})
-      ).to.be.rejectedWith(/revert/);
+      await expect(instance.bulkRevokeRelayed(documentMerkleRoots, signature, {from: nonOwner})).to.be.rejectedWith(
+        /revert/
+      );
     });
   });
 
@@ -368,7 +428,12 @@ contract("RelayedDocumentStore", accounts => {
     it("should emit an event with each transaction", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
       const receipt = await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
       expect(receipt.logs[0].event).to.be.equal("RelayedMessage", "Relayed Message event not emitted.");
     });
@@ -378,7 +443,12 @@ contract("RelayedDocumentStore", accounts => {
       let nonce = await instance.signerNonce(trustedSigner);
       expect(nonce).to.be.equal("0");
 
-      const signature = await signMessage(documentMerkleRoot, nonce, trustedSigner);
+      const signature = await signMessage(
+        documentMerkleRoot,
+        nonce,
+        signedMethodSignatures.issueRelayed,
+        trustedSigner
+      );
       await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
 
       nonce = await instance.signerNonce(trustedSigner);
