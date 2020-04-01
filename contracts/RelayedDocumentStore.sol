@@ -2,7 +2,6 @@ pragma solidity 0.5.12;
 
 import "./DocumentStore.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
 /**
  * @dev This contract enables meta-transactions to be sent and delegated to a third party.
@@ -10,6 +9,8 @@ import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol
   *     The relayer is the third party that is signing and paying for the transactions on behalf of the trustedSigner.
   *     The trusteSigner is the issuing party that is required to sign the actual messages and transaction data.
   *     This contract then relays transactions to the OpenAttestation DocumentStore on behalf of the trusedSigner.
+  *     This contract is intentionally left without an owner to eliminate centralization and the potential denial of service to the
+  *     trustedSigner in the case of malicious or unavailable relayers.
   *     The process for generating a valid signature is as follows:
   *       1. Generate the message to be signed. This will be either the docuementMerkleRoot or the hash of any array of docuementMerkleRoots (for batch operations).
   *         - const message = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"; // documentMerkleRoot
@@ -24,7 +25,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol
   *             const messageHash = web3.utils.soliditySha3(message, nonce, methodSignature, address); // 0x2bd7dce779d8d21e3266e847f21ce8160a53e6a78a65a5045f72b18081f7fc69
   *             const signature = await web3.eth.sign(messageHash, signer); // 0xf5731da089e7d9532aad446f9f92cabf3ce39c5cde8ba541cb26ed17b69ab8870a411a66ad8316d7b7478e1c1be05ca840ecfc8cc7468beb9c2832be4dc8fb1e1b
  */
-contract RelayedDocumentStore is Ownable {
+contract RelayedDocumentStore {
   using ECDSA for bytes32;
 
   address private trustedSigner; // Account that is signing *messages*
@@ -38,13 +39,8 @@ contract RelayedDocumentStore is Ownable {
 
   constructor(
     string memory _name,
-    address _trustedSigner,
-    address _relayer
+    address _trustedSigner
   ) public {
-    // Owner of this contract is the relayer
-    require(_relayer != address(0), "RelayedDocumentStore: relayer is the zero address");
-    super.initialize(_relayer);
-
     require(_trustedSigner != address(0), "RelayedDocumentStore: trustedSigner is the zero address");
     trustedSigner = _trustedSigner;
 
@@ -58,7 +54,6 @@ contract RelayedDocumentStore is Ownable {
     bytes memory signature
   )
     public
-    onlyOwner
     onlyTrustedSigner(keccak256(abi.encodePacked(documents)), signature)
   {
     documentStore.bulkIssue(documents);
@@ -69,7 +64,6 @@ contract RelayedDocumentStore is Ownable {
     bytes memory signature
   )
     public
-    onlyOwner
     onlyTrustedSigner(keccak256(abi.encodePacked(documents)), signature)
   {
     documentStore.bulkRevoke(documents);
@@ -80,7 +74,6 @@ contract RelayedDocumentStore is Ownable {
     bytes memory signature
   )
     public
-    onlyOwner
     onlyTrustedSigner(document, signature)
   {
     documentStore.issue(document);
@@ -91,7 +84,6 @@ contract RelayedDocumentStore is Ownable {
     bytes memory signature
   )
     public
-    onlyOwner
     onlyTrustedSigner(document, signature)
   {
     documentStore.revoke(document);

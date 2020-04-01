@@ -35,7 +35,7 @@ contract("RelayedDocumentStore", accounts => {
 
   before(async () => {
     // Required to have function sigs generated...
-    await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner, relayer, {from: relayer});
+    await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner);
     const {abi} = await RelayedDocumentStore.toJSON();
 
     for (let i = 0; i < abi.length; i += 1) {
@@ -48,7 +48,7 @@ contract("RelayedDocumentStore", accounts => {
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner, relayer, {from: relayer});
+    instance = await RelayedDocumentStore.new(config.INSTITUTE_NAME, trustedSigner);
     const documentStoreAddress = await instance.documentStore.call();
     documentStore = await DocumentStore.at(documentStoreAddress);
   });
@@ -59,9 +59,9 @@ contract("RelayedDocumentStore", accounts => {
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
     });
 
-    it("sets the owner properly", async () => {
-      const owner = await instance.owner();
-      expect(owner).to.be.equal(relayer);
+    it("sets the documentStore owner properly - relayer does not have an owner", async () => {
+      const owner = await documentStore.owner();
+      expect(owner).to.be.equal(instance.address);
     });
   });
 
@@ -82,7 +82,7 @@ contract("RelayedDocumentStore", accounts => {
         signedMethodSignatures.issueRelayed,
         trustedSigner
       );
-      const receipt = await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      const receipt = await instance.issueRelayed(documentMerkleRoot, signature);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[0].event).to.be.equal("RelayedMessage", "Relayed Message event not emitted.");
@@ -103,7 +103,7 @@ contract("RelayedDocumentStore", accounts => {
         trustedSigner
       );
 
-      await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(instance.issueRelayed(documentMerkleRoot, signature)).to.be.rejectedWith(/revert/);
     });
 
     it("should not be able to issue a document not signed by the trusted signer", async () => {
@@ -111,7 +111,7 @@ contract("RelayedDocumentStore", accounts => {
       const nonce = await instance.signerNonce(trustedSigner);
       const signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, relayer);
 
-      await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(instance.issueRelayed(documentMerkleRoot, signature)).to.be.rejectedWith(/revert/);
 
       const issued = await documentStore.isIssued(documentMerkleRoot);
       expect(issued, "Document is not issued").to.be.false;
@@ -126,30 +126,13 @@ contract("RelayedDocumentStore", accounts => {
         signedMethodSignatures.issueRelayed,
         trustedSigner
       );
-      await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      await instance.issueRelayed(documentMerkleRoot, signature);
 
       // Check that reissue is rejected
-      await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: relayer})).to.be.rejectedWith(
+      await expect(instance.issueRelayed(documentMerkleRoot, signature)).to.be.rejectedWith(
         /revert/,
         "Duplicate issue was not rejected"
       );
-    });
-
-    it("only allows the owner to issue", async () => {
-      const nonOwner = accounts[1];
-      const owner = await instance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
-
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(
-        documentMerkleRoot,
-        nonce,
-        signedMethodSignatures.issueRelayed,
-        trustedSigner
-      );
-
-      await expect(instance.issueRelayed(documentMerkleRoot, signature, {from: nonOwner})).to.be.rejectedWith(/revert/);
     });
   });
 
@@ -177,9 +160,7 @@ contract("RelayedDocumentStore", accounts => {
       const nonce = await instance.signerNonce(trustedSigner);
       const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, relayer); // singed by relayer instead of trustedSigner
 
-      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
-        /revert/
-      );
+      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature)).to.be.rejectedWith(/revert/);
 
       const issued = await documentStore.isIssued(documentMerkleRoots[0]);
       expect(issued, "Document is not issued").to.be.false;
@@ -220,24 +201,9 @@ contract("RelayedDocumentStore", accounts => {
       const nonce = await instance.signerNonce(trustedSigner);
       const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
       // Check that reissue is rejected
-      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
+      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature)).to.be.rejectedWith(
         /revert/,
         "Duplicate issue was not rejected"
-      );
-    });
-
-    it("only allows the owner to issue", async () => {
-      const nonOwner = accounts[1];
-      const owner = await instance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
-
-      const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
-      const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
-      const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(documentsHash, nonce, signedMethodSignatures.bulkIssueRelayed, trustedSigner);
-
-      await expect(instance.bulkIssueRelayed(documentMerkleRoots, signature, {from: nonOwner})).to.be.rejectedWith(
-        /revert/
       );
     });
   });
@@ -247,12 +213,12 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
       let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
-      await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      await instance.issueRelayed(documentMerkleRoot, signature);
 
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       nonce = await instance.signerNonce(trustedSigner);
       signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
-      const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
+      const receipt = await instance.revokeRelayed(documentHash, signature);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[1].event).to.be.equal("DocumentRevoked");
@@ -266,12 +232,12 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
       let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
-      await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      await instance.issueRelayed(documentMerkleRoot, signature);
 
       const documentHash = documentMerkleRoot;
       nonce = await instance.signerNonce(trustedSigner);
       signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
-      const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
+      const receipt = await instance.revokeRelayed(documentHash, signature);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[1].event).to.be.equal("DocumentRevoked");
@@ -285,21 +251,21 @@ contract("RelayedDocumentStore", accounts => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       let nonce = await instance.signerNonce(trustedSigner);
       let signature = await signMessage(documentMerkleRoot, nonce, signedMethodSignatures.issueRelayed, trustedSigner);
-      await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      await instance.issueRelayed(documentMerkleRoot, signature);
 
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       nonce = await instance.signerNonce(trustedSigner);
       signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
-      await instance.revokeRelayed(documentHash, signature, {from: relayer});
+      await instance.revokeRelayed(documentHash, signature);
 
-      await expect(instance.revokeRelayed(documentHash, signature, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(instance.revokeRelayed(documentHash, signature)).to.be.rejectedWith(/revert/);
     });
 
     it("should allow revocation of an unissued document", async () => {
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
       const nonce = await instance.signerNonce(trustedSigner);
       const signature = await signMessage(documentHash, nonce, signedMethodSignatures.revokeRelayed, trustedSigner);
-      const receipt = await instance.revokeRelayed(documentHash, signature, {from: relayer});
+      const receipt = await instance.revokeRelayed(documentHash, signature);
 
       // FIXME: Use a utility helper to watch for event
       expect(receipt.logs[1].event).to.be.equal("DocumentRevoked");
@@ -375,30 +341,9 @@ contract("RelayedDocumentStore", accounts => {
       );
 
       // Check that revoke is rejected
-      await expect(instance.bulkRevokeRelayed(documentMerkleRoots, signature, {from: relayer})).to.be.rejectedWith(
+      await expect(instance.bulkRevokeRelayed(documentMerkleRoots, signature)).to.be.rejectedWith(
         /revert/,
         "Duplicate revoke was not rejected"
-      );
-    });
-
-    it("only allows the owner to revoke", async () => {
-      const nonOwner = accounts[1];
-      const owner = await instance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
-
-      const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
-      const documentsHash = web3.utils.soliditySha3(...documentMerkleRoots);
-      const nonce = await instance.signerNonce(trustedSigner);
-      const signature = await signMessage(
-        documentsHash,
-        nonce,
-        signedMethodSignatures.bulkRevokeRelayed,
-        trustedSigner
-      );
-
-      // Check that revoke is rejected
-      await expect(instance.bulkRevokeRelayed(documentMerkleRoots, signature, {from: nonOwner})).to.be.rejectedWith(
-        /revert/
       );
     });
   });
@@ -406,21 +351,21 @@ contract("RelayedDocumentStore", accounts => {
   describe("RelayedDocumentStore.documentStore", () => {
     it("issue() should throw not called by owner (owner is the relay contract)", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await expect(documentStore.issue(documentMerkleRoot, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(documentStore.issue(documentMerkleRoot)).to.be.rejectedWith(/revert/);
     });
 
     it("revoke() should throw not called by owner (owner is the relay contract)", async () => {
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await expect(documentStore.revoke(documentMerkleRoot, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(documentStore.revoke(documentMerkleRoot)).to.be.rejectedWith(/revert/);
     });
 
     it("bulkIssue() should throw not called by owner (owner is the relay contract)", async () => {
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
-      await expect(documentStore.bulkIssue(documentMerkleRoots, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(documentStore.bulkIssue(documentMerkleRoots)).to.be.rejectedWith(/revert/);
     });
     it("bulkRevoke() should throw not called by owner (owner is the relay contract)", async () => {
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
-      await expect(documentStore.bulkRevoke(documentMerkleRoots, {from: relayer})).to.be.rejectedWith(/revert/);
+      await expect(documentStore.bulkRevoke(documentMerkleRoots)).to.be.rejectedWith(/revert/);
     });
   });
 
@@ -434,7 +379,7 @@ contract("RelayedDocumentStore", accounts => {
         signedMethodSignatures.issueRelayed,
         trustedSigner
       );
-      const receipt = await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      const receipt = await instance.issueRelayed(documentMerkleRoot, signature);
       expect(receipt.logs[0].event).to.be.equal("RelayedMessage", "Relayed Message event not emitted.");
     });
 
@@ -449,7 +394,7 @@ contract("RelayedDocumentStore", accounts => {
         signedMethodSignatures.issueRelayed,
         trustedSigner
       );
-      await instance.issueRelayed(documentMerkleRoot, signature, {from: relayer});
+      await instance.issueRelayed(documentMerkleRoot, signature);
 
       nonce = await instance.signerNonce(trustedSigner);
       expect(nonce).to.be.equal("1");
