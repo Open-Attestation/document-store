@@ -29,4 +29,3 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
 
 export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
 export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
-export * from "./contracts/index";

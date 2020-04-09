@@ -36,15 +36,6 @@
     "semantic-release": "semantic-release"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "jsx",
-      "ts",
-      "tsx",
-      "node",
-      "d.ts"
-    ],
     "globalSetup": "./jest/setup.ts",
     "globalTeardown": "./jest/teardown.ts",
     "testPathIgnorePatterns": [
