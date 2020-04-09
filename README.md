@@ -15,7 +15,7 @@ To use the package, you will need to provide your own Web3 [provider](https://do
 Deploying new document store
 
 ```ts
-import {deploy} from "@govtechsg/document-store";
+import {deployAndWait} from "@govtechsg/document-store";
 
 const documentStore = await deployAndWait("My Document Store", signer).then(console.log);
 ```
