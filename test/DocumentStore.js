@@ -1,16 +1,16 @@
-const DocumentStore = artifacts.require("./DocumentStore.sol");
-DocumentStore.numberFormat = "String";
+const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
+UpgradableDocumentStore.numberFormat = "String";
 const {get} = require("lodash");
 
 const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
-contract("DocumentStore", accounts => {
+contract("UpgradableDocumentStore", accounts => {
   let instance = null;
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await DocumentStore.new();
+    instance = await UpgradableDocumentStore.new();
     await instance.initialize(config.INSTITUTE_NAME, accounts[0]);
   });
 

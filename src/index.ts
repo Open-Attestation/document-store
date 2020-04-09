@@ -1,5 +1,5 @@
 import {Signer, providers, ContractTransaction} from "ethers";
-import {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
+import {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStoreFactory";
 import {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
 import {getDocumentStoreCreatorAddress} from "./config";
 
@@ -20,12 +20,13 @@ export const deploy = async (name: string, signer: Signer, options?: DeployOptio
 export const deployAndWait = async (name: string, signer: Signer, options?: DeployOptions) => {
   const receipt = await (await deploy(name, signer, options)).wait();
   if (!receipt.logs || !receipt.logs[0].address) throw new Error("Fail to detect deployed contract address");
-  return DocumentStoreFactory.connect(receipt.logs![0].address, signer);
+  return UpgradableDocumentStoreFactory.connect(receipt.logs![0].address, signer);
 };
 
 export const connect = async (address: string, signerOrProvider: Signer | providers.Provider) => {
-  return DocumentStoreFactory.connect(address, signerOrProvider);
+  return UpgradableDocumentStoreFactory.connect(address, signerOrProvider);
 };
 
+export {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStoreFactory";
 export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
 export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
