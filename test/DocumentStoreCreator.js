@@ -1,4 +1,4 @@
-const DocumentStore = artifacts.require("./DocumentStore.sol");
+const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
 const DocumentStoreCreator = artifacts.require("./DocumentStoreCreator.sol");
 
 const {expect} = require("chai").use(require("chai-as-promised"));
@@ -14,7 +14,7 @@ contract("DocumentStoreCreator", accounts => {
       expect(deployReceipt.logs[0].args.creator).to.be.equal(accounts[1], "Emitted contract creator does not match");
 
       // Test correctness of deployed DocumentStore
-      const deployedDocumentStore = await DocumentStore.at(deployReceipt.logs[0].args.instance);
+      const deployedDocumentStore = await UpgradableDocumentStore.at(deployReceipt.logs[0].args.instance);
       const name = await deployedDocumentStore.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
       const owner = await deployedDocumentStore.owner();

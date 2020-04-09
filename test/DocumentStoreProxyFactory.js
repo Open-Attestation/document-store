@@ -1,9 +1,9 @@
-const DocumentStore = artifacts.require("./DocumentStore.sol");
+const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
 const DocumentStoreWithRevokeReasons = artifacts.require("./DocumentStoreWithRevokeReasons.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilityProxy.sol");
 
-DocumentStore.numberFormat = "String";
+UpgradableDocumentStore.numberFormat = "String";
 
 const {expect} = require("chai").use(require("chai-as-promised"));
 
@@ -30,13 +30,13 @@ const initializeAbi = {
 
 const STORE_NAME = "THE_STORE_NAME";
 
-contract("DocumentStore (Proxied)", accounts => {
+contract("UpgradableDocumentStore (Proxied)", accounts => {
   let documentStoreInstance = null;
   let documentStoreWithRevokeInstance = null;
   let proxyFactoryInstance = null;
 
   before(async () => {
-    documentStoreInstance = await DocumentStore.new();
+    documentStoreInstance = await UpgradableDocumentStore.new();
     proxyFactoryInstance = await ProxyFactory.new();
     documentStoreWithRevokeInstance = await DocumentStoreWithRevokeReasons.new();
   });
@@ -54,7 +54,7 @@ contract("DocumentStore (Proxied)", accounts => {
     });
 
     it("should initialize DocumentStore with name and owner", async () => {
-      const proxiedDocumentStoreInstance = await DocumentStore.at(proxyAddress);
+      const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(proxyAddress);
 
       const name = await proxiedDocumentStoreInstance.name();
       const owner = await proxiedDocumentStoreInstance.owner();
@@ -65,7 +65,7 @@ contract("DocumentStore (Proxied)", accounts => {
     it("should handle delegated calls to DocumentStore", async () => {
       const issuedHash = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const revokedHash = "0x99967813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6999";
-      const proxiedDocumentStoreInstance = await DocumentStore.at(proxyAddress);
+      const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(proxyAddress);
       await proxiedDocumentStoreInstance.issue(issuedHash);
       await proxiedDocumentStoreInstance.revoke(revokedHash);
       const isIssued = await proxiedDocumentStoreInstance.isIssued(issuedHash);
@@ -99,7 +99,7 @@ contract("DocumentStore (Proxied)", accounts => {
     });
 
     it("should initialise DocumentStore correctly", async () => {
-      const proxiedDocumentStoreInstance = await DocumentStore.at(proxyAddress);
+      const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(proxyAddress);
 
       const name = await proxiedDocumentStoreInstance.name.call();
       const owner = await proxiedDocumentStoreInstance.owner.call();
@@ -109,7 +109,7 @@ contract("DocumentStore (Proxied)", accounts => {
     });
 
     it("should handle delegated calls to DocumentStore", async () => {
-      const proxiedDocumentStoreInstance = await DocumentStore.at(proxyAddress);
+      const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(proxyAddress);
       await proxiedDocumentStoreInstance.issue(initialIssuedHash);
       await proxiedDocumentStoreInstance.revoke(initialRevokedHash);
       const isIssued = await proxiedDocumentStoreInstance.isIssued(initialIssuedHash);
