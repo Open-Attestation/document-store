@@ -7,9 +7,9 @@ contract DocumentStore is Ownable {
   string public version = "2.3.0";
 
   /// A mapping of the document hash to the block number that was issued
-  mapping(bytes32 => uint256) documentIssued;
+  mapping(bytes32 => uint256) public documentIssued;
   /// A mapping of the hash of the claim being revoked to the revocation block number
-  mapping(bytes32 => uint256) documentRevoked;
+  mapping(bytes32 => uint256) public documentRevoked;
 
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
