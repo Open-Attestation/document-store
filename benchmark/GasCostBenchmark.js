@@ -1,12 +1,12 @@
 const {groupBy, mapValues} = require("lodash");
 
-const DocumentStore = artifacts.require("./DocumentStore.sol");
+const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
 const DocumentStoreWithRevokeReasons = artifacts.require("./DocumentStoreWithRevokeReasons.sol");
 const ProxyFactory = artifacts.require("./ProxyFactory.sol");
 const DocumentStoreCreator = artifacts.require("./DocumentStoreCreator.sol");
 const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilityProxy.sol");
 
-DocumentStore.numberFormat = "String";
+UpgradableDocumentStore.numberFormat = "String";
 const {generateHashes} = require("../scripts/generateHashes");
 
 const initializeAbi = {
@@ -124,24 +124,24 @@ describe("Gas Cost Benchmarks", () => {
     console.table(records);
   });
 
-  let staticDocumentStoreInstance;
+  let staticUpgradableDocumentStoreInstance;
   let staticProxyFactoryInstance;
   let staticDocumentStoreWithRevokeReasons;
 
   before(async () => {
-    staticDocumentStoreInstance = await DocumentStore.new();
+    staticUpgradableDocumentStoreInstance = await UpgradableDocumentStore.new();
     staticProxyFactoryInstance = await ProxyFactory.new();
     staticDocumentStoreWithRevokeReasons = await DocumentStoreWithRevokeReasons.new();
   });
 
   contract(
-    "DocumentStore",
+    "UpgradableDocumentStore",
     accounts => {
-      const contractName = "DocumentStore";
+      const contractName = "UpgradableDocumentStore";
 
       it("runs benchmark", async () => {
         // Deploy & initialize document store contract
-        const documentStoreInstance = await DocumentStore.new();
+        const documentStoreInstance = await UpgradableDocumentStore.new();
         const deploymentReceipt = await web3.eth.getTransactionReceipt(documentStoreInstance.transactionHash);
         const initializeReceipt = await documentStoreInstance.initialize(STORE_NAME, accounts[0]);
         recordGasCost(
@@ -185,13 +185,13 @@ describe("Gas Cost Benchmarks", () => {
         // Deploy & initialize document store contract in one transaction
         const encodedInitializeCall = web3.eth.abi.encodeFunctionCall(initializeAbi, [STORE_NAME, accounts[0]]);
         const deployTx = await staticProxyFactoryInstance.deployMinimal(
-          staticDocumentStoreInstance.address,
+          staticUpgradableDocumentStoreInstance.address,
           encodedInitializeCall
         );
         const minimalProxyAddress = deployTx.logs[0].args.proxy;
         recordGasCost(contractName, "deployment", deployTx.receipt.cumulativeGasUsed);
 
-        const proxiedDocumentStoreInstance = await DocumentStore.at(minimalProxyAddress);
+        const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(minimalProxyAddress);
 
         await benchmarkTransfer(contractName, proxiedDocumentStoreInstance, accounts);
         await benchmarkIssue(contractName, proxiedDocumentStoreInstance);
@@ -214,14 +214,14 @@ describe("Gas Cost Benchmarks", () => {
         const salt = 1337;
         const deployTx = await staticProxyFactoryInstance.deploy(
           salt,
-          staticDocumentStoreInstance.address,
+          staticUpgradableDocumentStoreInstance.address,
           accounts[1], // Must use separate account for proxy admin
           encodedInitializeCall
         );
         recordGasCost(contractName, "deployment", deployTx.receipt.cumulativeGasUsed);
 
         const adminUpgradableProxyAddress = deployTx.logs[0].args.proxy;
-        const proxiedDocumentStoreInstance = await DocumentStore.at(adminUpgradableProxyAddress);
+        const proxiedDocumentStoreInstance = await UpgradableDocumentStore.at(adminUpgradableProxyAddress);
 
         await benchmarkTransfer(contractName, proxiedDocumentStoreInstance, accounts);
         await benchmarkIssue(contractName, proxiedDocumentStoreInstance);

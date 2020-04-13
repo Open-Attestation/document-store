@@ -1,10 +1,11 @@
-pragma solidity ^0.5.12;
+pragma solidity 0.5.12;
 
-import "./Ownable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
-contract DocumentStore is Ownable {
+contract UpgradableDocumentStore is Initializable, Ownable {
   string public name;
-  string public version = "2.3.0";
+  string public version;
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public documentIssued;
@@ -14,7 +15,9 @@ contract DocumentStore is Ownable {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  constructor(string memory _name) public {
+  function initialize(string memory _name, address owner) public initializer {
+    super.initialize(owner);
+    version = "3.0.0";
     name = _name;
   }
 

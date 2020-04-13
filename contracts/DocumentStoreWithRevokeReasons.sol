@@ -1,8 +1,8 @@
 pragma solidity 0.5.12;
 
-import "./DocumentStore.sol";
+import "./UpgradableDocumentStore.sol";
 
-contract DocumentStoreWithRevokeReasons is DocumentStore {
+contract DocumentStoreWithRevokeReasons is UpgradableDocumentStore {
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public revokeReason;
 
