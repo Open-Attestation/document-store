@@ -4,6 +4,7 @@
   "files": [
     "dist",
     "src",
+    "scripts",
     "types",
     "truffle-config.js"
   ],
