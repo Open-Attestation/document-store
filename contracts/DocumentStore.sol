@@ -1,4 +1,6 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: Apache-2.0
+
+pragma solidity ^0.6.10;
 
 import "./Ownable.sol";
 

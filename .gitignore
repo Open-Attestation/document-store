@@ -4,6 +4,7 @@ yarn-error.log
 .env
 *.iml
 .idea
+/.vscode
 /src/contracts
 /dist
 /build
