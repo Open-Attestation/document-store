@@ -2,9 +2,11 @@
 
 pragma solidity ^0.6.10;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "./Initializable.sol";
+import "./ContextUpgradeSafe.sol";
+import "./OwnableUpgradeSafe.sol";
 
-contract UpgradableDocumentStore is OwnableUpgradeSafe {
+contract UpgradableDocumentStore is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   string public name;
   string public version;
 
