@@ -2,6 +2,9 @@
   "extends": ["solhint:recommended"],
   "plugins": ["prettier"],
   "rules": {
-    "indent": ["error", 2]
+    "compiler-version": ["error", "^0.6.10"],
+    "func-name-mixedcase": "off",
+    "no-empty-blocks": "off",
+    "reason-string": ["warn", {"maxLength": 256}]
   }
 }

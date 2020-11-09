@@ -85,7 +85,7 @@
     "prettier": "^1.19.1",
     "prettier-plugin-solidity": "^1.0.0-alpha.36",
     "semantic-release": "^17.0.4",
-    "solhint": "^2.3.0",
+    "solhint": "^3.3.2",
     "solhint-plugin-prettier": "0.0.3",
     "solium": "^1.2.5",
     "truffle": "5.1.37",

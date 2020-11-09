@@ -12,13 +12,13 @@ pragma solidity ^0.6.10;
  *
  * This contract is only required for intermediate, library-like contracts.
  */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
-    }
+contract Context {
+  function _msgSender() internal view virtual returns (address payable) {
+    return msg.sender;
+  }
 
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
+  function _msgData() internal view virtual returns (bytes memory) {
+    this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+    return msg.data;
+  }
 }
