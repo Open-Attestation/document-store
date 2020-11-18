@@ -29,4 +29,5 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
 
 export {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStoreFactory";
 export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
+export {GsnCapableDocumentStoreFactory} from "./contracts/GsnCapableDocumentStoreFactory";
 export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";

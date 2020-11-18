@@ -3,12 +3,13 @@
 pragma solidity ^0.6.10;
 
 import "./Ownable.sol";
+import "./GsnCapable.sol";
 import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
 import "@opengsn/gsn/contracts/interfaces/IKnowForwarderAddress.sol";
 
-contract DocumentStore is BaseRelayRecipient, IKnowForwarderAddress, Ownable {
+contract GsnCapableDocumentStore is BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
   string public name;
-  string public version = "2.3.0";
+  string public version = "2.4.0";
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public documentIssued;
@@ -65,15 +66,15 @@ contract DocumentStore is BaseRelayRecipient, IKnowForwarderAddress, Ownable {
     return documentRevoked[document] <= blockNumber && documentRevoked[document] != 0;
   }
 
-  function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+  function _msgSender() internal override(Context, BaseRelayRecipient) view returns (address payable) {
     return BaseRelayRecipient._msgSender();
   }
 
-  function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+  function _msgData() internal override(Context, BaseRelayRecipient) view returns (bytes memory) {
     return BaseRelayRecipient._msgData();
   }
 
-  function getTrustedForwarder() public view override returns (address) {
+  function getTrustedForwarder() public override view returns (address) {
     return trustedForwarder;
   }
 
@@ -81,7 +82,7 @@ contract DocumentStore is BaseRelayRecipient, IKnowForwarderAddress, Ownable {
     trustedForwarder = _forwarder;
   }
 
-  function versionRecipient() external view virtual override returns (string memory) {
+  function versionRecipient() external virtual override view returns (string memory) {
     return version;
   }
 
