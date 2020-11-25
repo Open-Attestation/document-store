@@ -40,7 +40,6 @@ contract("NaivePaymaster", accounts => {
 
   describe("targetAddresses", () => {
     beforeEach(async () => {
-      instance = await NaivePaymaster.new(config.INSTITUTE_NAME, {from: accounts[0]});
       await instance.setTarget(sampleGsnCapableDocumentStoreAddress1);
     });
 
