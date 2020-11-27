@@ -3,6 +3,7 @@ const ConfigurableTrustForwarder = artifacts.require("./ConfigurableTrustForward
 const CalculateSelector = artifacts.require("calculateGsnCapableSelector");
 GsnCapableDocumentStore.numberFormat = "String";
 
+const {utils} = require("ethers");
 const {expect} = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
@@ -60,6 +61,12 @@ contract("GsnCapableDocumentStore", accounts => {
     const owner = accounts[0];
     const relayer = accounts[1];
 
+    // eslint-disable-next-line no-underscore-dangle
+    const dsInterface = new utils.Interface(GsnCapableDocumentStore._json.abi);
+    const issueFnData = dsInterface.encodeFunctionData("issue", [
+      "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
+    ]);
+
     beforeEach(async () => {
       configurableForwarder = await ConfigurableTrustForwarder.new();
       configurableInstance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, configurableForwarder.address, {
@@ -69,14 +76,9 @@ contract("GsnCapableDocumentStore", accounts => {
 
     it("should issue document when receive a relayed call by owner from relayer", async () => {
       const configurableInstanceAddress = configurableInstance.address;
-      await configurableForwarder.execute(
-        "0x0f75e81fe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e021245e5b64d785b25057f7438f715f4aa5d965733",
-        owner,
-        configurableInstanceAddress,
-        {
-          from: relayer
-        }
-      );
+      await configurableForwarder.execute(issueFnData, owner, configurableInstanceAddress, {
+        from: relayer
+      });
       const documentIssued = await configurableInstance.isIssued(
         "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
       );
@@ -86,14 +88,9 @@ contract("GsnCapableDocumentStore", accounts => {
     it("should not allow issue document when receive a relayed call not by owner", async () => {
       const configurableInstanceAddress = configurableInstance.address;
       await expect(
-        configurableForwarder.execute(
-          "0x0f75e81fe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e021245e5b64d785b25057f7438f715f4aa5d965733",
-          relayer,
-          configurableInstanceAddress,
-          {
-            from: relayer
-          }
-        )
+        configurableForwarder.execute(issueFnData, relayer, configurableInstanceAddress, {
+          from: relayer
+        })
       ).to.be.rejectedWith(/revert/);
     });
   });
