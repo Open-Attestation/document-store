@@ -1,9 +1,12 @@
-pragma solidity 0.5.16;
+// SPDX-License-Identifier: Apache-2.0
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+pragma solidity ^0.6.10;
 
-contract UpgradableDocumentStore is Initializable, Ownable {
+import "./Initializable.sol";
+import "./ContextUpgradeSafe.sol";
+import "./OwnableUpgradeSafe.sol";
+
+contract UpgradableDocumentStore is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   string public name;
   string public version;
 
@@ -16,7 +19,8 @@ contract UpgradableDocumentStore is Initializable, Ownable {
   event DocumentRevoked(bytes32 indexed document);
 
   function initialize(string memory _name, address owner) public initializer {
-    super.initialize(owner);
+    super.__Ownable_init();
+    super.transferOwnership(owner);
     version = "3.0.0";
     name = _name;
   }
