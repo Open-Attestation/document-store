@@ -61,6 +61,7 @@ contract("GsnCapableDocumentStore", accounts => {
     const owner = accounts[0];
     const relayer = accounts[1];
 
+    // eslint-disable-next-line no-underscore-dangle
     const dsInterface = new utils.Interface(GsnCapableDocumentStore._json.abi);
     const issueFnData = dsInterface.encodeFunctionData("issue", [
       "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
