@@ -7,16 +7,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "./BaseDocumentStore.sol";
 
-contract UpgradableDocumentStore is Initializable, OwnableUpgradeable {
+contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
   function initialize(string memory _name, address owner) public initializer {
     super.__Ownable_init();
     super.transferOwnership(owner);
-    version = "3.0.0";
-    BaseDocumentStore.name = _name;
+    BaseDocumentStore.initialize(_name);
   }
 
   function issue(bytes32 document) public override(BaseDocumentStore) onlyOwner onlyNotIssued(document) {
-    return BaseDocumentStore.issue(document);
+    BaseDocumentStore.issue(document);
   }
 
   function revoke(bytes32 document)

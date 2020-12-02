@@ -3,10 +3,11 @@
 pragma solidity ^0.6.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract BaseDocumentStore {
+contract BaseDocumentStore is Initializable {
   string public name;
-  string public version = "2.3.0";
+  string public version;
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public documentIssued;
@@ -16,7 +17,8 @@ contract BaseDocumentStore {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  constructor(string memory _name) public {
+  function initialize(string memory _name) public initializer {
+    version = "2.3.0";
     name = _name;
   }
 

@@ -7,10 +7,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./BaseDocumentStore.sol";
 
 contract OwnableDocumentStore is BaseDocumentStore, Ownable {
-  constructor(string memory _name) public BaseDocumentStore(_name) {}
+  constructor(string memory _name) public {
+    BaseDocumentStore.initialize(_name);
+  }
 
   function issue(bytes32 document) public override(BaseDocumentStore) onlyOwner onlyNotIssued(document) {
-    return BaseDocumentStore.issue(document);
+    BaseDocumentStore.issue(document);
   }
 
   function revoke(bytes32 document)
