@@ -22,7 +22,7 @@ contract BaseDocumentStore is Initializable {
     name = _name;
   }
 
-  function issue(bytes32 document) public onlyNotIssued(document) {
+  function issue(bytes32 document) public virtual onlyNotIssued(document) {
     documentIssued[document] = block.number;
     emit DocumentIssued(document);
   }
@@ -45,7 +45,7 @@ contract BaseDocumentStore is Initializable {
     return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
-  function revoke(bytes32 document) public onlyNotRevoked(document) returns (bool) {
+  function revoke(bytes32 document) public virtual onlyNotRevoked(document) returns (bool) {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
   }
