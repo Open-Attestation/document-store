@@ -2,7 +2,7 @@
 
 pragma solidity ^0.6.10;
 
-import "./Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract DocumentStore is Ownable {
   string public name;

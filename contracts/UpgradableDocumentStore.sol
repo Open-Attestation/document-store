@@ -2,11 +2,10 @@
 
 pragma solidity ^0.6.10;
 
-import "./Initializable.sol";
-import "./ContextUpgradeSafe.sol";
-import "./OwnableUpgradeSafe.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract UpgradableDocumentStore is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
+contract UpgradableDocumentStore is Initializable, OwnableUpgradeable {
   string public name;
   string public version;
 
