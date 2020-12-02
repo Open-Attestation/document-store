@@ -3,13 +3,11 @@
 pragma solidity ^0.6.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-/*
- * Legacy version for reference and backward compatibility, similar to OwnableDocumentStore
- */
-contract DocumentStore is Ownable {
+contract BaseDocumentStore is Initializable {
   string public name;
-  string public version = "2.3.0";
+  string public version;
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public documentIssued;
@@ -19,11 +17,12 @@ contract DocumentStore is Ownable {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  constructor(string memory _name) public {
+  function initialize(string memory _name) public initializer {
+    version = "2.3.0";
     name = _name;
   }
 
-  function issue(bytes32 document) public onlyOwner onlyNotIssued(document) {
+  function issue(bytes32 document) public virtual onlyNotIssued(document) {
     documentIssued[document] = block.number;
     emit DocumentIssued(document);
   }
@@ -46,7 +45,7 @@ contract DocumentStore is Ownable {
     return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
-  function revoke(bytes32 document) public onlyOwner onlyNotRevoked(document) returns (bool) {
+  function revoke(bytes32 document) public virtual onlyNotRevoked(document) returns (bool) {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
   }

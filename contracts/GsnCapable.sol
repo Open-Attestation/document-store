@@ -26,7 +26,7 @@ contract GsnCapable is ERC165, Ownable {
   }
 }
 
-contract calculateGsnCapableSelector {
+contract CalculateGsnCapableSelector {
   function calculateSelector() public pure returns (bytes4) {
     GsnCapable i;
     return i.setPaymaster.selector ^ i.getPaymaster.selector;

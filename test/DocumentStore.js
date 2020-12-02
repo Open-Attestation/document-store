@@ -31,7 +31,7 @@ contract("UpgradableDocumentStore", accounts => {
   describe("version", () => {
     it("should have a version field value that should be bumped on new versions of the contract", async () => {
       const versionFromSolidity = await instance.version();
-      expect(versionFromSolidity).to.be.equal("3.0.0");
+      expect(versionFromSolidity).to.be.equal("2.3.0");
     });
   });
 

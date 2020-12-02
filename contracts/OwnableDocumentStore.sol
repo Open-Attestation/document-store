@@ -2,15 +2,12 @@
 
 pragma solidity ^0.6.10;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./BaseDocumentStore.sol";
 
-contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
-  function initialize(string memory _name, address owner) public initializer {
-    super.__Ownable_init();
-    super.transferOwnership(owner);
+contract OwnableDocumentStore is BaseDocumentStore, Ownable {
+  constructor(string memory _name) public {
     BaseDocumentStore.initialize(_name);
   }
 
@@ -27,4 +24,5 @@ contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
   {
     return BaseDocumentStore.revoke(document);
   }
+
 }

@@ -5,11 +5,11 @@ pragma solidity ^0.6.10;
 import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
 import "@opengsn/gsn/contracts/interfaces/IKnowForwarderAddress.sol";
 
-import "./DocumentStore.sol";
+import "./OwnableDocumentStore.sol";
 import "./GsnCapable.sol";
 
-contract GsnCapableDocumentStore is DocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
-  constructor(string memory _name, address _forwarder) public DocumentStore(_name) {
+contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
+  constructor(string memory _name, address _forwarder) public OwnableDocumentStore(_name) {
     trustedForwarder = _forwarder;
   }
 

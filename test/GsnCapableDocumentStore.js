@@ -1,6 +1,6 @@
 const GsnCapableDocumentStore = artifacts.require("./GsnCapableDocumentStore.sol");
 const ConfigurableTrustForwarder = artifacts.require("./ConfigurableTrustForwarder.sol");
-const CalculateSelector = artifacts.require("calculateGsnCapableSelector");
+const CalculateSelector = artifacts.require("CalculateGsnCapableSelector");
 GsnCapableDocumentStore.numberFormat = "String";
 
 const {utils} = require("ethers");
