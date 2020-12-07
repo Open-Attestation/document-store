@@ -22,14 +22,14 @@ contract BaseDocumentStore is Initializable {
     name = _name;
   }
 
-  function issue(bytes32 document) public virtual onlyNotIssued(document) {
+  function _issue(bytes32 document) internal onlyNotIssued(document) {
     documentIssued[document] = block.number;
     emit DocumentIssued(document);
   }
 
-  function bulkIssue(bytes32[] memory documents) public {
+  function _bulkIssue(bytes32[] memory documents) internal {
     for (uint256 i = 0; i < documents.length; i++) {
-      issue(documents[i]);
+      _issue(documents[i]);
     }
   }
 
@@ -45,14 +45,14 @@ contract BaseDocumentStore is Initializable {
     return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
-  function revoke(bytes32 document) public virtual onlyNotRevoked(document) returns (bool) {
+  function _revoke(bytes32 document) internal onlyNotRevoked(document) returns (bool) {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
   }
 
-  function bulkRevoke(bytes32[] memory documents) public {
+  function _bulkRevoke(bytes32[] memory documents) internal {
     for (uint256 i = 0; i < documents.length; i++) {
-      revoke(documents[i]);
+      _revoke(documents[i]);
     }
   }
 

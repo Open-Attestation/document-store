@@ -14,17 +14,19 @@ contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
     BaseDocumentStore.initialize(_name);
   }
 
-  function issue(bytes32 document) public override(BaseDocumentStore) onlyOwner onlyNotIssued(document) {
-    BaseDocumentStore.issue(document);
+  function issue(bytes32 document) public onlyOwner onlyNotIssued(document) {
+    BaseDocumentStore._issue(document);
   }
 
-  function revoke(bytes32 document)
-    public
-    override(BaseDocumentStore)
-    onlyOwner
-    onlyNotRevoked(document)
-    returns (bool)
-  {
-    return BaseDocumentStore.revoke(document);
+  function bulkIssue(bytes32[] memory documents) public onlyOwner {
+    BaseDocumentStore._bulkIssue(documents);
+  }
+
+  function revoke(bytes32 document) public onlyOwner onlyNotRevoked(document) returns (bool) {
+    return BaseDocumentStore._revoke(document);
+  }
+
+  function bulkRevoke(bytes32[] memory documents) public onlyOwner {
+    return BaseDocumentStore._bulkRevoke(documents);
   }
 }
