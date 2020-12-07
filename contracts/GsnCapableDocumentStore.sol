@@ -9,6 +9,9 @@ import "./OwnableDocumentStore.sol";
 import "./GsnCapable.sol";
 
 contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
+    
+  string public override versionRecipient = "2.0.0";
+
   constructor(string memory _name, address _forwarder) public OwnableDocumentStore(_name) {
     trustedForwarder = _forwarder;
   }
@@ -27,9 +30,5 @@ contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IK
 
   function setTrustedForwarder(address _forwarder) public onlyOwner {
     trustedForwarder = _forwarder;
-  }
-
-  function versionRecipient() external view virtual override returns (string memory) {
-    return version;
   }
 }
