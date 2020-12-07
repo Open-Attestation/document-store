@@ -31,3 +31,4 @@ export {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStor
 export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
 export {GsnCapableDocumentStoreFactory} from "./contracts/GsnCapableDocumentStoreFactory";
 export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
+export {NaivePaymasterFactory} from "./contracts/NaivePaymasterFactory";

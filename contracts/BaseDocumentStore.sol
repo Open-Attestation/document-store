@@ -3,13 +3,11 @@
 pragma solidity ^0.6.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-/*
- * Legacy version for reference and backward compatibility, similar to OwnableDocumentStore
- */
-contract DocumentStore is Ownable {
+contract BaseDocumentStore is Initializable {
   string public name;
-  string public version = "2.3.0";
+  string public version;
 
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public documentIssued;
@@ -19,18 +17,19 @@ contract DocumentStore is Ownable {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  constructor(string memory _name) public {
+  function initialize(string memory _name) public initializer {
+    version = "2.3.0";
     name = _name;
   }
 
-  function issue(bytes32 document) public onlyOwner onlyNotIssued(document) {
+  function _issue(bytes32 document) internal onlyNotIssued(document) {
     documentIssued[document] = block.number;
     emit DocumentIssued(document);
   }
 
-  function bulkIssue(bytes32[] memory documents) public {
+  function _bulkIssue(bytes32[] memory documents) internal {
     for (uint256 i = 0; i < documents.length; i++) {
-      issue(documents[i]);
+      _issue(documents[i]);
     }
   }
 
@@ -46,14 +45,14 @@ contract DocumentStore is Ownable {
     return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
-  function revoke(bytes32 document) public onlyOwner onlyNotRevoked(document) returns (bool) {
+  function _revoke(bytes32 document) internal onlyNotRevoked(document) returns (bool) {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
   }
 
-  function bulkRevoke(bytes32[] memory documents) public {
+  function _bulkRevoke(bytes32[] memory documents) internal {
     for (uint256 i = 0; i < documents.length; i++) {
-      revoke(documents[i]);
+      _revoke(documents[i]);
     }
   }
 
