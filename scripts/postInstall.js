@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-const {execSync} = require("child_process");
+const { execSync } = require("child_process");
 
 const truffle = path.join(process.cwd(), "node_modules", ".bin", "truffle");
 if (fs.existsSync(truffle) && process.env.npm_config_production !== "true") {

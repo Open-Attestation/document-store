@@ -76,13 +76,13 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    timeout: 10000
+    timeout: 10000,
   },
 
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.12" // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.6.12", // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
@@ -91,6 +91,6 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
-    }
-  }
+    },
+  },
 };
