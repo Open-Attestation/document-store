@@ -1,6 +1,6 @@
 import { providers } from "ethers";
 import { deploy, deployAndWait, connect } from "./index";
-import { DocumentStoreCreatorFactory } from "./contracts/DocumentStoreCreatorFactory";
+import { DocumentStoreCreator__factory as DocumentStoreCreatorFactory } from "./contracts";
 
 const provider = new providers.JsonRpcProvider();
 const signer = provider.getSigner();
