@@ -1,7 +1,7 @@
-import {Signer, providers, ContractTransaction} from "ethers";
-import {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStoreFactory";
-import {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
-import {getDocumentStoreCreatorAddress} from "./config";
+import { Signer, providers, ContractTransaction } from "ethers";
+import { UpgradableDocumentStoreFactory } from "./contracts/UpgradableDocumentStoreFactory";
+import { DocumentStoreCreatorFactory } from "./contracts/DocumentStoreCreatorFactory";
+import { getDocumentStoreCreatorAddress } from "./config";
 
 interface DeployOptions {
   documentStoreCreatorAddressOverride?: string;
@@ -27,8 +27,8 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
   return UpgradableDocumentStoreFactory.connect(address, signerOrProvider);
 };
 
-export {UpgradableDocumentStoreFactory} from "./contracts/UpgradableDocumentStoreFactory";
-export {DocumentStoreFactory} from "./contracts/DocumentStoreFactory";
-export {GsnCapableDocumentStoreFactory} from "./contracts/GsnCapableDocumentStoreFactory";
-export {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
-export {NaivePaymasterFactory} from "./contracts/NaivePaymasterFactory";
+export { UpgradableDocumentStoreFactory } from "./contracts/UpgradableDocumentStoreFactory";
+export { DocumentStoreFactory } from "./contracts/DocumentStoreFactory";
+export { GsnCapableDocumentStoreFactory } from "./contracts/GsnCapableDocumentStoreFactory";
+export { DocumentStoreCreatorFactory } from "./contracts/DocumentStoreCreatorFactory";
+export { NaivePaymasterFactory } from "./contracts/NaivePaymasterFactory";

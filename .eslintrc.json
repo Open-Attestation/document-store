@@ -30,7 +30,7 @@
         "no-unused-vars": "off",
         "no-restricted-globals": "off",
         "import/prefer-default-export": "off",
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*"]}]
+        "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.test.*"] }]
       }
     },
     {

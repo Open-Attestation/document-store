@@ -1,6 +1,6 @@
-import {providers} from "ethers";
-import {deploy, deployAndWait, connect} from "./index";
-import {DocumentStoreCreatorFactory} from "./contracts/DocumentStoreCreatorFactory";
+import { providers } from "ethers";
+import { deploy, deployAndWait, connect } from "./index";
+import { DocumentStoreCreatorFactory } from "./contracts/DocumentStoreCreatorFactory";
 
 const provider = new providers.JsonRpcProvider();
 const signer = provider.getSigner();
@@ -17,14 +17,14 @@ beforeAll(async () => {
 
 describe("deploy", () => {
   it("deploys a new UpgradableDocumentStore contract without waiting for confirmation", async () => {
-    const receipt = await deploy("My Store", signer, {documentStoreCreatorAddressOverride});
+    const receipt = await deploy("My Store", signer, { documentStoreCreatorAddressOverride });
     expect(receipt.from).toBe(account);
   });
 });
 
 describe("deployAndWait", () => {
   it("deploys a new UpgradableDocumentStore contract", async () => {
-    const instance = await deployAndWait("My Store", signer, {documentStoreCreatorAddressOverride});
+    const instance = await deployAndWait("My Store", signer, { documentStoreCreatorAddressOverride });
     const owner = await instance.owner();
     expect(owner).toBe(account);
     const name = await instance.name();
@@ -34,7 +34,7 @@ describe("deployAndWait", () => {
 
 describe("connect", () => {
   it("connects to existing contract", async () => {
-    const {address} = await deployAndWait("My Store", signer, {documentStoreCreatorAddressOverride});
+    const { address } = await deployAndWait("My Store", signer, { documentStoreCreatorAddressOverride });
     console.log(address);
     const instance = await connect(address, signer);
     const owner = await instance.owner();

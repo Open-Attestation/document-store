@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: 'circleci/node:12.13.0'
+      - image: "circleci/node:12.13.0"
       # if need to wait .. => https://support.circleci.com/hc/en-us/articles/360006773953-Race-Conditions-Wait-For-Database
       - image: trufflesuite/ganache-cli:v6.12.2
         command: [ganache-cli -h 0.0.0.0 -p 8545 -i 1337 -s foobar -e 100000000000000000000]

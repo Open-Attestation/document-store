@@ -26,5 +26,4 @@ contract OwnableDocumentStore is BaseDocumentStore, Ownable {
   function bulkRevoke(bytes32[] memory documents) public onlyOwner {
     return BaseDocumentStore._bulkRevoke(documents);
   }
-
 }
