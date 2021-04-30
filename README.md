@@ -15,7 +15,7 @@ To use the package, you will need to provide your own Web3 [provider](https://do
 Deploying new document store
 
 ```ts
-import {deployAndWait} from "@govtechsg/document-store";
+import { deployAndWait } from "@govtechsg/document-store";
 
 const documentStore = await deployAndWait("My Document Store", signer).then(console.log);
 ```
@@ -23,7 +23,7 @@ const documentStore = await deployAndWait("My Document Store", signer).then(cons
 Connecting to existing document store on Ethereum
 
 ```ts
-import {connect} from "@govtechsg/document-store";
+import { connect } from "@govtechsg/document-store";
 
 const documentStore = await connect("0x4077534e82c97be03a07fb10f5c853d2bc7161fb", providerOrSigner);
 ```
@@ -31,7 +31,7 @@ const documentStore = await connect("0x4077534e82c97be03a07fb10f5c853d2bc7161fb"
 Deploying new document store with minimal proxy (TBD - Not available yet)
 
 ```ts
-import {deployMinimal} from "@govtechsg/document-store";
+import { deployMinimal } from "@govtechsg/document-store";
 
 deployMinimal("My Document Store", signer).then(console.log);
 ```
@@ -79,7 +79,7 @@ isRevokedBefore
 Different ways to get provider or signer:
 
 ```ts
-import {Wallet, providers, getDefaultProvider} from "ethers";
+import { Wallet, providers, getDefaultProvider } from "ethers";
 
 // Providers
 const mainnetProvider = getDefaultProvider();
@@ -92,7 +92,6 @@ const signerFromEncryptedJson = Wallet.fromEncryptedJson(json, password);
 signerFromEncryptedJson.connect(provider);
 const signerFromMnemonic = Wallet.fromMnemonic("MNEMONIC-HERE");
 signerFromMnemonic.connect(provider);
-
 ```
 
 ## Setup

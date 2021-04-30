@@ -11,12 +11,12 @@ const generateHashes = (number, startingHash = defaultStartingHash) => {
   return hashes;
 };
 
-const formatHashes = hashes => {
+const formatHashes = (hashes) => {
   const hashesString = `[${hashes.join(", ")}]`;
   return hashesString;
 };
 
 module.exports = {
   generateHashes,
-  formatHashes
+  formatHashes,
 };

@@ -9,7 +9,6 @@ import "./OwnableDocumentStore.sol";
 import "./GsnCapable.sol";
 
 contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
-    
   string public override versionRecipient = "2.0.0";
 
   constructor(string memory _name, address _forwarder) public OwnableDocumentStore(_name) {

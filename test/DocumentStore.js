@@ -1,11 +1,11 @@
 const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
 UpgradableDocumentStore.numberFormat = "String";
-const {get} = require("lodash");
+const { get } = require("lodash");
 
-const {expect} = require("chai").use(require("chai-as-promised"));
+const { expect } = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
-contract("UpgradableDocumentStore", accounts => {
+contract("UpgradableDocumentStore", (accounts) => {
   let instance = null;
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
@@ -14,7 +14,7 @@ contract("UpgradableDocumentStore", accounts => {
     await instance.initialize(config.INSTITUTE_NAME, accounts[0]);
   });
 
-  const issue = documentMerkleRoot => instance.issue(documentMerkleRoot);
+  const issue = (documentMerkleRoot) => instance.issue(documentMerkleRoot);
 
   describe("initializer", () => {
     it("should have correct name", async () => {
@@ -63,7 +63,7 @@ contract("UpgradableDocumentStore", accounts => {
 
       const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
 
-      await expect(instance.issue(documentMerkleRoot, {from: nonOwner})).to.be.rejectedWith(/revert/);
+      await expect(instance.issue(documentMerkleRoot, { from: nonOwner })).to.be.rejectedWith(/revert/);
     });
   });
 
@@ -82,7 +82,7 @@ contract("UpgradableDocumentStore", accounts => {
       const documentMerkleRoots = [
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6331",
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6332"
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6332",
       ];
       const receipt = await instance.bulkIssue(documentMerkleRoots);
 
@@ -102,7 +102,7 @@ contract("UpgradableDocumentStore", accounts => {
     it("should not allow duplicate issues", async () => {
       const documentMerkleRoots = [
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
       ];
 
       // Check that reissue is rejected
@@ -119,7 +119,7 @@ contract("UpgradableDocumentStore", accounts => {
 
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
 
-      await expect(instance.bulkIssue(documentMerkleRoots, {from: nonOwner})).to.be.rejectedWith(/revert/);
+      await expect(instance.bulkIssue(documentMerkleRoots, { from: nonOwner })).to.be.rejectedWith(/revert/);
     });
   });
 
@@ -224,7 +224,7 @@ contract("UpgradableDocumentStore", accounts => {
       const documentMerkleRoots = [
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6331",
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6332"
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6332",
       ];
       const receipt = await instance.bulkRevoke(documentMerkleRoots);
 
@@ -244,7 +244,7 @@ contract("UpgradableDocumentStore", accounts => {
     it("should not allow duplicate revokes", async () => {
       const documentMerkleRoots = [
         "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
-        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"
+        "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330",
       ];
 
       // Check that revoke is rejected
@@ -261,7 +261,7 @@ contract("UpgradableDocumentStore", accounts => {
 
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
 
-      await expect(instance.bulkRevoke(documentMerkleRoots, {from: nonOwner})).to.be.rejectedWith(/revert/);
+      await expect(instance.bulkRevoke(documentMerkleRoots, { from: nonOwner })).to.be.rejectedWith(/revert/);
     });
   });
 

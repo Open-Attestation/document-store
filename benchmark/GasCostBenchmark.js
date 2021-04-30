@@ -1,4 +1,4 @@
-const {groupBy, mapValues} = require("lodash");
+const { groupBy, mapValues } = require("lodash");
 
 const UpgradableDocumentStore = artifacts.require("./UpgradableDocumentStore.sol");
 const DocumentStoreWithRevokeReasons = artifacts.require("./DocumentStoreWithRevokeReasons.sol");
@@ -7,7 +7,7 @@ const DocumentStoreCreator = artifacts.require("./DocumentStoreCreator.sol");
 const BaseAdminUpgradeabilityProxy = artifacts.require("./BaseAdminUpgradeabilityProxy.sol");
 
 UpgradableDocumentStore.numberFormat = "String";
-const {generateHashes} = require("../scripts/generateHashes");
+const { generateHashes } = require("../scripts/generateHashes");
 
 const initializeAbi = {
   constant: false,
@@ -15,24 +15,24 @@ const initializeAbi = {
     {
       internalType: "string",
       name: "_name",
-      type: "string"
+      type: "string",
     },
     {
       internalType: "address",
       name: "owner",
-      type: "address"
-    }
+      type: "address",
+    },
   ],
   name: "initialize",
   outputs: [],
   payable: false,
   stateMutability: "nonpayable",
-  type: "function"
+  type: "function",
 };
 
 const STORE_NAME = "THE_STORE_NAME";
 let lastIssuedHash = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6432";
-const randomHashes = num => {
+const randomHashes = (num) => {
   const generated = generateHashes(num, lastIssuedHash);
   lastIssuedHash = generated[generated.length - 1];
   return generated;
@@ -45,7 +45,7 @@ describe("Gas Cost Benchmarks", () => {
     gasRecords.push({
       contract,
       context,
-      gas
+      gas,
     });
   };
 
@@ -106,16 +106,16 @@ describe("Gas Cost Benchmarks", () => {
     recordGasCost(contractName, "transferOwnership", transferTx.receipt.cumulativeGasUsed);
 
     // Revert the owner by transferring back
-    await contractInstance.transferOwnership(accounts[0], {from: accounts[2]});
+    await contractInstance.transferOwnership(accounts[0], { from: accounts[2] });
   };
 
   after(() => {
-    const groupedRecords = groupBy(gasRecords, record => record.context);
-    const records = mapValues(groupedRecords, contextualizedRecords =>
+    const groupedRecords = groupBy(gasRecords, (record) => record.context);
+    const records = mapValues(groupedRecords, (contextualizedRecords) =>
       contextualizedRecords.reduce(
         (state, current) => ({
           ...state,
-          [current.contract]: current.gas
+          [current.contract]: current.gas,
         }),
         {}
       )
@@ -136,7 +136,7 @@ describe("Gas Cost Benchmarks", () => {
 
   contract(
     "UpgradableDocumentStore",
-    accounts => {
+    (accounts) => {
       const contractName = "UpgradableDocumentStore";
 
       it("runs benchmark", async () => {
@@ -178,7 +178,7 @@ describe("Gas Cost Benchmarks", () => {
 
   contract(
     "DocumentStore (Minimal Proxy)",
-    accounts => {
+    (accounts) => {
       const contractName = "DocumentStore (Minimal Proxy)";
 
       it("runs benchmark", async () => {
@@ -205,7 +205,7 @@ describe("Gas Cost Benchmarks", () => {
 
   contract(
     "DocumentStore (AdminUpgradableProxy)",
-    accounts => {
+    (accounts) => {
       const contractName = "DocumentStore (AdminUpgradableProxy)";
 
       it("runs benchmark", async () => {
@@ -231,8 +231,8 @@ describe("Gas Cost Benchmarks", () => {
 
         // update
         const proxyInstance = await BaseAdminUpgradeabilityProxy.at(adminUpgradableProxyAddress);
-        const {receipt} = await proxyInstance.upgradeTo(staticDocumentStoreWithRevokeReasons.address, {
-          from: accounts[1]
+        const { receipt } = await proxyInstance.upgradeTo(staticDocumentStoreWithRevokeReasons.address, {
+          from: accounts[1],
         });
         recordGasCost(contractName, "upgrade", receipt.cumulativeGasUsed);
       });

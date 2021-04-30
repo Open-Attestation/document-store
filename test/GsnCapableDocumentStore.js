@@ -3,16 +3,16 @@ const ConfigurableTrustForwarder = artifacts.require("./ConfigurableTrustForward
 const CalculateSelector = artifacts.require("CalculateGsnCapableSelector");
 GsnCapableDocumentStore.numberFormat = "String";
 
-const {utils} = require("ethers");
-const {expect} = require("chai").use(require("chai-as-promised"));
+const { utils } = require("ethers");
+const { expect } = require("chai").use(require("chai-as-promised"));
 const config = require("../config.js");
 
-contract("GsnCapableDocumentStore", accounts => {
+contract("GsnCapableDocumentStore", (accounts) => {
   let instance = null;
 
   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
   beforeEach(async () => {
-    instance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, accounts[1], {from: accounts[0]});
+    instance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, accounts[1], { from: accounts[0] });
   });
 
   describe("trustedForwarder", () => {
@@ -64,20 +64,20 @@ contract("GsnCapableDocumentStore", accounts => {
     // eslint-disable-next-line no-underscore-dangle
     const dsInterface = new utils.Interface(GsnCapableDocumentStore._json.abi);
     const issueFnData = dsInterface.encodeFunctionData("issue", [
-      "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
+      "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02",
     ]);
 
     beforeEach(async () => {
       configurableForwarder = await ConfigurableTrustForwarder.new();
       configurableInstance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, configurableForwarder.address, {
-        from: owner
+        from: owner,
       });
     });
 
     it("should issue document when receive a relayed call by owner from relayer", async () => {
       const configurableInstanceAddress = configurableInstance.address;
       await configurableForwarder.execute(issueFnData, owner, configurableInstanceAddress, {
-        from: relayer
+        from: relayer,
       });
       const documentIssued = await configurableInstance.isIssued(
         "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
@@ -89,7 +89,7 @@ contract("GsnCapableDocumentStore", accounts => {
       const configurableInstanceAddress = configurableInstance.address;
       await expect(
         configurableForwarder.execute(issueFnData, relayer, configurableInstanceAddress, {
-          from: relayer
+          from: relayer,
         })
       ).to.be.rejectedWith(/revert/);
     });
