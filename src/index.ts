@@ -1,6 +1,8 @@
 import { Signer, providers, ContractTransaction } from "ethers";
-import { UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory } from "./contracts/";
-import { DocumentStoreCreator__factory as DocumentStoreCreatorFactory } from "./contracts/";
+import {
+  DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
+  UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
+} from "./contracts/";
 import { getDocumentStoreCreatorAddress } from "./config";
 
 interface DeployOptions {
@@ -27,8 +29,10 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
   return UpgradableDocumentStoreFactory.connect(address, signerOrProvider);
 };
 
-export { UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory } from "./contracts";
-export { DocumentStore__factory as DocumentStoreFactory } from "./contracts";
-export { GsnCapableDocumentStore__factory as GsnCapableDocumentStoreFactory } from "./contracts";
-export { DocumentStoreCreator__factory as DocumentStoreCreatorFactory } from "./contracts";
-export { NaivePaymaster__factory as NaivePaymasterFactory } from "./contracts";
+export {
+  DocumentStore__factory as DocumentStoreFactory,
+  DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
+  GsnCapableDocumentStore__factory as GsnCapableDocumentStoreFactory,
+  NaivePaymaster__factory as NaivePaymasterFactory,
+  UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
+} from "./contracts";
