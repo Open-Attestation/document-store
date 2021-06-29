@@ -1,7 +1,7 @@
 const { expect } = require("chai").use(require("chai-as-promised"));
 const { ethers } = require("hardhat");
 const { get } = require("lodash");
-const config = require("../../config.js");
+const config = require("../config.js");
 
 describe("DocumentStore", async () => {
   let Accounts;

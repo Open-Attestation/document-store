@@ -5,13 +5,11 @@ const config = require("../config.js");
 describe("GsnCapableDocumentStore", async () => {
   let Accounts;
   let GsnCapableDocumentStore;
-  let ConfigurableTrustForwarder;
   let CalculateSelector;
 
   before("", async () => {
     Accounts = await ethers.getSigners();
     GsnCapableDocumentStore = await ethers.getContractFactory("GsnCapableDocumentStore");
-    ConfigurableTrustForwarder = await ethers.getContractFactory("ConfigurableTrustForwarder");
     CalculateSelector = await ethers.getContractFactory("CalculateGsnCapableSelector");
     GsnCapableDocumentStore.numberFormat = "String";
   });
@@ -67,31 +65,39 @@ describe("GsnCapableDocumentStore", async () => {
   });
 
   describe("able to receive relayed message", async () => {
+    let owner;
+    let relayer;
+    let dsInterface;
+    let issueFnData;
+    let ConfigurableTrustForwarder;
+
+    before("", async () => {
+      Accounts = await ethers.getSigners();
+      GsnCapableDocumentStore = await ethers.getContractFactory("GsnCapableDocumentStore");
+      ConfigurableTrustForwarder = await ethers.getContractFactory("ConfigurableTrustForwarder");
+      GsnCapableDocumentStore.numberFormat = "String";
+      // eslint-disable-next-line no-underscore-dangle
+      dsInterface = new ethers.utils.Interface(JSON.parse(GsnCapableDocumentStore.interface.format("json")));
+      issueFnData = dsInterface.encodeFunctionData("issue", [
+        "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02",
+      ]);
+      [owner, relayer] = Accounts;
+    });
+
     let configurableInstance;
     let configurableForwarder;
 
-    let Accounts2 = await ethers.getSigners();
-
-    const owner = Accounts2[0];
-    const relayer = Accounts2[1];
-
-    // eslint-disable-next-line no-underscore-dangle
-    GsnCapableDocumentStore = await ethers.getContractFactory("GsnCapableDocumentStore");
-    // console.log(JSON.parse(GsnCapableDocumentStore.interface.format('json')));
-    const dsInterface = new ethers.utils.Interface(JSON.parse(GsnCapableDocumentStore.interface.format('json')));
-    const issueFnData = dsInterface.encodeFunctionData("issue", [
-      "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02",
-    ]);
-
-    beforeEach(async () => {
-      configurableForwarder = await ConfigurableTrustForwarder.connect(relayer);
-      configurableInstance = await GsnCapableDocumentStore.connect(owner).deploy(config.INSTITUTE_NAME, configurableForwarder.address)
+    beforeEach("", async () => {
+      configurableForwarder = await ConfigurableTrustForwarder.deploy();
+      configurableInstance = await GsnCapableDocumentStore.connect(owner).deploy(
+        config.INSTITUTE_NAME,
+        configurableForwarder.address
+      );
     });
 
     it("should issue document when receive a relayed call by owner from relayer", async () => {
       const configurableInstanceAddress = configurableInstance.address;
-      await configurableForwarder.execute(issueFnData, owner.address, configurableInstanceAddress);
-      await configurableForwarder.connect(relayer).execute(issueFnData, owner, configurableInstanceAddress);
+      await configurableForwarder.connect(relayer).execute(issueFnData, owner.address, configurableInstanceAddress);
       const documentIssued = await configurableInstance.isIssued(
         "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
       );
@@ -100,68 +106,9 @@ describe("GsnCapableDocumentStore", async () => {
 
     it("should not allow issue document when receive a relayed call not by owner", async () => {
       const configurableInstanceAddress = configurableInstance.address;
-      await expect(configurableForwarder.execute(issueFnData, owner.address, configurableInstanceAddress)).to.be.rejectedWith(/revert/);
+      await expect(
+        configurableForwarder.connect(relayer).execute(issueFnData, relayer.address, configurableInstanceAddress)
+      ).to.be.rejectedWith(/revert/);
     });
   });
 });
-
-// -------------------------------------------
-
-// const GsnCapableDocumentStore = artifacts.require("./GsnCapableDocumentStore.sol");
-// const ConfigurableTrustForwarder = artifacts.require("./ConfigurableTrustForwarder.sol");
-// const CalculateSelector = artifacts.require("CalculateGsnCapableSelector");
-// GsnCapableDocumentStore.numberFormat = "String";
-
-// const { utils } = require("ethers");
-// const { expect } = require("chai").use(require("chai-as-promised"));
-// const config = require("../config.js");
-
-// contract("GsnCapableDocumentStore", (accounts) => {
-//   let instance = null;
-
-//   // Related: https://github.com/trufflesuite/truffle-core/pull/98#issuecomment-360619561
-//   beforeEach(async () => {
-//     instance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, accounts[1], { from: accounts[0] });
-//   });
-
-//   describe("able to receive relayed message", () => {
-//     let configurableInstance;
-//     let configurableForwarder;
-
-//     const owner = accounts[0];
-//     const relayer = accounts[1];
-
-//     // eslint-disable-next-line no-underscore-dangle
-//     const dsInterface = new utils.Interface(GsnCapableDocumentStore._json.abi);
-//     const issueFnData = dsInterface.encodeFunctionData("issue", [
-//       "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02",
-//     ]);
-
-//     beforeEach(async () => {
-//       configurableForwarder = await ConfigurableTrustForwarder.new();
-//       configurableInstance = await GsnCapableDocumentStore.new(config.INSTITUTE_NAME, configurableForwarder.address, {
-//         from: owner,
-//       });
-//     });
-
-//     it("should issue document when receive a relayed call by owner from relayer", async () => {
-//       const configurableInstanceAddress = configurableInstance.address;
-//       await configurableForwarder.execute(issueFnData, owner, configurableInstanceAddress, {
-//         from: relayer,
-//       });
-//       const documentIssued = await configurableInstance.isIssued(
-//         "0xe44e17b840f424f3764363e0fe331e812ef1a4d08ff8f63cbef5bfffe91a5e02"
-//       );
-//       expect(documentIssued).to.be.true;
-//     });
-
-//     it("should not allow issue document when receive a relayed call not by owner", async () => {
-//       const configurableInstanceAddress = configurableInstance.address;
-//       await expect(
-//         configurableForwarder.execute(issueFnData, relayer, configurableInstanceAddress, {
-//           from: relayer,
-//         })
-//       ).to.be.rejectedWith(/revert/);
-//     });
-//   });
-// });
