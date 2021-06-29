@@ -29,7 +29,7 @@ describe("DocumentStoreCreator", async () => {
         "Emitted contract creator does not match"
       );
       // Test correctness of deployed DocumentStore
-      const deployedDocumentStore = await UpgradableDocumentStore.(receipt.events[2].args.instance);
+      const deployedDocumentStore = await UpgradableDocumentStore.attach(receipt.events[2].args.instance);
       const name = await deployedDocumentStore.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
       const owner = await deployedDocumentStore.owner();
