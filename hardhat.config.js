@@ -1,6 +1,6 @@
-require('@nomiclabs/hardhat-waffle');
-require('hardhat-typechain');
-require('@openzeppelin/hardhat-upgrades');
+require("@nomiclabs/hardhat-waffle");
+require("hardhat-typechain");
+require("@openzeppelin/hardhat-upgrades");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -12,11 +12,11 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   typechain: {
-    outDir: "src/contracts"
+    outDir: "src/contracts",
   },
 };
