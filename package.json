@@ -5,8 +5,7 @@
     "dist",
     "src",
     "scripts",
-    "types",
-    "truffle-config.js"
+    "types"
   ],
   "main": "dist/index.js",
   "types": "dist/ts/index.d.ts",
@@ -30,8 +29,7 @@
     "test:sol": "hardhat test",
     "test:js": "jest --testPathPattern=src",
     "test": "npm run test:sol && npm run test:js",
-    "truffle": "truffle",
-    "benchmark": "truffle test ./benchmark/*",
+    "benchmark": "hardhat test ./benchmark/*",
     "typechain": "typechain --target ethers-v5 \"build/contracts/*.json\" --outDir src/contracts",
     "postinstall": "node scripts/postInstall",
     "semantic-release": "semantic-release"
@@ -96,7 +94,6 @@
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "solium": "^1.2.5",
-    "truffle": "^5.3.3",
     "typechain": "^4.0.3",
     "typescript": "^4.2.4"
   },
