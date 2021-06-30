@@ -2,28 +2,28 @@ const { ethers } = require("hardhat");
 const { groupBy, mapValues } = require("lodash");
 const { generateHashes } = require("../scripts/generateHashes");
 
-const initializeAbi = {
-  constant: false,
-  inputs: [
-    {
-      internalType: "string",
-      name: "_name",
-      type: "string",
-    },
-    {
-      internalType: "address",
-      name: "owner",
-      type: "address",
-    },
-  ],
-  name: "initialize",
-  outputs: [],
-  payable: false,
-  stateMutability: "nonpayable",
-  type: "function",
-};
+// const initializeAbi = {
+//   constant: false,
+//   inputs: [
+//     {
+//       internalType: "string",
+//       name: "_name",
+//       type: "string",
+//     },
+//     {
+//       internalType: "address",
+//       name: "owner",
+//       type: "address",
+//     },
+//   ],
+//   name: "initialize",
+//   outputs: [],
+//   payable: false,
+//   stateMutability: "nonpayable",
+//   type: "function",
+// };
 
-const STORE_NAME = "THE_STORE_NAME";
+// const STORE_NAME = "THE_STORE_NAME";
 let lastIssuedHash = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6432";
 
 const randomHashes = (num) => {
@@ -35,7 +35,6 @@ const randomHashes = (num) => {
 const randomHash = () => randomHashes(1)[0];
 
 const getCumulativeGasUsed = async (tx) => {
-
   let cumulativeGasUsed;
   let receipt;
 
@@ -48,7 +47,7 @@ const getCumulativeGasUsed = async (tx) => {
   }
 
   return cumulativeGasUsed;
-}
+};
 
 describe("Gas Cost Benchmarks", () => {
   const gasRecords = [];
@@ -62,7 +61,7 @@ describe("Gas Cost Benchmarks", () => {
 
   const benchmarkTransfer = async (contractName, contractInstance, accounts) => {
     const tx = await contractInstance.transferOwnership(accounts[2].address);
-    recordGasCost(contractName, "transferOwnership", (await getCumulativeGasUsed(tx)));
+    recordGasCost(contractName, "transferOwnership", await getCumulativeGasUsed(tx));
 
     // Revert the owner by transferring back
     await contractInstance.connect(accounts[2]).transferOwnership(accounts[0].address);
@@ -70,54 +69,54 @@ describe("Gas Cost Benchmarks", () => {
 
   const benchmarkIssue = async (contractName, contractInstance) => {
     const tx = await contractInstance.issue(randomHash());
-    recordGasCost(contractName, "issue", (await getCumulativeGasUsed(tx)));
+    recordGasCost(contractName, "issue", await getCumulativeGasUsed(tx));
   };
 
   const benchmarkBulkIssue = async (contractName, contractInstance) => {
     const tx1 = await contractInstance.bulkIssue(randomHashes(1));
-    recordGasCost(contractName, "bulkIssue - 1 hash", (await getCumulativeGasUsed(tx1)));
+    recordGasCost(contractName, "bulkIssue - 1 hash", await getCumulativeGasUsed(tx1));
     const tx2 = await contractInstance.bulkIssue(randomHashes(2));
-    recordGasCost(contractName, "bulkIssue - 2 hash", (await getCumulativeGasUsed(tx2)));
+    recordGasCost(contractName, "bulkIssue - 2 hash", await getCumulativeGasUsed(tx2));
     const tx3 = await contractInstance.bulkIssue(randomHashes(4));
-    recordGasCost(contractName, "bulkIssue - 4 hash", (await getCumulativeGasUsed(tx3)));
+    recordGasCost(contractName, "bulkIssue - 4 hash", await getCumulativeGasUsed(tx3));
     const tx4 = await contractInstance.bulkIssue(randomHashes(8));
-    recordGasCost(contractName, "bulkIssue - 8 hash", (await getCumulativeGasUsed(tx4)));
+    recordGasCost(contractName, "bulkIssue - 8 hash", await getCumulativeGasUsed(tx4));
     const tx5 = await contractInstance.bulkIssue(randomHashes(16));
-    recordGasCost(contractName, "bulkIssue - 16 hash", (await getCumulativeGasUsed(tx5)));
+    recordGasCost(contractName, "bulkIssue - 16 hash", await getCumulativeGasUsed(tx5));
     const tx6 = await contractInstance.bulkIssue(randomHashes(32));
-    recordGasCost(contractName, "bulkIssue - 32 hash", (await getCumulativeGasUsed(tx6)));
+    recordGasCost(contractName, "bulkIssue - 32 hash", await getCumulativeGasUsed(tx6));
     const tx7 = await contractInstance.bulkIssue(randomHashes(64));
-    recordGasCost(contractName, "bulkIssue - 64 hash", (await getCumulativeGasUsed(tx7)));
+    recordGasCost(contractName, "bulkIssue - 64 hash", await getCumulativeGasUsed(tx7));
     const tx8 = await contractInstance.bulkIssue(randomHashes(128));
-    recordGasCost(contractName, "bulkIssue - 128 hash", (await getCumulativeGasUsed(tx8)));
+    recordGasCost(contractName, "bulkIssue - 128 hash", await getCumulativeGasUsed(tx8));
     const tx9 = await contractInstance.bulkIssue(randomHashes(256));
-    recordGasCost(contractName, "bulkIssue - 256 hash", (await getCumulativeGasUsed(tx9)));
+    recordGasCost(contractName, "bulkIssue - 256 hash", await getCumulativeGasUsed(tx9));
   };
 
   const benchmarkRevoke = async (contractName, contractInstance) => {
     const tx = await contractInstance.revoke(randomHash());
-    recordGasCost(contractName, "revoke", (await getCumulativeGasUsed(tx)));
+    recordGasCost(contractName, "revoke", await getCumulativeGasUsed(tx));
   };
 
   const benchmarkBulkRevoke = async (contractName, contractInstance) => {
     const tx1 = await contractInstance.bulkRevoke(randomHashes(1));
-    recordGasCost(contractName, "bulkRevoke - 1 hash", (await getCumulativeGasUsed(tx1)));
+    recordGasCost(contractName, "bulkRevoke - 1 hash", await getCumulativeGasUsed(tx1));
     const tx2 = await contractInstance.bulkRevoke(randomHashes(2));
-    recordGasCost(contractName, "bulkRevoke - 2 hash", (await getCumulativeGasUsed(tx2)));
+    recordGasCost(contractName, "bulkRevoke - 2 hash", await getCumulativeGasUsed(tx2));
     const tx3 = await contractInstance.bulkRevoke(randomHashes(4));
-    recordGasCost(contractName, "bulkRevoke - 4 hash", (await getCumulativeGasUsed(tx3)));
+    recordGasCost(contractName, "bulkRevoke - 4 hash", await getCumulativeGasUsed(tx3));
     const tx4 = await contractInstance.bulkRevoke(randomHashes(8));
-    recordGasCost(contractName, "bulkRevoke - 8 hash", (await getCumulativeGasUsed(tx4)));
+    recordGasCost(contractName, "bulkRevoke - 8 hash", await getCumulativeGasUsed(tx4));
     const tx5 = await contractInstance.bulkRevoke(randomHashes(16));
-    recordGasCost(contractName, "bulkRevoke - 16 hash", (await getCumulativeGasUsed(tx5)));
+    recordGasCost(contractName, "bulkRevoke - 16 hash", await getCumulativeGasUsed(tx5));
     const tx6 = await contractInstance.bulkRevoke(randomHashes(32));
-    recordGasCost(contractName, "bulkRevoke - 32 hash", (await getCumulativeGasUsed(tx6)));
+    recordGasCost(contractName, "bulkRevoke - 32 hash", await getCumulativeGasUsed(tx6));
     const tx7 = await contractInstance.bulkRevoke(randomHashes(64));
-    recordGasCost(contractName, "bulkRevoke - 64 hash", (await getCumulativeGasUsed(tx7)));
+    recordGasCost(contractName, "bulkRevoke - 64 hash", await getCumulativeGasUsed(tx7));
     const tx8 = await contractInstance.bulkRevoke(randomHashes(128));
-    recordGasCost(contractName, "bulkRevoke - 128 hash", (await getCumulativeGasUsed(tx8)));
+    recordGasCost(contractName, "bulkRevoke - 128 hash", await getCumulativeGasUsed(tx8));
     const tx9 = await contractInstance.bulkRevoke(randomHashes(256));
-    recordGasCost(contractName, "bulkRevoke - 256 hash", (await getCumulativeGasUsed(tx9)));
+    recordGasCost(contractName, "bulkRevoke - 256 hash", await getCumulativeGasUsed(tx9));
   };
 
   after(() => {
@@ -149,42 +148,35 @@ describe("Gas Cost Benchmarks", () => {
   });
 
   describe("DocumentStore", () => {
-      const contractName = "DocumentStore";
+    const contractName = "DocumentStore";
 
-      it("runs benchmark", async () => {
-        // Deploy & initialize document store contract
-        const documentStoreInstance = await DocumentStore.deploy(contractName);
-        const tx = await documentStoreInstance.deployed();
-        recordGasCost(
-          contractName,
-          "deployment",
-          (await getCumulativeGasUsed(tx))
-        );
+    it("runs benchmark", async () => {
+      // Deploy & initialize document store contract
+      const documentStoreInstance = await DocumentStore.deploy(contractName);
+      const tx = await documentStoreInstance.deployed();
+      recordGasCost(contractName, "deployment", await getCumulativeGasUsed(tx));
 
-        // const documentStoreInstance = await UpgradableDocumentStore.deploy();
-        // const initializeTx = await documentStoreInstance.functions["initialize(string)"](STORE_NAME);
-        // // console.log(await initializeTx.wait());
-        // recordGasCost(
-        //   contractName,
-        //   "deployment",
-        //   (await getCumulativeGasUsed(documentStoreInstance)) + (await getCumulativeGasUsed(initializeTx))
-        // );
+      // const documentStoreInstance = await UpgradableDocumentStore.deploy();
+      // const initializeTx = await documentStoreInstance.functions["initialize(string)"](STORE_NAME);
+      // recordGasCost(
+      //   contractName,
+      //   "deployment",
+      //   (await getCumulativeGasUsed(documentStoreInstance)) + (await getCumulativeGasUsed(initializeTx))
+      // );
 
-        await benchmarkTransfer(contractName, documentStoreInstance, Accounts);
-        await benchmarkIssue(contractName, documentStoreInstance);
-        await benchmarkBulkIssue(contractName, documentStoreInstance);
-        await benchmarkRevoke(contractName, documentStoreInstance);
-        await benchmarkBulkRevoke(contractName, documentStoreInstance);
-      });
-    },
-    20000
-  );
+      await benchmarkTransfer(contractName, documentStoreInstance, Accounts);
+      await benchmarkIssue(contractName, documentStoreInstance);
+      await benchmarkBulkIssue(contractName, documentStoreInstance);
+      await benchmarkRevoke(contractName, documentStoreInstance);
+      await benchmarkBulkRevoke(contractName, documentStoreInstance);
+    });
+  }, 20000);
 
   describe("DocumentStoreCreator", () => {
     it("runs benchmark", async () => {
       const documentStoreCreatorInstance = await DocumentStoreCreator.deploy();
-      const tx = await documentStoreCreatorInstance.deployed()
-      recordGasCost("DocumentStoreCreator", "deployment", (await getCumulativeGasUsed(tx)));
+      const tx = await documentStoreCreatorInstance.deployed();
+      recordGasCost("DocumentStoreCreator", "deployment", await getCumulativeGasUsed(tx));
     });
   });
 
