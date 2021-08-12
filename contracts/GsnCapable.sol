@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/introspection/ERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
 
-contract GsnCapable is ERC165, Ownable {
+contract GsnCapable is ERC165Storage, Ownable {
   address public paymaster;
   bytes4 private constant _INTERFACE_ID_GSN_CAPABLE = 0xa5a23640;
 
   event PaymasterSet(address indexed target);
 
-  constructor() public {
+  constructor() {
     // register the supported interface to conform to TradeTrustERC721 via ERC165
     _registerInterface(_INTERFACE_ID_GSN_CAPABLE);
   }

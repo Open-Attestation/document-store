@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "@opengsn/contracts/src/forwarder/IForwarder.sol";
@@ -23,7 +23,7 @@ contract NaivePaymaster is BasePaymaster {
    */
   mapping(address => bool) private targetAddresses;
 
-  constructor(string memory _name) public {
+  constructor(string memory _name) {
     name = _name;
   }
 
