@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.7.6;
 
-import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
-import "@opengsn/gsn/contracts/interfaces/IKnowForwarderAddress.sol";
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 import "./OwnableDocumentStore.sol";
 import "./GsnCapable.sol";
+import "./interfaces/IKnowForwarderAddress.sol";
 
 contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
   string public override versionRecipient = "2.0.0";

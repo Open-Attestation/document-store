@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.7.6;
 
-import "./UpgradableDocumentStore.sol";
+import "./UpgradeableDocumentStore.sol";
 
-contract DocumentStoreWithRevokeReasons is UpgradableDocumentStore {
+contract DocumentStoreWithRevokeReasons is UpgradeableDocumentStore {
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public revokeReason;
 
