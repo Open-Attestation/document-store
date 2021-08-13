@@ -5,8 +5,7 @@
     "dist",
     "src",
     "scripts",
-    "types",
-    "truffle-config.js"
+    "types"
   ],
   "main": "dist/index.js",
   "types": "dist/ts/index.d.ts",
@@ -14,7 +13,7 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "truffle build",
+    "build:sol": "hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js:copy-types": "mkdir -p types && cp src/contracts/*.d.ts types/",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
@@ -27,11 +26,10 @@
     "lint:sol:fix": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "npm run lint:sol && npm run lint:js",
     "lint:fix": "npm run lint:sol:fix && npm run lint:js:fix",
-    "test:sol": "truffle test",
+    "test:sol": "hardhat test",
     "test:js": "jest --testPathPattern=src",
     "test": "npm run test:sol && npm run test:js",
-    "truffle": "truffle",
-    "benchmark": "truffle test ./benchmark/*",
+    "benchmark": "hardhat test ./benchmark/*",
     "typechain": "typechain --target ethers-v5 \"build/contracts/*.json\" --outDir src/contracts",
     "postinstall": "node scripts/postInstall",
     "semantic-release": "semantic-release"
@@ -46,7 +44,12 @@
     ]
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "^1.8.2",
+    "hardhat-typechain": "^0.3.5",
+    "hardhat": "^2.4.1",
+    "lodash": "^4.17.21",
+    "ts-generator": "^0.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
@@ -61,6 +64,7 @@
     "@commitlint/config-conventional": "^12.1.1",
     "@commitlint/prompt": "^12.1.1",
     "@ls-age/commitlint-circle": "1.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@opengsn/gsn": "^2.1.0",
     "@openzeppelin/contracts": "^3.4.0",
     "@openzeppelin/contracts-upgradeable": "^3.4.0",
@@ -79,7 +83,8 @@
     "eslint-plugin-chai-friendly": "^0.6.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
-    "ethers": "^5.1.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.0",
     "ganache-cli": "^6.12.2",
     "git-cz": "^4.7.6",
     "jest": "^26.6.3",
@@ -89,7 +94,6 @@
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "solium": "^1.2.5",
-    "truffle": "^5.3.3",
     "typechain": "^4.0.3",
     "typescript": "^4.2.4"
   },
