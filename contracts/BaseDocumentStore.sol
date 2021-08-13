@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 contract BaseDocumentStore is Initializable {

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "./BaseDocumentStore.sol";
 
-contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
+contract UpgradeableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
   function initialize(string memory _name, address owner) public initializer {
     super.__Ownable_init();
     super.transferOwnership(owner);
@@ -28,5 +28,9 @@ contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
 
   function bulkRevoke(bytes32[] memory documents) public onlyOwner {
     return BaseDocumentStore._bulkRevoke(documents);
+  }
+
+  function TestUpgradeV2() public view onlyOwner returns (string memory) {
+    return version;
   }
 }
