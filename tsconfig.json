@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist/ts",
+    "outDir": "dist/types",
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",

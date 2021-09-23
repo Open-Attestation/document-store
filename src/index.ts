@@ -2,7 +2,7 @@ import { Signer, providers, ContractTransaction } from "ethers";
 import {
   DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
   UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
-} from "./contracts/";
+} from "./contracts";
 import { getDocumentStoreCreatorAddress } from "./config";
 
 interface DeployOptions {
@@ -36,3 +36,5 @@ export {
   NaivePaymaster__factory as NaivePaymasterFactory,
   UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
 } from "./contracts";
+
+export * from "./contracts";
