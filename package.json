@@ -67,6 +67,8 @@
     "@openzeppelin/upgrades": "^2.8.0",
     "@typechain/ethers-v5": "^6.0.5",
     "@types/jest": "^26.0.23",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.3",
     "chai": "^4.3.4",
