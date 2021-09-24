@@ -15,7 +15,7 @@
   "scripts": {
     "build:sol": "truffle build",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-types": "mkdir -p types && cp ./src/contracts/*.d.ts ./dist/types/contracts",
+    "build:js:copy-types": "cp ./src/contracts/*.d.ts ./dist/types/contracts",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
     "build": "npm run clean:build && npm run build:sol && npm run typechain && npm run build:js",
     "clean:build": "rm -rf ./dist && rm -rf build && rm -rf ./src/contracts",
