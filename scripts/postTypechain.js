@@ -1,6 +1,6 @@
 /**
  * Post script to rename the default exported factory names by Typechain.
- * Renamed factory names is only used for distribution and should not be used internally.
+ * Renamed factory names are only used for distribution and should not be used internally.
  */
 const fs = require("fs");
 const readline = require("readline");
