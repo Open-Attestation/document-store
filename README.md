@@ -107,4 +107,4 @@ npm run benchmark
 
 ## Notes
 
-If you are using vscode, you may need to link the openzeppelin libraries. Refer [here](https://github.com/juanfranblanco/vscode-solidity#openzeppelin).
+If you are using vscode, you may need to link the openzeppelin libraries. Refer to [here](https://github.com/juanfranblanco/vscode-solidity#openzeppelin).
