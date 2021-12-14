@@ -64,7 +64,7 @@
     "@ls-age/commitlint-circle": "1.0.0",
     "@opengsn/gsn": "^2.1.0",
     "@openzeppelin/contracts": "^3.4.0",
-    "@openzeppelin/contracts-upgradeable": "^3.4.0",
+    "@openzeppelin/contracts-upgradeable": "^4.4.1",
     "@openzeppelin/upgrades": "^2.8.0",
     "@typechain/ethers-v5": "^6.0.5",
     "@types/jest": "^26.0.23",
