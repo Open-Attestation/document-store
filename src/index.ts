@@ -1,8 +1,10 @@
+/* eslint-disable import/extensions */
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Signer, providers, ContractTransaction } from "ethers";
 import {
   DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
   UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
-} from "./contracts/";
+} from "./contracts";
 import { getDocumentStoreCreatorAddress } from "./config";
 
 interface DeployOptions {
@@ -29,10 +31,5 @@ export const connect = async (address: string, signerOrProvider: Signer | provid
   return UpgradableDocumentStoreFactory.connect(address, signerOrProvider);
 };
 
-export {
-  DocumentStore__factory as DocumentStoreFactory,
-  DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
-  GsnCapableDocumentStore__factory as GsnCapableDocumentStoreFactory,
-  NaivePaymaster__factory as NaivePaymasterFactory,
-  UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
-} from "./contracts";
+// Export typechain classes for distribution purposes
+export * from "./contracts/index.dist";

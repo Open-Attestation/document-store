@@ -9,5 +9,6 @@ yarn-error.log
 /dist
 /build
 /types
+.DS_STORE
 /cache
 /artifacts
