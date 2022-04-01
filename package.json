@@ -13,11 +13,11 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "hardhat compile",
+    "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js:copy-types": "cp ./src/contracts/*.d.ts ./dist/types/contracts",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
-    "build": "npm run clean:build && npm run build:sol && npm run typechain && npm run build:js",
+    "build": "npm run clean:build && npm run build:sol && npm run posttypechain && npm run build:js",
     "clean:build": "rm -rf ./dist && rm -rf build && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
@@ -31,7 +31,6 @@
     "test:js": "jest --testPathPattern=src",
     "test": "npm run test:sol && npm run test:js",
     "benchmark": "hardhat test ./benchmark/*",
-    "typechain": "typechain --target ethers-v5 \"build/contracts/*.json\" --outDir src/contracts",
     "posttypechain": "node scripts/postTypechain.js",
     "postinstall": "node scripts/postInstall",
     "semantic-release": "semantic-release"
