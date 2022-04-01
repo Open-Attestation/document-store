@@ -17,7 +17,7 @@ contract BaseDocumentStore is Initializable {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  function initialize(string memory _name) public initializer {
+  function initialize(string memory _name) internal onlyInitializing {
     version = "2.3.0";
     name = _name;
   }

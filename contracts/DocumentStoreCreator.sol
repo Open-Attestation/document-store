@@ -12,8 +12,7 @@ contract DocumentStoreCreator {
 
   function deploy(string memory name) public returns (address) {
     // solhint-disable-next-line mark-callable-contracts
-    UpgradableDocumentStore instance = new UpgradableDocumentStore();
-    instance.initialize(name, msg.sender);
+    UpgradableDocumentStore instance = new UpgradableDocumentStore(name, msg.sender);
     emit DocumentStoreDeployed(address(instance), msg.sender);
     return address(instance);
   }

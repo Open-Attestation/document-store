@@ -10,6 +10,8 @@ contract DocumentStoreWithRevokeReasons is UpgradableDocumentStore {
 
   event DocumentRevokedWithReason(bytes32 indexed document, uint256 reason);
 
+  constructor(string memory _name, address owner) UpgradableDocumentStore(_name, owner) {}
+
   function revoke(bytes32 document, uint256 reason) public onlyOwner onlyNotRevoked(document) returns (bool) {
     revoke(document);
     revokeReason[document] = reason;
