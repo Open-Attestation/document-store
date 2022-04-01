@@ -32,7 +32,6 @@
     "test": "npm run test:sol && npm run test:js",
     "benchmark": "hardhat test ./benchmark/*",
     "posttypechain": "node scripts/postTypechain.js",
-    "postinstall": "node scripts/postInstall",
     "semantic-release": "semantic-release"
   },
   "jest": {
