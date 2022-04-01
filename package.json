@@ -33,6 +33,7 @@
     "benchmark": "hardhat test ./benchmark/*",
     "typechain": "typechain --target ethers-v5 \"build/contracts/*.json\" --outDir src/contracts",
     "posttypechain": "node scripts/postTypechain.js",
+    "prepare": "npm run build",
     "semantic-release": "semantic-release"
   },
   "jest": {
