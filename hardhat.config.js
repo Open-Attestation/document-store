@@ -1,6 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-typechain");
-require("@openzeppelin/hardhat-upgrades");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -8,7 +7,7 @@ require("@openzeppelin/hardhat-upgrades");
 
 module.exports = {
   solidity: {
-    version: "0.8.0",
+    version: "0.8.2",
     settings: {
       optimizer: {
         enabled: true,
