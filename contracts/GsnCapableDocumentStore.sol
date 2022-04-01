@@ -12,7 +12,7 @@ contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IK
   string public override versionRecipient = "2.0.0";
 
   constructor(string memory _name, address _forwarder) OwnableDocumentStore(_name) {
-    trustedForwarder = _forwarder;
+    _setTrustedForwarder(_forwarder);
   }
 
   function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address) {
@@ -24,10 +24,10 @@ contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IK
   }
 
   function getTrustedForwarder() public view override returns (address) {
-    return trustedForwarder;
+    return trustedForwarder();
   }
 
   function setTrustedForwarder(address _forwarder) public onlyOwner {
-    trustedForwarder = _forwarder;
+    _setTrustedForwarder(_forwarder);
   }
 }
