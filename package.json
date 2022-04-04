@@ -68,7 +68,7 @@
     "@ls-age/commitlint-circle": "1.0.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@opengsn/gsn": "^2.1.0",
-    "@openzeppelin/contracts": "^3.4.0",
+    "@openzeppelin/contracts": "^4.4.2",
     "@openzeppelin/contracts-upgradeable": "^3.4.0",
     "@openzeppelin/upgrades": "^2.8.0",
     "@typechain/ethers-v5": "^6.0.5",
