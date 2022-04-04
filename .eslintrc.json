@@ -17,6 +17,10 @@
     "assert": "readonly",
     "web3": "writable"
   },
+  "rules": {
+    "import/extensions": "off",
+    "import/no-unresolved": "off"
+  },
   "overrides": [
     {
       "files": ["**/*.ts", "**/*.tsx"],

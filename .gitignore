@@ -10,3 +10,5 @@ yarn-error.log
 /build
 /types
 .DS_STORE
+/cache
+/artifacts
