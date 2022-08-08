@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 const { ethers } = require("hardhat");
 const { groupBy, mapValues } = require("lodash");
 const { generateHashes } = require("../scripts/generateHashes");

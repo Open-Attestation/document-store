@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-typechain");
 
