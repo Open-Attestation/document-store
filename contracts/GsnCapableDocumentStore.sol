@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.8.0;
 
-import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
-import "@opengsn/gsn/contracts/interfaces/IKnowForwarderAddress.sol";
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 import "./OwnableDocumentStore.sol";
 import "./GsnCapable.sol";
+import "../interfaces/IKnowForwarderAddress.sol";
 
 contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
   string public override versionRecipient = "2.0.0";
 
-  constructor(string memory _name, address _forwarder) public OwnableDocumentStore(_name) {
-    trustedForwarder = _forwarder;
+  constructor(string memory _name, address _forwarder) OwnableDocumentStore(_name) {
+    _setTrustedForwarder(_forwarder);
   }
 
-  function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+  function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address) {
     return BaseRelayRecipient._msgSender();
   }
 
@@ -24,10 +24,10 @@ contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IK
   }
 
   function getTrustedForwarder() public view override returns (address) {
-    return trustedForwarder;
+    return trustedForwarder();
   }
 
   function setTrustedForwarder(address _forwarder) public onlyOwner {
-    trustedForwarder = _forwarder;
+    _setTrustedForwarder(_forwarder);
   }
 }

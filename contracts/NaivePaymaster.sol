@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@opengsn/gsn/contracts/forwarder/IForwarder.sol";
-import "@opengsn/gsn/contracts/BasePaymaster.sol";
+import "@opengsn/contracts/src/forwarder/IForwarder.sol";
+import "@opengsn/contracts/src/BasePaymaster.sol";
 
 /**
  * @dev Implementation of the {BasePaymaster} interface.
@@ -23,7 +23,7 @@ contract NaivePaymaster is BasePaymaster {
    */
   mapping(address => bool) private targetAddresses;
 
-  constructor(string memory _name) public {
+  constructor(string memory _name) {
     name = _name;
   }
 
@@ -68,8 +68,8 @@ contract NaivePaymaster is BasePaymaster {
 
     // check if relayed request is to a accepted address
     require(targetAddresses[relayRequest.request.to]);
-    emit PreRelayed(now);
-    return (abi.encode(now), false);
+    emit PreRelayed(block.timestamp);
+    return (abi.encode(block.timestamp), false);
   }
 
   function postRelayedCall(

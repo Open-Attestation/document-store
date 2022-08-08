@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -19,7 +19,7 @@ contract DocumentStore is Ownable {
   event DocumentIssued(bytes32 indexed document);
   event DocumentRevoked(bytes32 indexed document);
 
-  constructor(string memory _name) public {
+  constructor(string memory _name) {
     name = _name;
   }
 

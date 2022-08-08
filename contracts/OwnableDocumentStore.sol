@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.6.10;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 import "./BaseDocumentStore.sol";
 
 contract OwnableDocumentStore is BaseDocumentStore, Ownable {
-  constructor(string memory _name) public {
+  constructor(string memory _name) initializer {
     BaseDocumentStore.initialize(_name);
   }
 
