@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 
 import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
-import "./OwnableDocumentStore.sol";
+import "./DocumentStore.sol";
 import "./GsnCapable.sol";
 import "../interfaces/IKnowForwarderAddress.sol";
 
-contract GsnCapableDocumentStore is OwnableDocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
+contract GsnCapableDocumentStore is DocumentStore, BaseRelayRecipient, IKnowForwarderAddress, GsnCapable {
   string public override versionRecipient = "2.0.0";
 
   constructor(string memory _name, address _forwarder) OwnableDocumentStore(_name) {
