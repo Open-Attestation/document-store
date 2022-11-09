@@ -20,6 +20,7 @@ describe("GsnCapableDocumentStore", async () => {
   beforeEach("", async () => {
     GsnCapableDocumentStoreInstance = await GsnCapableDocumentStore.connect(Accounts[0]).deploy(
       config.INSTITUTE_NAME,
+      Accounts[0].address,
       Accounts[1].address
     );
     CalculatorSelectorInstance = await CalculateSelector.connect(Accounts[0]).deploy();
@@ -91,6 +92,7 @@ describe("GsnCapableDocumentStore", async () => {
       configurableForwarder = await ConfigurableTrustForwarder.deploy();
       configurableInstance = await GsnCapableDocumentStore.connect(owner).deploy(
         config.INSTITUTE_NAME,
+        owner.address,
         configurableForwarder.address
       );
     });

@@ -138,15 +138,12 @@ describe("Gas Cost Benchmarks", () => {
 
   let Accounts;
   let DocumentStore;
-  let UpgradableDocumentStore;
   let DocumentStoreCreator;
 
   before(async () => {
     Accounts = await ethers.getSigners();
     DocumentStore = await ethers.getContractFactory("DocumentStore");
-    UpgradableDocumentStore = await ethers.getContractFactory("UpgradableDocumentStore");
     DocumentStoreCreator = await ethers.getContractFactory("DocumentStoreCreator");
-    UpgradableDocumentStore.numberFormat = "String";
   });
 
   describe("DocumentStore", () => {
@@ -154,7 +151,7 @@ describe("Gas Cost Benchmarks", () => {
 
     it("runs benchmark", async () => {
       // Deploy & initialize document store contract
-      const documentStoreInstance = await DocumentStore.deploy(contractName);
+      const documentStoreInstance = await DocumentStore.deploy(contractName, Accounts[0].address);
       const tx = await documentStoreInstance.deployed();
       recordGasCost(contractName, "deployment", await getCumulativeGasUsed(tx));
 
