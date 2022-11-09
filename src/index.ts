@@ -3,7 +3,7 @@
 import { Signer, providers, ContractTransaction } from "ethers";
 import {
   DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
-  UpgradableDocumentStore__factory as UpgradableDocumentStoreFactory,
+  DocumentStore__factory as DocumentStoreFactory,
 } from "./contracts";
 import { getDocumentStoreCreatorAddress } from "./config";
 
@@ -24,11 +24,11 @@ export const deploy = async (name: string, signer: Signer, options?: DeployOptio
 export const deployAndWait = async (name: string, signer: Signer, options?: DeployOptions) => {
   const receipt = await (await deploy(name, signer, options)).wait();
   if (!receipt.logs || !receipt.logs[0].address) throw new Error("Fail to detect deployed contract address");
-  return UpgradableDocumentStoreFactory.connect(receipt.logs![0].address, signer);
+  return DocumentStoreFactory.connect(receipt.logs![0].address, signer);
 };
 
 export const connect = async (address: string, signerOrProvider: Signer | providers.Provider) => {
-  return UpgradableDocumentStoreFactory.connect(address, signerOrProvider);
+  return DocumentStoreFactory.connect(address, signerOrProvider);
 };
 
 // Export typechain classes for distribution purposes

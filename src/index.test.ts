@@ -16,14 +16,14 @@ beforeAll(async () => {
 });
 
 describe("deploy", () => {
-  it("deploys a new UpgradableDocumentStore contract without waiting for confirmation", async () => {
+  it("deploys a new DocumentStore contract without waiting for confirmation", async () => {
     const receipt = await deploy("My Store", signer, { documentStoreCreatorAddressOverride });
     expect(receipt.from).toBe(account);
   });
 });
 
 describe("deployAndWait", () => {
-  it("deploys a new UpgradableDocumentStore contract", async () => {
+  it("deploys a new DocumentStore contract", async () => {
     const instance = await deployAndWait("My Store", signer, { documentStoreCreatorAddressOverride });
     const owner = await instance.owner();
     expect(owner).toBe(account);

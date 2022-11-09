@@ -2,15 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import "./UpgradableDocumentStore.sol";
+import "./DocumentStore.sol";
 
-contract DocumentStoreWithRevokeReasons is UpgradableDocumentStore {
+contract DocumentStoreWithRevokeReasons is DocumentStore {
   /// A mapping of the document hash to the block number that was issued
   mapping(bytes32 => uint256) public revokeReason;
 
   event DocumentRevokedWithReason(bytes32 indexed document, uint256 reason);
 
-  constructor(string memory _name, address owner) UpgradableDocumentStore(_name, owner) {}
+  constructor(string memory _name, address owner) DocumentStore(_name, owner) {}
 
   function revoke(bytes32 document, uint256 reason) public onlyOwner onlyNotRevoked(document) returns (bool) {
     revoke(document);

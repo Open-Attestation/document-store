@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./BaseDocumentStore.sol";
 
-contract UpgradableDocumentStore is BaseDocumentStore, OwnableUpgradeable {
+contract DocumentStore is BaseDocumentStore, OwnableUpgradeable {
   constructor(string memory _name, address owner) {
     initialize(_name, owner);
   }
