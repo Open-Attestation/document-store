@@ -13,6 +13,7 @@ contract DocumentStore is BaseDocumentStore, OwnableUpgradeable {
   }
 
   function initialize(string memory _name, address owner) internal initializer {
+    require(owner != address(0), "Owner is required");
     super.__Ownable_init();
     super.transferOwnership(owner);
     BaseDocumentStore.initialize(_name);
