@@ -10,7 +10,7 @@ describe("DocumentStore", async () => {
 
   beforeEach("", async () => {
     Accounts = await ethers.getSigners();
-    DocumentStore = await ethers.getContractFactory("DocumentStore");
+    DocumentStore = await ethers.getContractFactory("OwnableDocumentStore");
     DocumentStoreInstance = await DocumentStore.connect(Accounts[0]).deploy(config.INSTITUTE_NAME);
     await DocumentStoreInstance.deployed();
   });
