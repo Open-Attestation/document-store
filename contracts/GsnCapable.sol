@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Storage.sol";
 
-contract GsnCapable is ERC165Storage, Ownable {
+contract GsnCapable is ERC165Storage, OwnableUpgradeable {
   address public paymaster;
   bytes4 private constant _INTERFACE_ID_GSN_CAPABLE = 0xa5a23640;
 
