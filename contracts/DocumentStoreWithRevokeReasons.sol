@@ -12,7 +12,12 @@ contract DocumentStoreWithRevokeReasons is DocumentStore {
 
   constructor(string memory _name, address owner) DocumentStore(_name, owner) {}
 
-  function revoke(bytes32 document, uint256 reason) public onlyOwner onlyNotRevoked(document) returns (bool) {
+  function revoke(bytes32 document, uint256 reason)
+    public
+    onlyRole(REVOKER_ROLE)
+    onlyNotRevoked(document)
+    returns (bool)
+  {
     revoke(document);
     revokeReason[document] = reason;
     emit DocumentRevokedWithReason(document, reason);

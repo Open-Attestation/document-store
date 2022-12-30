@@ -1,4 +1,4 @@
-const { expect } = require("chai").use(require("chai-as-promised"));
+const { expect, assert } = require("chai").use(require("chai-as-promised"));
 const { ethers } = require("hardhat");
 const { get } = require("lodash");
 const config = require("../config.js");
@@ -7,6 +7,10 @@ describe("DocumentStore", async () => {
   let Accounts;
   let DocumentStore;
   let DocumentStoreInstance;
+
+  const adminRole = ethers.constants.HashZero;
+  const issuerRole = ethers.utils.id("ISSUER_ROLE");
+  const revokerRole = ethers.utils.id("REVOKER_ROLE");
 
   beforeEach("", async () => {
     Accounts = await ethers.getSigners();
@@ -20,10 +24,35 @@ describe("DocumentStore", async () => {
       const name = await DocumentStoreInstance.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
     });
+  });
 
-    it("it should have the corrent owner", async () => {
-      const owner = await DocumentStoreInstance.owner();
-      expect(owner).to.be.equal(Accounts[0].address);
+  describe("Access Control", () => {
+    describe("Initialisation", () => {
+      it("should revert if owner is zero address", async () => {
+        const tx = DocumentStore.connect(Accounts[0]).deploy(config.INSTITUTE_NAME, ethers.constants.AddressZero);
+
+        await expect(tx).to.be.revertedWith("Owner is zero");
+      });
+
+      describe("Owner Default Roles", () => {
+        it("should have default admin role", async () => {
+          const hasRole = await DocumentStoreInstance.hasRole(adminRole, Accounts[0].address);
+
+          expect(hasRole).to.be.true;
+        });
+
+        it("should have issuer role", async () => {
+          const hasRole = await DocumentStoreInstance.hasRole(issuerRole, Accounts[0].address);
+
+          expect(hasRole).to.be.true;
+        });
+
+        it("should have revoker role", async () => {
+          const hasRole = await DocumentStoreInstance.hasRole(revokerRole, Accounts[0].address);
+
+          expect(hasRole).to.be.true;
+        });
+      });
     });
   });
 
@@ -35,8 +64,9 @@ describe("DocumentStore", async () => {
   });
 
   describe("issue", () => {
+    const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+
     it("should be able to issue a document", async () => {
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const tx = await DocumentStoreInstance.issue(documentMerkleRoot);
       const receipt = await tx.wait();
 
@@ -49,7 +79,6 @@ describe("DocumentStore", async () => {
     });
 
     it("should not allow duplicate issues", async () => {
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       await DocumentStoreInstance.issue(documentMerkleRoot);
 
       // Check that reissue is rejected
@@ -59,13 +88,25 @@ describe("DocumentStore", async () => {
       );
     });
 
-    it("only allows the owner to issue", async () => {
-      const nonOwner = Accounts[1];
-      const owner = await DocumentStoreInstance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
+    it("should revert when caller has no issuer role", async () => {
+      const account = Accounts[1];
+      const hasNoIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, account.address);
+      assert.isFalse(hasNoIssuerRole, "Non-Issuer Account has issuer role");
 
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
-      await expect(DocumentStoreInstance.connect(nonOwner).issue(documentMerkleRoot)).to.be.rejectedWith(/revert/);
+      await expect(DocumentStoreInstance.connect(account).issue(documentMerkleRoot)).to.be.rejectedWith(
+        /AccessControl/
+      );
+    });
+
+    it("should issue successfully when caller has issuer role", async () => {
+      const account = Accounts[0];
+      const hasIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, account.address);
+      assert.isTrue(hasIssuerRole, "Issuer Account has issuer role");
+
+      await DocumentStoreInstance.connect(account).issue(documentMerkleRoot);
+      const issued = await DocumentStoreInstance.isIssued(documentMerkleRoot);
+
+      expect(issued).to.be.true;
     });
   });
 
@@ -116,15 +157,30 @@ describe("DocumentStore", async () => {
       );
     });
 
-    it("only allows the owner to issue", async () => {
-      const nonOwner = Accounts[1];
-      const owner = await DocumentStoreInstance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
+    it("should revert when caller has no issuer role", async () => {
+      const nonIssuerAccount = Accounts[1];
+      const hasNoIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, nonIssuerAccount.address);
+      assert.isFalse(hasNoIssuerRole, "Non-Issuer Account has issuer role");
 
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
 
       // FIXME:
-      await expect(DocumentStoreInstance.connect(nonOwner).bulkIssue(documentMerkleRoots)).to.be.rejectedWith(/revert/);
+      await expect(DocumentStoreInstance.connect(nonIssuerAccount).bulkIssue(documentMerkleRoots)).to.be.rejectedWith(
+        /AccessControl/
+      );
+    });
+
+    it("should bulk issue successfully when caller has issuer role", async () => {
+      const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
+
+      const account = Accounts[0];
+      const hasIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, account.address);
+      assert.isTrue(hasIssuerRole, "Issuer Account has no issuer role");
+
+      await DocumentStoreInstance.connect(account).bulkIssue(documentMerkleRoots);
+      const issued = await DocumentStoreInstance.isIssued(documentMerkleRoots[0]);
+
+      expect(issued).to.be.true;
     });
   });
 
@@ -166,8 +222,9 @@ describe("DocumentStore", async () => {
   });
 
   describe("revoke", () => {
+    const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
+
     it("should allow the revocation of a valid and issued document", async () => {
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
       await DocumentStoreInstance.issue(documentMerkleRoot);
@@ -181,7 +238,6 @@ describe("DocumentStore", async () => {
     });
 
     it("should allow the revocation of an issued root", async () => {
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const documentHash = documentMerkleRoot;
 
       await DocumentStoreInstance.issue(documentMerkleRoot);
@@ -195,7 +251,6 @@ describe("DocumentStore", async () => {
     });
 
     it("should not allow repeated revocation of a valid and issued document", async () => {
-      const documentMerkleRoot = "0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330";
       const documentHash = "0x10327d7f904ee3ee0e69d592937be37a33692a78550bd100d635cdea2344e6c7";
 
       await DocumentStoreInstance.issue(documentMerkleRoot);
@@ -214,6 +269,27 @@ describe("DocumentStore", async () => {
       // FIXME: Use a utility helper to watch for event
       expect(receipt.events[0].event).to.be.equal("DocumentRevoked");
       expect(receipt.events[0].args.document).to.be.equal(documentHash);
+    });
+
+    it("should revert when caller has no revoker role", async () => {
+      const nonRevokerAccount = Accounts[1];
+      const hasNoRevokerRole = await DocumentStoreInstance.hasRole(revokerRole, nonRevokerAccount.address);
+      assert.isFalse(hasNoRevokerRole, "Non-Revoker Account has revoker role");
+
+      await expect(DocumentStoreInstance.connect(nonRevokerAccount).revoke(documentMerkleRoot)).to.be.rejectedWith(
+        /AccessControl/
+      );
+    });
+
+    it("should revoke successfully when caller has issuer role", async () => {
+      const account = Accounts[0];
+      const hasIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, account.address);
+      assert.isTrue(hasIssuerRole, "Revoker Account has no revoker role");
+
+      await DocumentStoreInstance.connect(account).revoke(documentMerkleRoot);
+      const issued = await DocumentStoreInstance.isRevoked(documentMerkleRoot);
+
+      expect(issued).to.be.true;
     });
   });
 
@@ -266,15 +342,28 @@ describe("DocumentStore", async () => {
       );
     });
 
-    it("only allows the owner to revoke", async () => {
-      const nonOwner = Accounts[1];
-      const owner = await DocumentStoreInstance.owner();
-      expect(nonOwner).to.not.be.equal(owner);
+    it("should revert when caller has no revoker role", async () => {
+      const nonRevokerAccount = Accounts[1];
+      const hasNoRevokerRole = await DocumentStoreInstance.hasRole(revokerRole, nonRevokerAccount.address);
+      assert.isFalse(hasNoRevokerRole, "Non-Revoker Account has revoker role");
 
       const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
-      await expect(DocumentStoreInstance.connect(nonOwner).bulkRevoke(documentMerkleRoots)).to.be.rejectedWith(
-        /revert/
+      await expect(DocumentStoreInstance.connect(nonRevokerAccount).bulkRevoke(documentMerkleRoots)).to.be.rejectedWith(
+        /AccessControl/
       );
+    });
+
+    it("should bulk revoke successfully when caller has issuer role", async () => {
+      const documentMerkleRoots = ["0x3a267813bea8120f55a7b9ca814c34dd89f237502544d7c75dfd709a659f6330"];
+
+      const account = Accounts[0];
+      const hasIssuerRole = await DocumentStoreInstance.hasRole(issuerRole, account.address);
+      assert.isTrue(hasIssuerRole, "Revoker Account has no revoker role");
+
+      await DocumentStoreInstance.connect(account).bulkRevoke(documentMerkleRoots);
+      const issued = await DocumentStoreInstance.isRevoked(documentMerkleRoots[0]);
+
+      expect(issued).to.be.true;
     });
   });
 
