@@ -34,4 +34,8 @@ contract DocumentStore is BaseDocumentStore, OwnableUpgradeable {
   function bulkRevoke(bytes32[] memory documents) public onlyOwner {
     return BaseDocumentStore._bulkRevoke(documents);
   }
+
+  function renounceOwnership() public virtual override onlyOwner {
+    revert("Ownership cannot be renounced");
+  }
 }

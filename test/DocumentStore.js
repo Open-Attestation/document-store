@@ -375,4 +375,12 @@ describe("DocumentStore", async () => {
       expect(issued).to.be.false;
     });
   });
+
+  describe("Ownership", () => {
+    it("should revert when renounce ownership", async () => {
+      const tx = DocumentStoreInstance.renounceOwnership();
+
+      await expect(tx).to.be.rejectedWith("Ownership cannot be renounced");
+    });
+  });
 });
