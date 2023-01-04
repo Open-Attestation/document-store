@@ -48,6 +48,8 @@ contract BaseDocumentStore is Initializable {
   function _revoke(bytes32 document) internal onlyNotRevoked(document) returns (bool) {
     documentRevoked[document] = block.number;
     emit DocumentRevoked(document);
+
+    return true;
   }
 
   function _bulkRevoke(bytes32[] memory documents) internal {

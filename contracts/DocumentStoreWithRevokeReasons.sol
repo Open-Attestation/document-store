@@ -21,6 +21,8 @@ contract DocumentStoreWithRevokeReasons is DocumentStore {
     revoke(document);
     revokeReason[document] = reason;
     emit DocumentRevokedWithReason(document, reason);
+
+    return true;
   }
 
   function bulkRevoke(bytes32[] memory documents, uint256 reason) public {
