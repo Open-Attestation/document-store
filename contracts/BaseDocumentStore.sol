@@ -41,6 +41,7 @@ contract BaseDocumentStore is Initializable {
     return (documentIssued[document] != 0);
   }
 
+  /// @notice Checks if a document was issued before a specific block number (inclusive)
   function isIssuedBefore(bytes32 document, uint256 blockNumber) public view returns (bool) {
     return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
@@ -62,6 +63,7 @@ contract BaseDocumentStore is Initializable {
     return documentRevoked[document] != 0;
   }
 
+  /// @notice Checks if a document was revoked before a specific block number (inclusive)
   function isRevokedBefore(bytes32 document, uint256 blockNumber) public view returns (bool) {
     return documentRevoked[document] <= blockNumber && documentRevoked[document] != 0;
   }
