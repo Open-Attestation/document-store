@@ -12,7 +12,7 @@ describe("DocumentStore", async () => {
   const issuerRole = ethers.utils.id("ISSUER_ROLE");
   const revokerRole = ethers.utils.id("REVOKER_ROLE");
 
-  let wrongVar = { name: "hello"}
+  const wrongVar = { name: "hello"}
   const {name } = wrongVar;
 
 
