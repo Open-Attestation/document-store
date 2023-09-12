@@ -1,21 +1,22 @@
-import { providers, ethers } from "ethers";
+import { JsonRpcProvider, JsonRpcSigner, ethers } from "ethers";
 import { deploy, deployAndWait, connect } from "./index";
 import { DocumentStoreCreator__factory as DocumentStoreCreatorFactory } from "./contracts";
 
-const provider = new providers.JsonRpcProvider();
-const signer = provider.getSigner();
+const provider = new JsonRpcProvider();
+let signer: JsonRpcSigner;
 let account: string;
 let documentStoreCreatorAddressOverride: string;
 
-const adminRole = ethers.constants.HashZero;
-const issuerRole = ethers.utils.id("ISSUER_ROLE");
-const revokerRole = ethers.utils.id("REVOKER_ROLE");
+const adminRole = ethers.ZeroHash;
+const issuerRole = ethers.id("ISSUER_ROLE");
+const revokerRole = ethers.id("REVOKER_ROLE");
 
 beforeAll(async () => {
   // Deploy an instance of DocumentStoreFactory on the new blockchain
+  signer = await provider.getSigner();
   const factory = new DocumentStoreCreatorFactory(signer);
   const receipt = await factory.deploy();
-  documentStoreCreatorAddressOverride = receipt.address;
+  documentStoreCreatorAddressOverride = await receipt.getAddress();
   account = await signer.getAddress();
 });
 
@@ -44,8 +45,8 @@ describe("deployAndWait", () => {
 
 describe("connect", () => {
   it("connects to existing contract", async () => {
-    const { address } = await deployAndWait("My Store", signer, { documentStoreCreatorAddressOverride });
-    console.log(address);
+    const documentStore = await deployAndWait("My Store", signer, { documentStoreCreatorAddressOverride });
+    const address = await documentStore.getAddress();
     const instance = await connect(address, signer);
     const name = await instance.name();
     expect(name).toBe("My Store");

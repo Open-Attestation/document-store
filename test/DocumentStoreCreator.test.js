@@ -1,4 +1,3 @@
-const { expect } = require("chai").use(require("chai-as-promised"));
 const { ethers } = require("hardhat");
 const config = require("../config.js");
 
@@ -7,7 +6,7 @@ describe("DocumentStoreCreator", async () => {
   let DocumentStore;
   let DocumentStoreCreator;
 
-  before("", async () => {
+  before(async () => {
     Accounts = await ethers.getSigners();
     DocumentStore = await ethers.getContractFactory("DocumentStore");
     DocumentStoreCreator = await ethers.getContractFactory("DocumentStoreCreator");
@@ -15,8 +14,10 @@ describe("DocumentStoreCreator", async () => {
 
   let DocumentStoreCreatorInstance;
 
-  beforeEach("", async () => {
+  beforeEach(async () => {
     DocumentStoreCreatorInstance = await DocumentStoreCreator.connect(Accounts[0]).deploy();
+    const tx = DocumentStoreCreatorInstance.deploymentTransaction();
+    await tx.wait();
   });
 
   describe("deploy", () => {
@@ -24,16 +25,16 @@ describe("DocumentStoreCreator", async () => {
       // Test for events emitted by factory
       const tx = await DocumentStoreCreatorInstance.deploy(config.INSTITUTE_NAME);
       const receipt = await tx.wait();
-      expect(receipt.events[3].args.creator).to.be.equal(
-        Accounts[0].address,
-        "Emitted contract creator does not match"
-      );
+
+      expect(receipt.logs[4].args[1]).to.be.equal(Accounts[0].address, "Emitted contract creator does not match");
       // Test correctness of deployed DocumentStore
-      const deployedDocumentStore = await DocumentStore.attach(receipt.events[3].args.instance);
+
+      const deployedDocumentStore = await DocumentStore.attach(receipt.logs[4].args[0]);
+
       const name = await deployedDocumentStore.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
 
-      const hasAdminRole = await deployedDocumentStore.hasRole(ethers.constants.HashZero, Accounts[0].address);
+      const hasAdminRole = await deployedDocumentStore.hasRole(ethers.ZeroHash, Accounts[0].address);
       expect(hasAdminRole).to.be.true;
     });
   });
