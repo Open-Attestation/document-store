@@ -13,7 +13,7 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "hardhat clean && hardhat compile && npm run typechain",
+    "build:sol": "hardhat compile && npm run typechain",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js:copy-types": "cp ./src/contracts/*.d.ts ./dist/types/contracts",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
@@ -79,6 +79,7 @@
     "eslint-plugin-chai-friendly": "^0.6.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
+    "ethers": "^6.7.1",
     "ganache-cli": "^6.12.2",
     "git-cz": "^4.7.6",
     "hardhat": "^2.4.1",
