@@ -28,7 +28,7 @@
     "lint": "npm run lint:sol && npm run lint:js",
     "lint:fix": "npm run lint:sol:fix && npm run lint:js:fix",
     "test:sol": "hardhat test",
-    "test:js": "jest --testPathPattern=src && jest --testPathPattern=test",
+    "test:js": "jest --testPathPattern=src",
     "test": "npm run test:sol && npm run test:js",
     "benchmark": "hardhat test ./benchmark/*",
     "typechain": "typechain --target ethers-v6 --out-dir src/contracts './artifacts/contracts/**/*[^dbg].json'",
