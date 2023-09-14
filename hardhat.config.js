@@ -19,5 +19,6 @@ module.exports = {
   },
   typechain: {
     outDir: "src/contracts",
+    dontOverrideCompile: false,
   },
 };

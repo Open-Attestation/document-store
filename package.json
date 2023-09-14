@@ -13,9 +13,9 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "hardhat compile && npm run typechain",
+    "build:sol": "hardhat clean && hardhat compile",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
-    "build:js:copy-types": "cp ./src/contracts/*.ts ./dist/types/contracts",
+    "build:js:copy-types": "cp ./src/contracts/*.d.ts ./dist/types/contracts",
     "build:js": "tsc --emitDeclarationOnly && npm run build:js:copy-src && npm run build:js:copy-types",
     "build": "npm run clean:build && npm run build:sol && npm run posttypechain && npm run build:js",
     "clean:build": "rm -rf ./dist && rm -rf build && rm -rf ./src/contracts",
