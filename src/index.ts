@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Signer, providers, ContractTransaction } from "ethers";
+import { Signer, Provider, ContractTransactionResponse } from "ethers";
 import {
   DocumentStoreCreator__factory as DocumentStoreCreatorFactory,
   DocumentStore__factory as DocumentStoreFactory,
@@ -11,23 +11,29 @@ interface DeployOptions {
   documentStoreCreatorAddressOverride?: string;
 }
 
-export const deploy = async (name: string, signer: Signer, options?: DeployOptions): Promise<ContractTransaction> => {
+export const deploy = async (
+  name: string,
+  signer: Signer,
+  options?: DeployOptions
+): Promise<ContractTransactionResponse> => {
   let documentStoreCreatorFactoryAddress = options?.documentStoreCreatorAddressOverride;
   if (!documentStoreCreatorFactoryAddress) {
     const chainId = (await signer.provider?.getNetwork())?.chainId;
     documentStoreCreatorFactoryAddress = getDocumentStoreCreatorAddress(chainId);
   }
   const factory = DocumentStoreCreatorFactory.connect(documentStoreCreatorFactoryAddress, signer);
-  return factory.deploy(name);
+  const tx = await factory.deploy(name);
+  return tx;
 };
 
 export const deployAndWait = async (name: string, signer: Signer, options?: DeployOptions) => {
   const receipt = await (await deploy(name, signer, options)).wait();
-  if (!receipt.logs || !receipt.logs[0].address) throw new Error("Fail to detect deployed contract address");
+  if (!receipt || !receipt.logs || !receipt.logs[0].address)
+    throw new Error("Fail to detect deployed contract address");
   return DocumentStoreFactory.connect(receipt.logs![0].address, signer);
 };
 
-export const connect = async (address: string, signerOrProvider: Signer | providers.Provider) => {
+export const connect = async (address: string, signerOrProvider: Signer | Provider) => {
   return DocumentStoreFactory.connect(address, signerOrProvider);
 };
 

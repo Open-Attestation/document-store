@@ -24,16 +24,13 @@ describe("DocumentStoreCreator", async () => {
       // Test for events emitted by factory
       const tx = await DocumentStoreCreatorInstance.deploy(config.INSTITUTE_NAME);
       const receipt = await tx.wait();
-      expect(receipt.events[3].args.creator).to.be.equal(
-        Accounts[0].address,
-        "Emitted contract creator does not match"
-      );
+      expect(receipt.logs[4].args[1]).to.be.equal(Accounts[0].address, "Emitted contract creator does not match");
       // Test correctness of deployed DocumentStore
-      const deployedDocumentStore = await DocumentStore.attach(receipt.events[3].args.instance);
+      const deployedDocumentStore = await DocumentStore.attach(receipt.logs[4].args[0]);
       const name = await deployedDocumentStore.name();
       expect(name).to.be.equal(config.INSTITUTE_NAME, "Name of institute does not match");
 
-      const hasAdminRole = await deployedDocumentStore.hasRole(ethers.constants.HashZero, Accounts[0].address);
+      const hasAdminRole = await deployedDocumentStore.hasRole(ethers.ZeroHash, Accounts[0].address);
       expect(hasAdminRole).to.be.true;
     });
   });

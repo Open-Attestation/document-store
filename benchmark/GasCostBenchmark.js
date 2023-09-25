@@ -42,10 +42,10 @@ const getCumulativeGasUsed = async (tx) => {
 
   if (tx.deployTransaction) {
     receipt = await tx.deployTransaction.wait();
-    cumulativeGasUsed = receipt.cumulativeGasUsed.toNumber();
+    cumulativeGasUsed = Number(receipt.cumulativeGasUsed);
   } else {
     receipt = await tx.wait();
-    cumulativeGasUsed = await receipt.cumulativeGasUsed.toNumber();
+    cumulativeGasUsed = Number(receipt.cumulativeGasUsed);
   }
 
   return cumulativeGasUsed;
@@ -61,12 +61,20 @@ describe("Gas Cost Benchmarks", () => {
     });
   };
 
-  const benchmarkTransfer = async (contractName, contractInstance, accounts) => {
-    const tx = await contractInstance.transferOwnership(accounts[2].address);
-    recordGasCost(contractName, "transferOwnership", await getCumulativeGasUsed(tx));
+  const benchmarkGrantRole = async (contractName, contractInstance, accounts) => {
+    const tx = await contractInstance.grantRole(ethers.ZeroHash, accounts[2].address);
+    recordGasCost(contractName, "grantRole", await getCumulativeGasUsed(tx));
 
-    // Revert the owner by transferring back
-    await contractInstance.connect(accounts[2]).transferOwnership(accounts[0].address);
+    // Revert the change by revoking role
+    await contractInstance.connect(accounts[0]).revokeRole(ethers.ZeroHash, accounts[2].address);
+  };
+
+  const benchmarkRevokeRole = async (contractName, contractInstance, accounts) => {
+    // Setup by granting role
+    await contractInstance.connect(accounts[0]).grantRole(ethers.ZeroHash, accounts[2].address);
+
+    const tx = await contractInstance.revokeRole(ethers.ZeroHash, accounts[2].address);
+    recordGasCost(contractName, "revokeRole", await getCumulativeGasUsed(tx));
   };
 
   const benchmarkIssue = async (contractName, contractInstance) => {
@@ -152,7 +160,7 @@ describe("Gas Cost Benchmarks", () => {
     it("runs benchmark", async () => {
       // Deploy & initialize document store contract
       const documentStoreInstance = await DocumentStore.deploy(contractName, Accounts[0].address);
-      const tx = await documentStoreInstance.deployed();
+      const tx = await documentStoreInstance.deploymentTransaction();
       recordGasCost(contractName, "deployment", await getCumulativeGasUsed(tx));
 
       // const documentStoreInstance = await UpgradableDocumentStore.deploy();
@@ -163,7 +171,8 @@ describe("Gas Cost Benchmarks", () => {
       //   (await getCumulativeGasUsed(documentStoreInstance)) + (await getCumulativeGasUsed(initializeTx))
       // );
 
-      await benchmarkTransfer(contractName, documentStoreInstance, Accounts);
+      await benchmarkGrantRole(contractName, documentStoreInstance, Accounts);
+      await benchmarkRevokeRole(contractName, documentStoreInstance, Accounts);
       await benchmarkIssue(contractName, documentStoreInstance);
       await benchmarkBulkIssue(contractName, documentStoreInstance);
       await benchmarkRevoke(contractName, documentStoreInstance);
@@ -174,7 +183,7 @@ describe("Gas Cost Benchmarks", () => {
   describe("DocumentStoreCreator", () => {
     it("runs benchmark", async () => {
       const documentStoreCreatorInstance = await DocumentStoreCreator.deploy();
-      const tx = await documentStoreCreatorInstance.deployed();
+      const tx = await documentStoreCreatorInstance.deploymentTransaction();
       recordGasCost("DocumentStoreCreator", "deployment", await getCumulativeGasUsed(tx));
     });
   });

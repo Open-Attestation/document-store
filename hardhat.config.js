@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-require("@nomiclabs/hardhat-waffle");
-require("hardhat-typechain");
+require("@nomicfoundation/hardhat-toolbox");
+require("@typechain/hardhat");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -19,5 +19,6 @@ module.exports = {
   },
   typechain: {
     outDir: "src/contracts",
+    dontOverrideCompile: false,
   },
 };

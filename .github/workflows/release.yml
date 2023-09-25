@@ -22,12 +22,12 @@ jobs:
   release:
     name: Publish Release
     runs-on: ubuntu-latest
-    needs: [ tests, linters ]
+    needs: [tests, linters]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version: 18.x
       - run: npm ci
       - run: npm run build
       - uses: codfish/semantic-release-action@v2

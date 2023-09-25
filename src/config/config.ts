@@ -3,8 +3,8 @@ export const DOCUMENT_STORE_CREATOR_MAINNET = "0x0";
 export const PROXY_FACTORY_ROPSTEN = "0xba2501bf20593f156879c17d38b6c245ca65de80";
 export const PROXY_FACTORY_MAINNET = "0x0";
 
-export const getDocumentStoreCreatorAddress = (networkId?: number) => {
-  if (networkId === 3) return DOCUMENT_STORE_CREATOR_ROPSTEN;
+export const getDocumentStoreCreatorAddress = (networkId?: BigInt) => {
+  if (networkId === BigInt(3)) return DOCUMENT_STORE_CREATOR_ROPSTEN;
   return DOCUMENT_STORE_CREATOR_MAINNET;
 };
 
