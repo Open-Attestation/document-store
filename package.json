@@ -1,5 +1,5 @@
 {
-  "name": "@govtechsg/document-store",
+  "name": "@tradetrust-tt/document-store",
   "version": "1.0.0",
   "files": [
     "dist",
@@ -9,7 +9,7 @@
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
-  "repository": "git@github.com:Open-Attestation/document-store-contract.git",
+  "repository": "git@github.com:TradeTrust/document-store.git",
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
