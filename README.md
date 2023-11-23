@@ -5,7 +5,7 @@ The [Document Store](https://github.com/Open-Attestation/document-store) reposit
 ## Installation
 
 ```sh
-npm i @govtechsg/document-store
+npm i @tradetrust-tt/document-store
 ```
 
 ---
@@ -17,7 +17,7 @@ To use the package, you will need to provide your own Web3 [provider](https://do
 ### Deploy new document store
 
 ```ts
-import { deployAndWait } from "@govtechsg/document-store";
+import { deployAndWait } from "@tradetrust-tt/document-store";
 
 const documentStore = await deployAndWait("My Document Store", signer).then(console.log);
 ```
@@ -25,7 +25,7 @@ const documentStore = await deployAndWait("My Document Store", signer).then(cons
 ### Connect to existing document store
 
 ```ts
-import { connect } from "@govtechsg/document-store";
+import { connect } from "@tradetrust-tt/document-store";
 
 const documentStore = await connect("0x4077534e82c97be03a07fb10f5c853d2bc7161fb", providerOrSigner);
 ```
