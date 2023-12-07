@@ -77,7 +77,7 @@ import { Wallet, providers, getDefaultProvider } from "ethers";
 
 // Providers
 const mainnetProvider = getDefaultProvider();
-const goerliProvider = getDefaultProvider("goerli");
+const sepoliaProvider = getDefaultProvider("sepolia");
 const metamaskProvider = new providers.Web3Provider(web3.currentProvider); // Will change network automatically
 
 // Signer
