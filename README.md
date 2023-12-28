@@ -1,8 +1,13 @@
 # Document Store
 
-The [Document Store](https://github.com/Open-Attestation/document-store) repository contains both the smart contract code for document store (in `/contracts`) as well as the node package for using this library (in `/src`).
+The [Document Store](https://github.com/Open-Attestation/document-store) repository contains the following: 
+
+* The smart contract code for document store in the `/contracts` folder
+* The node package for using this library in the `/src` folder
 
 ## Installation
+
+To install OpenAttestation document store on your machine, run the command below:
 
 ```sh
 npm i @govtechsg/document-store
@@ -12,9 +17,15 @@ npm i @govtechsg/document-store
 
 ## Usage
 
-To use the package, you will need to provide your own Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/) or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
+Provide one of the following depending on your needs:
 
-### Deploy new document store
+* To use the package, provide your own Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/).
+
+* To write to the blockchain, provide the [signer](https://docs.ethers.io/v5/api/signer/#Wallet) instead.
+
+### Deploying a new document store
+
+The following shows a code example to deploy a new document store:
 
 ```ts
 import { deployAndWait } from "@govtechsg/document-store";
@@ -22,7 +33,9 @@ import { deployAndWait } from "@govtechsg/document-store";
 const documentStore = await deployAndWait("My Document Store", signer).then(console.log);
 ```
 
-### Connect to existing document store
+### Connecting to an existing document store
+
+The following shows a code example to connect to an existing document store:
 
 ```ts
 import { connect } from "@govtechsg/document-store";
@@ -30,7 +43,9 @@ import { connect } from "@govtechsg/document-store";
 const documentStore = await connect("0x4077534e82c97be03a07fb10f5c853d2bc7161fb", providerOrSigner);
 ```
 
-### Interact with document store
+### Interacting with a document store
+
+The following shows a code example to interact with a document store:
 
 ```ts
 const issueMerkleRoot = async () => {
@@ -47,30 +62,30 @@ const issueMerkleRoot = async () => {
 
 ### List of available functions
 
-```text
-documentIssued
-documentRevoked
-isOwner
-name
-owner
-renounceOwnership
-transferOwnership
-version
-initialize
-issue
-bulkIssue
-getIssuedBlock
-isIssued
-isIssuedBefore
-revoke
-bulkRevoke
-isRevoked
-isRevokedBefore
-```
+The following is a list of available functions to be used with document store:
 
-## Provider & Signer
+- `documentIssued`
+- `documentRevoked`
+- `isOwner`
+- `name`
+- `owner`
+- `renounceOwnership`
+- `transferOwnership`
+- `version`
+- `initialize`
+- `issue`
+- `bulkIssue`
+- `getIssuedBlock`
+- `isIssued`
+- `isIssuedBefore`
+- `revoke`
+- `bulkRevoke`
+- `isRevoked`
+- `isRevokedBefore`
 
-Different ways to get provider or signer:
+## Provider & signer
+
+The following code example shows different ways to get the provider or signer:
 
 ```ts
 import { Wallet, providers, getDefaultProvider } from "ethers";
@@ -90,6 +105,8 @@ signerFromMnemonic.connect(provider);
 
 ## Setup
 
+You can install dependencies, check source code, test your project, and use the Truffle development framework with the commands below:
+
 ```sh
 npm install
 npm lint
@@ -97,14 +114,14 @@ npm test
 npm truffle <command>
 ```
 
-## Contract Benchmark
+## Contract benchmark
 
-A benchmark is provided to show the different transaction cost of the different variants of the document store.
+To show the different transaction costs of the different variants of the document store, run the contract benchmark with the command below:
 
 ```sh
 npm run benchmark
 ```
 
-## Notes
+## Additional information
 
-If you are using vscode, you may need to link the openzeppelin libraries. Refer to [here](https://github.com/juanfranblanco/vscode-solidity#openzeppelin).
+If you are using Visual Studio Code, you may need to link the OpenZeppelin libraries. Refer to [here](https://github.com/juanfranblanco/vscode-solidity#openzeppelin) for more information.
