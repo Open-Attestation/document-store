@@ -78,7 +78,7 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to check
    * @return A boolean indicating whether the document has been issued
    */
-  function isIssued(bytes32 document) public view returns (bool) {
+  function _isIssued(bytes32 document) internal view returns (bool) {
     return (documentIssued[document] != 0);
   }
 
