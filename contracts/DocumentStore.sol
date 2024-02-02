@@ -13,7 +13,7 @@ import "./base/DocumentStoreAccessControl.sol";
  * @title DocumentStore
  * @notice A contract for storing and revoking documents with access control
  */
-contract DocumentStore is BaseDocumentStore, DocumentStoreAccessControl {
+contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
   using MerkleProof for bytes32[];
 
   /**
@@ -40,7 +40,7 @@ contract DocumentStore is BaseDocumentStore, DocumentStoreAccessControl {
    * @param document The hash of the document to issue
    */
   function issue(bytes32 documentRoot) public onlyRole(ISSUER_ROLE) onlyNotIssued(document) {
-    BaseDocumentStore._issue(documentRoot);
+    _issue(documentRoot);
   }
 
   /**
@@ -48,7 +48,7 @@ contract DocumentStore is BaseDocumentStore, DocumentStoreAccessControl {
    * @param documents The hashes of the documents to issue
    */
   function bulkIssue(bytes32[] memory documentRoots) public onlyRole(ISSUER_ROLE) {
-    BaseDocumentStore._bulkIssue(documentRoots);
+    _bulkIssue(documentRoots);
   }
 
   /**
@@ -57,7 +57,7 @@ contract DocumentStore is BaseDocumentStore, DocumentStoreAccessControl {
    * @return A boolean indicating whether the revocation was successful
    */
   function revoke(bytes32 document) public onlyRole(REVOKER_ROLE) onlyNotRevoked(document) returns (bool) {
-    return BaseDocumentStore._revoke(document);
+    return _revoke(document);
   }
 
   /**
@@ -65,7 +65,7 @@ contract DocumentStore is BaseDocumentStore, DocumentStoreAccessControl {
    * @param documents The hashes of the documents to revoke
    */
   function bulkRevoke(bytes32[] memory documents) public onlyRole(REVOKER_ROLE) {
-    return BaseDocumentStore._bulkRevoke(documents);
+    return _bulkRevoke(documents);
   }
 
   function isIssued(
