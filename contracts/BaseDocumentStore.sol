@@ -16,11 +16,6 @@ contract BaseDocumentStore is Initializable {
   string public name;
 
   /**
-   * @notice The version of the contract
-   */
-  string public version;
-
-  /**
    * @notice A mapping of the document hash to the block number that was issued
    */
   mapping(bytes32 => uint256) public documentIssued;
@@ -47,7 +42,6 @@ contract BaseDocumentStore is Initializable {
    * @param _name The name of the contract
    */
   function __BaseDocumentStore_init(string memory _name) internal onlyInitializing {
-    version = "2.3.0";
     name = _name;
   }
 
