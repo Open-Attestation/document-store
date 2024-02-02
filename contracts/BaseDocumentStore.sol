@@ -115,7 +115,7 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to check
    * @return A boolean indicating whether the document has been revoked
    */
-  function isRevoked(bytes32 document) public view returns (bool) {
+  function _isRevoked(bytes32 document) internal view returns (bool) {
     return documentRevoked[document] != 0;
   }
 

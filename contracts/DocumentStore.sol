@@ -75,16 +75,41 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
   ) public view returns (bool) {
     require(document != 0x0 && documentRoot != 0x0, "Invalid document");
     if (documentRoot == document && proof.length == 0) {
-      return _isIssued(document) && !isRevoked(document);
+      return _isIssued(document);
     }
-    return
-      _isIssued(documentRoot) &&
-      !isRevoked(documentRoot) &&
-      !isRevoked(document) &&
-      proof.verify(documentRoot, document);
+    return _isIssued(documentRoot) && proof.verify(documentRoot, document);
   }
 
   function isIssued(bytes32 documentRoot) public view returns (bool) {
     return isIssued(documentRoot, documentRoot, new bytes32[](0));
+  }
+
+  function isRevoked(
+    bytes32 documentRoot,
+    bytes32 document,
+    bytes32[] memory proof
+  ) public view returns (bool) {
+    require(document != 0x0 && documentRoot != 0x0, "Invalid document");
+    if (documentRoot == document && proof.length == 0) {
+      return _isRevoked(document);
+    }
+    return (_isRevoked(documentRoot) || _isRevoked(document)) && proof.verify(documentRoot, document);
+  }
+
+  /**
+   * @notice Checks if a document has been revoked
+   * @param document The hash of the document to check
+   * @return A boolean indicating whether the document has been revoked
+   */
+  function isRevoked(bytes32 documentRoot) public view returns (bool) {
+    return isRevoked(documentRoot, documentRoot, new bytes32[](0));
+  }
+
+  function isActive(
+    bytes32 documentRoot,
+    bytes32 document,
+    bytes32[] memory proof
+  ) public view returns (bool) {
+    return isIssued(documentRoot, document, proof) && !isRevoked(documentRoot, document, proof);
   }
 }
