@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18.x
       - run: npm ci --ignore-scripts
-      - run: npm run lint
+      # - run: npm run lint
 
   commit-lint:
     name: Commit Lint

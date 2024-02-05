@@ -95,7 +95,6 @@ contract BaseDocumentStore is Initializable {
   /**
    * @notice Revokes a document
    * @param document The hash of the document to revoke
-   * @return A boolean indicating whether the document was successfully revoked
    */
   function _revoke(bytes32 document) internal {
     documentRevoked[document] = block.number;
@@ -131,7 +130,7 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to check
    */
   modifier onlyIssued(bytes32 document) {
-    require(isIssued(document), "Error: Only issued document hashes can be revoked");
+    require(_isIssued(document), "Error: Only issued document hashes can be revoked");
     _;
   }
 
@@ -141,7 +140,7 @@ contract BaseDocumentStore is Initializable {
    */
   modifier onlyNotIssued(bytes32 document) {
     // TODO: TO BE REMOVED
-    require(!isIssued(document), "Error: Only hashes that have not been issued can be issued");
+    require(!_isIssued(document), "Error: Only hashes that have not been issued can be issued");
     _;
   }
 

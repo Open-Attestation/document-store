@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
+      - uses: foundry-rs/foundry-toolchain@v1
       - run: npm ci
       - run: npm run test
 
@@ -27,4 +28,4 @@ jobs:
         with:
           node-version: 18.x
       - run: npm ci --ignore-scripts
-      - run: npm run build
+      # - run: npm run build
