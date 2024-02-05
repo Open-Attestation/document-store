@@ -42,7 +42,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
 
   /**
    * @notice Issues a document
-   * @param document The hash of the document to issue
+   * @param documentRoot The hash of the document to issue
    */
   function issue(bytes32 documentRoot) public onlyRole(ISSUER_ROLE) {
     if (isRootIssued(documentRoot)) {
@@ -56,7 +56,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
 
   /**
    * @notice Issues multiple documents
-   * @param documents The hashes of the documents to issue
+   * @param documentRoots The hashes of the documents to issue
    */
   function bulkIssue(bytes32[] memory documentRoots) public onlyRole(ISSUER_ROLE) {
     _bulkIssue(documentRoots);
@@ -64,21 +64,16 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
 
   /**
    * @notice Revokes a document
-   * @param document The hash of the document to revoke
-   * @return A boolean indicating whether the revocation was successful
+   * @param documentRoot The hash of the document to revoke
    */
   function revokeRoot(bytes32 documentRoot) public onlyRole(REVOKER_ROLE) {
     revoke(documentRoot, documentRoot, new bytes32[](0));
   }
 
-  function revoke(
-    bytes32 documentRoot,
-    bytes32 document,
-    bytes32[] memory proof
-  ) public onlyRole(REVOKER_ROLE) {
-    bool isActive = isActive(documentRoot, document, proof);
-    if (!isActive) {
-      revert InActiveDocument(documentRoot, document);
+  function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) public onlyRole(REVOKER_ROLE) {
+    bool active = isActive(documentRoot, document, proof);
+    if (!active) {
+      revert InactiveDocument(documentRoot, document);
     }
     _revoke(document);
     emit DocumentRevoked(documentRoot, document);
@@ -86,11 +81,11 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
 
   /**
    * @notice Revokes documents in bulk
-   * @param documents The hashes of the documents to revoke
+   * @param documentRoots The hashes of the documents to revoke
    */
   function bulkRevoke(
-    bytes32[] documentRoots,
-    bytes32[] documents,
+    bytes32[] memory documentRoots,
+    bytes32[] memory documents,
     bytes32[][] memory proofs
   ) public onlyRole(REVOKER_ROLE) {
     for (uint256 i = 0; i < documentRoots.length; i++) {
@@ -98,7 +93,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     }
   }
 
-  function bulkRevokeRoot(bytes32[] documentRoots, bytes32[][] memory proofs) public onlyRole(REVOKER_ROLE) {
+  function bulkRevokeRoot(bytes32[] memory documentRoots, bytes32[][] memory proofs) public onlyRole(REVOKER_ROLE) {
     for (uint256 i = 0; i < documentRoots.length; i++) {
       revoke(documentRoots[i], documentRoots[i], proofs[i]);
     }
@@ -132,18 +127,14 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
 
   /**
    * @notice Checks if a document has been revoked
-   * @param document The hash of the document to check
+   * @param documentRoot The hash of the document to check
    * @return A boolean indicating whether the document has been revoked
    */
   function isRootRevoked(bytes32 documentRoot) public view returns (bool) {
     return isRevoked(documentRoot, documentRoot, new bytes32[](0));
   }
 
-  function isActive(
-    bytes32 documentRoot,
-    bytes32 document,
-    bytes32[] memory proof
-  ) public view returns (bool) {
+  function isActive(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) public view returns (bool) {
     return isIssued(documentRoot, document, proof) && !isRevoked(documentRoot, document, proof);
   }
 
