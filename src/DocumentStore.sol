@@ -14,11 +14,6 @@ import "./base/DocumentStoreAccessControl.sol";
  * @notice A contract for storing and revoking documents with access control
  */
 contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
-  error InactiveDocument(bytes32 documentRoot, bytes32 document);
-  error DocumentAlreadyRevoked(bytes32 document);
-  error DocumentAlreadyIssued(bytes32 document);
-  error InvalidDocument();
-
   using MerkleProof for bytes32[];
 
   /**
@@ -46,7 +41,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    */
   function issue(bytes32 documentRoot) public onlyRole(ISSUER_ROLE) {
     if (isRootIssued(documentRoot)) {
-      revert DocumentAlreadyIssued(documentRoot);
+      revert DocumentExists(documentRoot);
     }
 
     _issue(documentRoot);
@@ -58,8 +53,10 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    * @notice Issues multiple documents
    * @param documentRoots The hashes of the documents to issue
    */
-  function bulkIssue(bytes32[] memory documentRoots) public onlyRole(ISSUER_ROLE) {
-    _bulkIssue(documentRoots);
+  function bulkIssue(bytes32[] memory documentRoots) public {
+    for (uint256 i = 0; i < documentRoots.length; i++) {
+      issue(documentRoots[i]);
+    }
   }
 
   /**
@@ -93,21 +90,15 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     }
   }
 
-  function bulkRevokeRoot(bytes32[] memory documentRoots, bytes32[][] memory proofs) public onlyRole(REVOKER_ROLE) {
-    for (uint256 i = 0; i < documentRoots.length; i++) {
-      revoke(documentRoots[i], documentRoots[i], proofs[i]);
-    }
-  }
-
   function isIssued(
     bytes32 documentRoot,
     bytes32 document,
     bytes32[] memory proof
-  ) public view onlyValidDocument(documentRoot, document) returns (bool) {
+  ) public view onlyValidDocument(documentRoot, document, proof) returns (bool) {
     if (documentRoot == document && proof.length == 0) {
       return _isIssued(document);
     }
-    return _isIssued(documentRoot) && proof.verify(documentRoot, document);
+    return _isIssued(documentRoot);
   }
 
   function isRootIssued(bytes32 documentRoot) public view returns (bool) {
@@ -118,11 +109,22 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     bytes32 documentRoot,
     bytes32 document,
     bytes32[] memory proof
-  ) public view onlyValidDocument(documentRoot, document) returns (bool) {
+  ) public view onlyValidDocument(documentRoot, document, proof) returns (bool) {
+    if (!isIssued(documentRoot, document, proof)) {
+      revert InvalidDocument(documentRoot, document);
+    }
+    return _isRevokedInternal(documentRoot, document, proof);
+  }
+
+  function _isRevokedInternal(
+    bytes32 documentRoot,
+    bytes32 document,
+    bytes32[] memory proof
+  ) internal view returns (bool) {
     if (documentRoot == document && proof.length == 0) {
       return _isRevoked(document);
     }
-    return (_isRevoked(documentRoot) || _isRevoked(document)) && proof.verify(documentRoot, document);
+    return (_isRevoked(documentRoot) || _isRevoked(document));
   }
 
   /**
@@ -135,12 +137,22 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
   }
 
   function isActive(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) public view returns (bool) {
-    return isIssued(documentRoot, document, proof) && !isRevoked(documentRoot, document, proof);
+    if (!isIssued(documentRoot, document, proof)) {
+      revert InvalidDocument(documentRoot, document);
+    }
+    return !_isRevokedInternal(documentRoot, document, proof);
   }
 
-  modifier onlyValidDocument(bytes32 documentRoot, bytes32 document) {
+  modifier onlyValidDocument(
+    bytes32 documentRoot,
+    bytes32 document,
+    bytes32[] memory proof
+  ) {
     if (document == 0x0 || documentRoot == 0x0) {
-      revert InvalidDocument();
+      revert ZeroDocument();
+    }
+    if (!proof.verify(documentRoot, document)) {
+      revert InvalidDocument(documentRoot, document);
     }
     _;
   }
