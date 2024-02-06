@@ -4,12 +4,13 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IDocumentStore} from "./interfaces/IDocumentStore.sol";
 
 /**
  * @title BaseDocumentStore
  * @notice A base contract for storing and revoking documents
  */
-contract BaseDocumentStore is Initializable {
+contract BaseDocumentStore is Initializable, IDocumentStore {
   /**
    * @notice The name of the contract
    */
@@ -26,18 +27,6 @@ contract BaseDocumentStore is Initializable {
   mapping(bytes32 => uint256) public documentRevoked;
 
   /**
-   * @notice Emitted when a document is issued
-   * @param document The hash of the issued document
-   */
-  event DocumentIssued(bytes32 indexed document);
-
-  /**
-   * @notice Emitted when a document is revoked
-   * @param document The hash of the revoked document
-   */
-  event DocumentRevoked(bytes32 indexed documentRoot, bytes32 indexed document);
-
-  /**
    * @notice Initialises the contract with a name
    * @param _name The name of the contract
    */
@@ -52,16 +41,6 @@ contract BaseDocumentStore is Initializable {
   function _issue(bytes32 document) internal {
     documentIssued[document] = block.number;
     // emit DocumentIssued(document);
-  }
-
-  /**
-   * @notice Issues documents in bulk
-   * @param documents The hashes of the documents to issue
-   */
-  function _bulkIssue(bytes32[] memory documents) internal {
-    for (uint256 i = 0; i < documents.length; i++) {
-      _issue(documents[i]);
-    }
   }
 
   /**
@@ -100,12 +79,6 @@ contract BaseDocumentStore is Initializable {
     documentRevoked[document] = block.number;
   }
 
-  function _bulkRevoke(bytes32[] memory documents) internal {
-    for (uint256 i = 0; i < documents.length; i++) {
-      _revoke(documents[i]);
-    }
-  }
-
   /**
    * @notice Checks if a document has been revoked
    * @param document The hash of the document to check
@@ -131,26 +104,6 @@ contract BaseDocumentStore is Initializable {
    */
   modifier onlyIssued(bytes32 document) {
     require(_isIssued(document), "Error: Only issued document hashes can be revoked");
-    _;
-  }
-
-  /**
-   * @dev Checks if a document has not been issued
-   * @param document The hash of the document to check
-   */
-  modifier onlyNotIssued(bytes32 document) {
-    // TODO: TO BE REMOVED
-    require(!_isIssued(document), "Error: Only hashes that have not been issued can be issued");
-    _;
-  }
-
-  /**
-   * @dev Modifier that checks if a document has not been revoked
-   * @param claim The hash of the document to check
-   */
-  modifier onlyNotRevoked(bytes32 claim) {
-    // TODO: TO BE REMOVED
-    require(!_isRevoked(claim), "Error: Hash has been revoked previously");
     _;
   }
 }
