@@ -19,12 +19,12 @@ abstract contract BaseDocumentStore is Initializable, IDocumentStore {
   /**
    * @notice A mapping of the document hash to the block number that was issued
    */
-  mapping(bytes32 => uint256) public documentIssued;
+  mapping(bytes32 => uint256) internal documentIssued;
 
   /**
    * @notice A mapping of the hash of the claim being revoked to the revocation block number
    */
-  mapping(bytes32 => uint256) public documentRevoked;
+  mapping(bytes32 => uint256) internal documentRevoked;
 
   /**
    * @notice Initialises the contract with a name
