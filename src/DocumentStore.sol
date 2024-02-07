@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
 import "./BaseDocumentStore.sol";
 import "./base/DocumentStoreAccessControl.sol";
 
