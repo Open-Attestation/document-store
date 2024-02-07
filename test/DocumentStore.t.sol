@@ -9,7 +9,7 @@ import "../src/DocumentStore.sol";
 import "../src/interfaces/IDocumentStore.sol";
 import "./CommonTest.t.sol";
 
-contract DocumentStore_init_Test is BaseTest {
+contract DocumentStore_init_Test is CommonTest {
   function testDocumentName() public {
     assertEq(documentStore.name(), storeName);
   }
@@ -31,7 +31,7 @@ contract DocumentStore_init_Test is BaseTest {
   }
 }
 
-contract DocumentStore_issue_Test is BaseTest {
+contract DocumentStore_issue_Test is CommonTest {
   function setUp() public override {
     super.setUp();
   }
@@ -109,7 +109,7 @@ contract DocumentStore_issue_Test is BaseTest {
   }
 }
 
-contract DocumentStore_bulkIssue_Test is BaseTest {
+contract DocumentStore_bulkIssue_Test is CommonTest {
   bytes32[] public docHashes;
 
   function setUp() public override {

@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import "../src/DocumentStore.sol";
 
-abstract contract BaseTest is Test {
+abstract contract CommonTest is Test {
   string public storeName = "DocumentStore Test";
 
   address public owner = vm.addr(1);
@@ -25,7 +25,7 @@ abstract contract BaseTest is Test {
   }
 }
 
-abstract contract DocumentStoreWithFakeDocuments_Base is BaseTest {
+abstract contract DocumentStoreWithFakeDocuments_Base is CommonTest {
   bytes32 public docRoot;
   bytes32[] public documents = new bytes32[](3);
   bytes32[][] public proofs = new bytes32[][](3);
