@@ -10,7 +10,7 @@ import {IDocumentStore} from "./interfaces/IDocumentStore.sol";
  * @title BaseDocumentStore
  * @notice A base contract for storing and revoking documents
  */
-contract BaseDocumentStore is Initializable, IDocumentStore {
+abstract contract BaseDocumentStore is Initializable, IDocumentStore {
   /**
    * @notice The name of the contract
    */
@@ -40,16 +40,6 @@ contract BaseDocumentStore is Initializable, IDocumentStore {
    */
   function _issue(bytes32 document) internal {
     documentIssued[document] = block.number;
-    // emit DocumentIssued(document);
-  }
-
-  /**
-   * @notice Gets the block number at which a document was issued
-   * @param document The hash of the issued document
-   * @return The block number at which the document was issued
-   */
-  function getIssuedBlock(bytes32 document) public view onlyIssued(document) returns (uint256) {
-    return documentIssued[document];
   }
 
   /**
@@ -59,16 +49,6 @@ contract BaseDocumentStore is Initializable, IDocumentStore {
    */
   function _isIssued(bytes32 document) internal view returns (bool) {
     return (documentIssued[document] != 0);
-  }
-
-  /**
-   * @notice Checks if a document was issued before a specific block number (inclusive)
-   * @param document The hash of the document to check
-   * @param blockNumber The block number to check against
-   * @return A boolean indicating whether the document was issued before the specified block number
-   */
-  function isIssuedBefore(bytes32 document, uint256 blockNumber) public view returns (bool) {
-    return documentIssued[document] != 0 && documentIssued[document] <= blockNumber;
   }
 
   /**
@@ -86,24 +66,5 @@ contract BaseDocumentStore is Initializable, IDocumentStore {
    */
   function _isRevoked(bytes32 document) internal view returns (bool) {
     return documentRevoked[document] != 0;
-  }
-
-  /**
-   * @notice Checks if a document was revoked before a specific block number (inclusive)
-   * @param document The hash of the document to check
-   * @param blockNumber The block number to check against
-   * @return A boolean indicating whether the document was revoked before the specified block number
-   */
-  function isRevokedBefore(bytes32 document, uint256 blockNumber) public view returns (bool) {
-    return documentRevoked[document] <= blockNumber && documentRevoked[document] != 0;
-  }
-
-  /**
-   * @dev Checks if a document has been issued
-   * @param document The hash of the document to check
-   */
-  modifier onlyIssued(bytes32 document) {
-    require(_isIssued(document), "Error: Only issued document hashes can be revoked");
-    _;
   }
 }

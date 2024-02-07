@@ -113,14 +113,10 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     if (!isIssued(documentRoot, document, proof)) {
       revert InvalidDocument(documentRoot, document);
     }
-    return _isRevokedInternal(documentRoot, document, proof);
+    return _isRevoked(documentRoot, document, proof);
   }
 
-  function _isRevokedInternal(
-    bytes32 documentRoot,
-    bytes32 document,
-    bytes32[] memory proof
-  ) internal view returns (bool) {
+  function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
     if (documentRoot == document && proof.length == 0) {
       return _isRevoked(document);
     }
@@ -140,7 +136,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     if (!isIssued(documentRoot, document, proof)) {
       revert InvalidDocument(documentRoot, document);
     }
-    return !_isRevokedInternal(documentRoot, document, proof);
+    return !_isRevoked(documentRoot, document, proof);
   }
 
   modifier onlyValidDocument(
