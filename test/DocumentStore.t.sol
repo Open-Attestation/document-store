@@ -32,13 +32,12 @@ contract DocumentStore_init_Test is BaseTest {
 }
 
 contract DocumentStore_issue_Test is BaseTest {
-  bytes32 public docHash = "0x1234";
-
   function setUp() public override {
     super.setUp();
   }
 
-  function testIssueByOwner() public {
+  function testIssueByOwner(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectEmit(true, true, true, true);
 
     emit IDocumentStore.DocumentIssued(docHash);
@@ -49,7 +48,8 @@ contract DocumentStore_issue_Test is BaseTest {
     assert(documentStore.isIssued(docHash));
   }
 
-  function testIssueByIssuer() public {
+  function testIssueByIssuer(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectEmit(true, true, true, true);
 
     emit IDocumentStore.DocumentIssued(docHash);
@@ -60,7 +60,8 @@ contract DocumentStore_issue_Test is BaseTest {
     assert(documentStore.isIssued(docHash));
   }
 
-  function testIssueByRevokerRevert() public {
+  function testIssueByRevokerRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectRevert(
       abi.encodeWithSelector(
         IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -73,7 +74,8 @@ contract DocumentStore_issue_Test is BaseTest {
     documentStore.issue(docHash);
   }
 
-  function testIssueByNonIssuerRevert() public {
+  function testIssueByNonIssuerRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     address notIssuer = vm.addr(69);
 
     vm.expectRevert(
@@ -88,7 +90,8 @@ contract DocumentStore_issue_Test is BaseTest {
     documentStore.issue(docHash);
   }
 
-  function testIssueAlreadyIssuedRevert() public {
+  function testIssueAlreadyIssuedRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.startPrank(issuer);
     documentStore.issue(docHash);
 
@@ -294,8 +297,8 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     vm.stopPrank();
   }
 
-  function testRevokeRootNonIssuedRootRevert() public {
-    bytes32 nonIssuedRoot = "0x1234";
+  function testRevokeRootNonIssuedRootRevert(bytes32 nonIssuedRoot) public {
+    vm.assume(nonIssuedRoot != docRoot);
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -398,8 +401,8 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     vm.stopPrank();
   }
 
-  function testRevokeNonIssuedDocumentRevert() public {
-    bytes32 nonIssuedRoot = "0x1234";
+  function testRevokeNonIssuedDocumentRevert(bytes32 nonIssuedRoot) public {
+    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -562,8 +565,8 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
     assertTrue(documentStore.isRevoked(docRoot));
   }
 
-  function testIsRootRevokedWithNotRevokedRoot() public {
-    bytes32 notRevokedRoot = "0x1234";
+  function testIsRootRevokedWithNotRevokedRoot(bytes32 notRevokedRoot) public {
+    vm.assume(notRevokedRoot != docRoot);
 
     vm.prank(issuer);
     documentStore.issue(notRevokedRoot);
@@ -577,8 +580,8 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
     documentStore.isRevoked(0x0);
   }
 
-  function testIsRootRevokedWithNotIssuedRootRevert() public {
-    bytes32 notIssuedRoot = "0x1234";
+  function testIsRootRevokedWithNotIssuedRootRevert(bytes32 notIssuedRoot) public {
+    vm.assume(notIssuedRoot != docRoot && notIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, notIssuedRoot, notIssuedRoot));
 
@@ -624,8 +627,8 @@ contract DocumentStore_isActive_Test is DocumentStoreWithFakeDocuments_Base {
     documentStore.isActive(0x0, documents[0], proofs[0]);
   }
 
-  function testIsActiveWithNotIssuedDocumentRevert() public {
-    bytes32 notIssuedDoc = "0x1234";
+  function testIsActiveWithNotIssuedDocumentRevert(bytes32 notIssuedDoc) public {
+    vm.assume(notIssuedDoc != docRoot && notIssuedDoc != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, notIssuedDoc));
 
