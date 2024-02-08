@@ -15,21 +15,21 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
   using MerkleProof for bytes32[];
 
   /**
-   * @notice Initialises the contract with a name and owner
+   * @notice Initialises the contract with a name and initial admin
    * @param _name The name of the contract
-   * @param owner The owner of the contract
+   * @param initAdmin The initial admin of the contract
    */
-  constructor(string memory _name, address owner) {
-    initialize(_name, owner);
+  constructor(string memory _name, address initAdmin) {
+    initialize(_name, initAdmin);
   }
 
   /**
    * @notice Internally initialises the contract with a name and owner
    * @param _name The name of the contract
-   * @param owner The owner of the contract
+   * @param initAdmin The owner of the contract
    */
-  function initialize(string memory _name, address owner) internal initializer {
-    __DocumentStoreAccessControl_init(owner);
+  function initialize(string memory _name, address initAdmin) internal initializer {
+    __DocumentStoreAccessControl_init(initAdmin);
     __BaseDocumentStore_init(_name);
   }
 
@@ -37,41 +37,30 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    * @notice Issues a document
    * @param documentRoot The hash of the document to issue
    */
-  function issue(bytes32 documentRoot) public onlyRole(ISSUER_ROLE) {
-    if (isIssued(documentRoot)) {
-      revert DocumentExists(documentRoot);
-    }
-
+  function issue(bytes32 documentRoot) external onlyRole(ISSUER_ROLE) {
     _issue(documentRoot);
-
-    emit DocumentIssued(documentRoot);
   }
 
   /**
    * @notice Issues multiple documents
    * @param documentRoots The hashes of the documents to issue
    */
-  function bulkIssue(bytes32[] memory documentRoots) public {
+  function bulkIssue(bytes32[] memory documentRoots) external onlyRole(ISSUER_ROLE) {
     for (uint256 i = 0; i < documentRoots.length; i++) {
-      issue(documentRoots[i]);
+      _issue(documentRoots[i]);
     }
+  }
+
+  function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external onlyRole(REVOKER_ROLE) {
+    _revoke(documentRoot, document, proof);
   }
 
   /**
    * @notice Revokes a document
    * @param documentRoot The hash of the document to revoke
    */
-  function revoke(bytes32 documentRoot) public onlyRole(REVOKER_ROLE) {
-    revoke(documentRoot, documentRoot, new bytes32[](0));
-  }
-
-  function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) public onlyRole(REVOKER_ROLE) {
-    bool active = isActive(documentRoot, document, proof);
-    if (!active) {
-      revert InactiveDocument(documentRoot, document);
-    }
-    _revoke(document);
-    emit DocumentRevoked(documentRoot, document);
+  function revoke(bytes32 documentRoot) external onlyRole(REVOKER_ROLE) {
+    _revoke(documentRoot, documentRoot, new bytes32[](0));
   }
 
   /**
@@ -82,9 +71,9 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     bytes32[] memory documentRoots,
     bytes32[] memory documents,
     bytes32[][] memory proofs
-  ) public onlyRole(REVOKER_ROLE) {
+  ) external onlyRole(REVOKER_ROLE) {
     for (uint256 i = 0; i < documentRoots.length; i++) {
-      revoke(documentRoots[i], documents[i], proofs[i]);
+      _revoke(documentRoots[i], documents[i], proofs[i]);
     }
   }
 
@@ -114,13 +103,6 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     return _isRevoked(documentRoot, document, proof);
   }
 
-  function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
-    if (documentRoot == document && proof.length == 0) {
-      return _isRevoked(document);
-    }
-    return (_isRevoked(documentRoot) || _isRevoked(document));
-  }
-
   /**
    * @notice Checks if a document has been revoked
    * @param documentRoot The hash of the document to check
@@ -135,6 +117,32 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
       revert InvalidDocument(documentRoot, document);
     }
     return !_isRevoked(documentRoot, document, proof);
+  }
+
+  function _issue(bytes32 documentRoot) internal override {
+    if (isIssued(documentRoot)) {
+      revert DocumentExists(documentRoot);
+    }
+
+    BaseDocumentStore._issue(documentRoot);
+
+    emit DocumentIssued(documentRoot);
+  }
+
+  function _revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal {
+    bool active = isActive(documentRoot, document, proof);
+    if (!active) {
+      revert InactiveDocument(documentRoot, document);
+    }
+    _revoke(document);
+    emit DocumentRevoked(documentRoot, document);
+  }
+
+  function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
+    if (documentRoot == document && proof.length == 0) {
+      return _isRevoked(document);
+    }
+    return (_isRevoked(documentRoot) || _isRevoked(document));
   }
 
   modifier onlyValidDocument(

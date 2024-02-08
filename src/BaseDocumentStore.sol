@@ -38,7 +38,7 @@ abstract contract BaseDocumentStore is Initializable, IDocumentStore {
    * @notice Issues a document
    * @param document The hash of the document to issue
    */
-  function _issue(bytes32 document) internal {
+  function _issue(bytes32 document) internal virtual {
     documentIssued[document] = block.number;
   }
 
@@ -47,7 +47,7 @@ abstract contract BaseDocumentStore is Initializable, IDocumentStore {
    * @param document The hash of the document to check
    * @return A boolean indicating whether the document has been issued
    */
-  function _isIssued(bytes32 document) internal view returns (bool) {
+  function _isIssued(bytes32 document) internal view virtual returns (bool) {
     return (documentIssued[document] != 0);
   }
 
@@ -55,7 +55,7 @@ abstract contract BaseDocumentStore is Initializable, IDocumentStore {
    * @notice Revokes a document
    * @param document The hash of the document to revoke
    */
-  function _revoke(bytes32 document) internal {
+  function _revoke(bytes32 document) internal virtual {
     documentRevoked[document] = block.number;
   }
 
@@ -64,7 +64,7 @@ abstract contract BaseDocumentStore is Initializable, IDocumentStore {
    * @param document The hash of the document to check
    * @return A boolean indicating whether the document has been revoked
    */
-  function _isRevoked(bytes32 document) internal view returns (bool) {
+  function _isRevoked(bytes32 document) internal view virtual returns (bool) {
     return documentRevoked[document] != 0;
   }
 }
