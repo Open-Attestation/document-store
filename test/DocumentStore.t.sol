@@ -298,7 +298,7 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
   }
 
   function testRevokeRootNonIssuedRootRevert(bytes32 nonIssuedRoot) public {
-    vm.assume(nonIssuedRoot != docRoot);
+    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -566,7 +566,7 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
   }
 
   function testIsRootRevokedWithNotRevokedRoot(bytes32 notRevokedRoot) public {
-    vm.assume(notRevokedRoot != docRoot);
+    vm.assume(notRevokedRoot != docRoot && notRevokedRoot != bytes32(0));
 
     vm.prank(issuer);
     documentStore.issue(notRevokedRoot);
