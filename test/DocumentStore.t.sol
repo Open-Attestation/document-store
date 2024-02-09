@@ -300,7 +300,7 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
   function testRevokeRootNonIssuedRootRevert(bytes32 nonIssuedRoot) public {
     vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot));
 
     vm.prank(revoker);
     documentStore.revoke(nonIssuedRoot);
@@ -404,7 +404,7 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
   function testRevokeNonIssuedDocumentRevert(bytes32 nonIssuedRoot) public {
     vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot));
 
     vm.prank(revoker);
     documentStore.revoke(nonIssuedRoot);
@@ -583,7 +583,7 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
   function testIsRootRevokedWithNotIssuedRootRevert(bytes32 notIssuedRoot) public {
     vm.assume(notIssuedRoot != docRoot && notIssuedRoot != bytes32(0));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, notIssuedRoot, notIssuedRoot));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedRoot, notIssuedRoot));
 
     assertFalse(documentStore.isRevoked(notIssuedRoot));
   }
@@ -630,8 +630,20 @@ contract DocumentStore_isActive_Test is DocumentStoreWithFakeDocuments_Base {
   function testIsActiveWithNotIssuedDocumentRevert(bytes32 notIssuedDoc) public {
     vm.assume(notIssuedDoc != docRoot && notIssuedDoc != bytes32(0));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, notIssuedDoc));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedDoc, notIssuedDoc));
 
-    documentStore.isActive(docRoot, notIssuedDoc, proofs[0]);
+    documentStore.isActive(notIssuedDoc, notIssuedDoc, new bytes32[](0));
+  }
+
+  function testIsActiveWithNotIssuedRootRevert() public {
+    bytes32 notIssuedRoot = 0xb841229d504c5c9bcb8132078db8c4a483825ad811078144c6f9aec84213d798;
+    bytes32 notIssuedDoc = 0xd56c26db0fde817dcd82269d0f9a3f50ea256ee0c870e43c3ec2ebdd655e3f37;
+
+    bytes32[] memory proofs = new bytes32[](1);
+    proofs[0] = 0x9800b3feae3c44fe4263f6cbb2d8dd529c26c3a1c3ca7208a30cfa5efbc362e7;
+
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedRoot, notIssuedDoc));
+
+    documentStore.isActive(notIssuedRoot, notIssuedDoc, proofs);
   }
 }

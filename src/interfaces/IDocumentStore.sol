@@ -10,6 +10,8 @@ interface IDocumentStore {
 
   error InvalidDocument(bytes32 documentRoot, bytes32 document);
 
+  error DocumentNotIssued(bytes32 documentRoot, bytes32 document);
+
   /**
    * @notice Emitted when a document is issued
    * @param document The hash of the issued document
@@ -28,15 +30,9 @@ interface IDocumentStore {
 
   function revoke(bytes32 documentRoot) external;
 
-  function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external;
-
   function isIssued(bytes32 documentRoot) external view returns (bool);
-
-  function isIssued(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external view returns (bool);
 
   function isRevoked(bytes32 documentRoot) external view returns (bool);
 
-  function isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external view returns (bool);
-
-  function isActive(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external view returns (bool);
+  function isActive(bytes32 documentRoot) external view returns (bool);
 }
