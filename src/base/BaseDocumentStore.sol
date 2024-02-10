@@ -6,8 +6,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 
-import "./interfaces/IDocumentStoreBatchable.sol";
-import "./base/DocumentStoreAccessControl.sol";
+import "../interfaces/IDocumentStoreBatchable.sol";
+import "./DocumentStoreAccessControl.sol";
 
 /**
  * @title BaseDocumentStore

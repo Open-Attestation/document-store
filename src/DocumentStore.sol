@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.23 <0.9.0;
 
-import "./BaseDocumentStore.sol";
+import "./base/BaseDocumentStore.sol";
 
 /**
  * @title DocumentStore
