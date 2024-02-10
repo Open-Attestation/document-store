@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 import "../src/DocumentStore.sol";
 import "../src/interfaces/IDocumentStore.sol";
+import "../src/interfaces/IDocumentStoreBatchable.sol";
 import "./CommonTest.t.sol";
 
 contract DocumentStore_init_Test is CommonTest {
@@ -109,19 +110,21 @@ contract DocumentStore_issue_Test is CommonTest {
   }
 }
 
-contract DocumentStore_bulkIssue_Test is CommonTest {
+contract DocumentStore_multicallIssue_Test is CommonTest {
   bytes32[] public docHashes;
+
+  bytes[] public bulkIssueData;
 
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
-    vm.stopPrank();
-
     docHashes = new bytes32[](2);
     docHashes[0] = "0x1234";
     docHashes[1] = "0x5678";
+
+    bulkIssueData = new bytes[](2);
+    bulkIssueData[0] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
+    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[1]));
   }
 
   function testBulkIssueByIssuer() public {
@@ -131,23 +134,10 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
     emit IDocumentStore.DocumentIssued(docHashes[1]);
 
     vm.prank(issuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
 
     assert(documentStore.isIssued(docHashes[0]));
     assert(documentStore.isIssued(docHashes[1]));
-  }
-
-  function testBulkIssueByRevokerRevert() public {
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        revoker,
-        documentStore.ISSUER_ROLE()
-      )
-    );
-
-    vm.prank(revoker);
-    documentStore.bulkIssue(docHashes);
   }
 
   function testBulkIssueByNonIssuerRevert() public {
@@ -162,27 +152,21 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
     );
 
     vm.prank(notIssuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
   }
 
   function testBulkIssueWithDuplicatesRevert() public {
     docHashes[1] = docHashes[0];
+    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHashes[1])));
 
     vm.prank(issuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
   }
 }
 
-contract DocumentStore_isIssued_Test is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
+contract DocumentStore_isIssued_Test is BatchedDocuments_Initializer {
   function testIsRootIssuedWithRoot() public {
     assertTrue(documentStore.isIssued(docRoot));
   }
@@ -224,14 +208,7 @@ contract DocumentStore_isIssued_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
+contract DocumentStore_revokeRoot_Test is BatchedDocuments_Initializer {
   function testRevokeRootByOwner() public {
     vm.expectEmit(true, true, false, true);
     emit IDocumentStore.DocumentRevoked(docRoot, docRoot);
@@ -307,14 +284,7 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
+contract DocumentStoreBatchable_revoke_Test is BatchedDocuments_Initializer {
   function testRevokeByOwner() public {
     vm.expectEmit(true, true, false, true);
     emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
@@ -401,6 +371,18 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     vm.stopPrank();
   }
 
+  function testRevokeAlreadyRevokedRootRevert() public {
+    vm.startPrank(revoker);
+
+    documentStore.revoke(docRoot);
+
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoot, documents[0]));
+
+    documentStore.revoke(docRoot, documents[0], proofs[0]);
+
+    vm.stopPrank();
+  }
+
   function testRevokeNonIssuedDocumentRevert(bytes32 nonIssuedRoot) public {
     vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
@@ -411,53 +393,43 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_bulkRevoke_Test is DocumentStoreWithFakeDocuments_Base {
+abstract contract DocumentStore_multicall_revoke_Base is BatchedDocuments_Initializer {
   bytes32[] public docRoots = new bytes32[](3);
+  bytes[] public bulkRevokeData;
 
-  function setUp() public override {
-    super.setUp();
-
-    docRoots[0] = docRoot;
-    docRoots[1] = docRoot;
-    docRoots[2] = docRoot;
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
-  function testBulkRevokeByOwner() public {
+  function testMulticallRevokeByOwner() public {
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
+    emit IDocumentStore.DocumentRevoked(docRoots[0], documents[0]);
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[1]);
+    emit IDocumentStore.DocumentRevoked(docRoots[1], documents[1]);
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[2]);
+    emit IDocumentStore.DocumentRevoked(docRoots[2], documents[2]);
 
     vm.prank(owner);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    documentStore.multicall(bulkRevokeData);
 
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[2], proofs[2]));
+    assertTrue(documentStore.isRevoked(docRoots[0], documents[0], proofs[0]));
+    assertTrue(documentStore.isRevoked(docRoots[1], documents[1], proofs[1]));
+    assertTrue(documentStore.isRevoked(docRoots[2], documents[2], proofs[2]));
   }
 
-  function testBulkRevokeByRevoker() public {
+  function testMulticallRevokeByRevoker() public {
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
+    emit IDocumentStore.DocumentRevoked(docRoots[0], documents[0]);
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[1]);
+    emit IDocumentStore.DocumentRevoked(docRoots[1], documents[1]);
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[2]);
+    emit IDocumentStore.DocumentRevoked(docRoots[2], documents[2]);
 
     vm.prank(revoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    documentStore.multicall(bulkRevokeData);
 
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[2], proofs[2]));
+    assertTrue(documentStore.isRevoked(docRoots[0], documents[0], proofs[0]));
+    assertTrue(documentStore.isRevoked(docRoots[1], documents[1], proofs[1]));
+    assertTrue(documentStore.isRevoked(docRoots[2], documents[2], proofs[2]));
   }
 
-  function testBulkRevokeByIssuerRevert() public {
+  function testMulticallRevokeByIssuerRevert() public {
     vm.expectRevert(
       abi.encodeWithSelector(
         IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -467,10 +439,10 @@ contract DocumentStore_bulkRevoke_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(issuer);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    documentStore.multicall(bulkRevokeData);
   }
 
-  function testBulkRevokeByNonRevokerRevert() public {
+  function testMulticallRevokeByNonRevokerRevert() public {
     address notRevoker = vm.addr(69);
 
     vm.expectRevert(
@@ -482,29 +454,71 @@ contract DocumentStore_bulkRevoke_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(notRevoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    documentStore.multicall(bulkRevokeData);
   }
 
-  function testBulkRevokeWithDuplicatesRevert() public {
+  function testMulticallRevokeWithDuplicatesRevert() public {
+    // Make document0 and document1 with same data
     docRoots[1] = docRoots[0];
     documents[1] = documents[0];
     proofs[1] = proofs[0];
+    bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoots[0], documents[0], proofs[0]));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoots[1], documents[1]));
 
     vm.prank(revoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    documentStore.multicall(bulkRevokeData);
   }
 }
 
-contract DocumentStore_isRevoked_Test is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStoreBatchable_multicall_revoke_Test is DocumentStore_multicall_revoke_Base {
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    docRoots[0] = docRoot;
+    docRoots[1] = docRoot;
+    docRoots[2] = docRoot;
+
+    bulkRevokeData = new bytes[](3);
+    bulkRevokeData[0] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoot, documents[0], proofs[0]));
+    bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoot, documents[1], proofs[1]));
+    bulkRevokeData[2] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoot, documents[2], proofs[2]));
+  }
+}
+
+contract DocumentStore_multicall_revoke_Test is DocumentStore_multicall_revoke_Base {
+  function setUp() public override {
+    super.setUp();
+
+    // Set up the document fixtures to be independent documents
+    docRoots[0] = documents[0];
+    docRoots[1] = documents[1];
+    docRoots[2] = documents[2];
+
+    // We want the documents to be independent, thus no need proofs
+    proofs[0] = new bytes32[](0);
+    proofs[1] = new bytes32[](0);
+    proofs[2] = new bytes32[](0);
+
+    vm.startPrank(issuer);
+    documentStore.issue(docRoots[0]);
+    documentStore.issue(docRoots[1]);
+    documentStore.issue(docRoots[2]);
     vm.stopPrank();
+
+    bulkRevokeData = new bytes[](3);
+    bulkRevokeData[0] = abi.encodeCall(IDocumentStore.revoke, (documents[0]));
+    bulkRevokeData[1] = abi.encodeCall(IDocumentStore.revoke, (documents[1]));
+    bulkRevokeData[2] = abi.encodeCall(IDocumentStore.revoke, (documents[2]));
+  }
+}
+
+contract DocumentStore_isRevoked_Test is BatchedDocuments_Initializer {
+  function setUp() public override {
+    super.setUp();
+
+    vm.prank(revoker);
+    documentStore.revoke(docRoot, documents[0], proofs[0]);
   }
 
   function testIsRevokedWithRevokedDocument() public {
@@ -551,14 +565,12 @@ contract DocumentStore_isRevoked_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStore_isRootRevoked is BatchedDocuments_Initializer {
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
+    vm.prank(revoker);
     documentStore.revoke(docRoot);
-    vm.stopPrank();
   }
 
   function testIsRootRevokedWithRevokedRoot() public {
@@ -589,14 +601,12 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_isActive_Test is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStore_isActive_Test is BatchedDocuments_Initializer {
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
+    vm.prank(revoker);
     documentStore.revoke(docRoot, documents[0], proofs[0]);
-    vm.stopPrank();
   }
 
   function testIsActiveWithActiveDocument() public {

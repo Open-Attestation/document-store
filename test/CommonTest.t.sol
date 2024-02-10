@@ -25,14 +25,12 @@ abstract contract CommonTest is Test {
   }
 }
 
-abstract contract DocumentStoreWithFakeDocuments_Base is CommonTest {
+abstract contract BatchedDocuments_Initializer is CommonTest {
   bytes32 public docRoot;
   bytes32[] public documents = new bytes32[](3);
   bytes32[][] public proofs = new bytes32[][](3);
 
-  function setUp() public virtual override {
-    super.setUp();
-
+  constructor() {
     docRoot = 0x5f0ed7e331c430ce34bcb45e2ddbff2b56a0f5971a226eee85f7ed6cc85e8e27;
 
     documents = [
@@ -52,5 +50,12 @@ abstract contract DocumentStoreWithFakeDocuments_Base is CommonTest {
       ]
     ];
     proofs.push([bytes32(0x3763f4f892fb4c2ff4d76c4b9d391985568f8940f93f71283a84ff73277fb81e)]);
+  }
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    vm.prank(issuer);
+    documentStore.issue(docRoot);
   }
 }

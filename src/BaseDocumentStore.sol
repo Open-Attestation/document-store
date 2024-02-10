@@ -4,8 +4,8 @@ pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 
-import "./interfaces/IDocumentStore.sol";
 import "./interfaces/IDocumentStoreBatchable.sol";
 import "./base/DocumentStoreAccessControl.sol";
 
@@ -15,8 +15,8 @@ import "./base/DocumentStoreAccessControl.sol";
  */
 abstract contract BaseDocumentStore is
   Initializable,
+  MulticallUpgradeable,
   IDocumentStoreBatchable,
-  IDocumentStore,
   DocumentStoreAccessControl
 {
   using MerkleProof for bytes32[];
@@ -53,15 +53,15 @@ abstract contract BaseDocumentStore is
     _issue(documentRoot);
   }
 
-  /**
-   * @notice Issues multiple documents
-   * @param documentRoots The hashes of the documents to issue
-   */
-  function bulkIssue(bytes32[] memory documentRoots) external onlyRole(ISSUER_ROLE) {
-    for (uint256 i = 0; i < documentRoots.length; i++) {
-      _issue(documentRoots[i]);
-    }
-  }
+//  /**
+//   * @notice Issues multiple documents
+//   * @param documentRoots The hashes of the documents to issue
+//   */
+//  function bulkIssue(bytes32[] memory documentRoots) external onlyRole(ISSUER_ROLE) {
+//    for (uint256 i = 0; i < documentRoots.length; i++) {
+//      _issue(documentRoots[i]);
+//    }
+//  }
 
   function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external onlyRole(REVOKER_ROLE) {
     _revoke(documentRoot, document, proof);
@@ -75,19 +75,19 @@ abstract contract BaseDocumentStore is
     _revoke(documentRoot, documentRoot, new bytes32[](0));
   }
 
-  /**
-   * @notice Revokes documents in bulk
-   * @param documentRoots The hashes of the documents to revoke
-   */
-  function bulkRevoke(
-    bytes32[] memory documentRoots,
-    bytes32[] memory documents,
-    bytes32[][] memory proofs
-  ) external onlyRole(REVOKER_ROLE) {
-    for (uint256 i = 0; i < documentRoots.length; i++) {
-      _revoke(documentRoots[i], documents[i], proofs[i]);
-    }
-  }
+//  /**
+//   * @notice Revokes documents in bulk
+//   * @param documentRoots The hashes of the documents to revoke
+//   */
+//  function bulkRevoke(
+//    bytes32[] memory documentRoots,
+//    bytes32[] memory documents,
+//    bytes32[][] memory proofs
+//  ) external onlyRole(REVOKER_ROLE) {
+//    for (uint256 i = 0; i < documentRoots.length; i++) {
+//      _revoke(documentRoots[i], documents[i], proofs[i]);
+//    }
+//  }
 
   function isIssued(
     bytes32 documentRoot,
