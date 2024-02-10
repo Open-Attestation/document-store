@@ -367,3 +367,11 @@ contract DocumentStore_isActive_Test is DocumentStore_Initializer {
     documentStore.isActive(notIssuedDoc);
   }
 }
+
+contract DocumentStore_supportsInterface_Test is CommonTest {
+  function testSupportsInterface() public {
+    assertTrue(documentStore.supportsInterface(type(IDocumentStore).interfaceId));
+    assertTrue(documentStore.supportsInterface(type(IDocumentStoreBatchable).interfaceId));
+    assertTrue(documentStore.supportsInterface(type(IAccessControl).interfaceId));
+  }
+}
