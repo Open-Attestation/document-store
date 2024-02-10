@@ -53,16 +53,6 @@ abstract contract BaseDocumentStore is
     _issue(documentRoot);
   }
 
-//  /**
-//   * @notice Issues multiple documents
-//   * @param documentRoots The hashes of the documents to issue
-//   */
-//  function bulkIssue(bytes32[] memory documentRoots) external onlyRole(ISSUER_ROLE) {
-//    for (uint256 i = 0; i < documentRoots.length; i++) {
-//      _issue(documentRoots[i]);
-//    }
-//  }
-
   function revoke(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) external onlyRole(REVOKER_ROLE) {
     _revoke(documentRoot, document, proof);
   }
@@ -74,20 +64,6 @@ abstract contract BaseDocumentStore is
   function revoke(bytes32 documentRoot) external onlyRole(REVOKER_ROLE) {
     _revoke(documentRoot, documentRoot, new bytes32[](0));
   }
-
-//  /**
-//   * @notice Revokes documents in bulk
-//   * @param documentRoots The hashes of the documents to revoke
-//   */
-//  function bulkRevoke(
-//    bytes32[] memory documentRoots,
-//    bytes32[] memory documents,
-//    bytes32[][] memory proofs
-//  ) external onlyRole(REVOKER_ROLE) {
-//    for (uint256 i = 0; i < documentRoots.length; i++) {
-//      _revoke(documentRoots[i], documents[i], proofs[i]);
-//    }
-//  }
 
   function isIssued(
     bytes32 documentRoot,
