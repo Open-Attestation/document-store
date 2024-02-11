@@ -21,20 +21,24 @@ abstract contract BaseDocumentStore is
 {
   using MerkleProof for bytes32[];
 
-  /**
-   * @notice The name of the contract
-   */
-  string public name;
+  struct DocumentStoreStorage {
+    /**
+     * @notice The name of the contract
+     */
+    string name;
+    /**
+     * @notice A mapping of the document hash to the block number that was issued
+     */
+    mapping(bytes32 => uint256) documentIssued;
+    /**
+     * @notice A mapping of the hash of the claim being revoked to the revocation block number
+     */
+    mapping(bytes32 => uint256) documentRevoked;
+  }
 
-  /**
-   * @notice A mapping of the document hash to the block number that was issued
-   */
-  mapping(bytes32 => uint256) internal documentIssued;
-
-  /**
-   * @notice A mapping of the hash of the claim being revoked to the revocation block number
-   */
-  mapping(bytes32 => uint256) internal documentRevoked;
+  // bytes32(uint256(keccak256("openattestation.storage.DocumentStore")) - 1)
+  bytes32 private constant _DocumentStoreStorageSlot =
+    0xd1729b464cf3942c060af2de854503be68723da388e8d702eabdad3958b7feb9;
 
   /**
    * @notice Initialises the contract with a name
@@ -42,7 +46,11 @@ abstract contract BaseDocumentStore is
    */
   function __BaseDocumentStore_init(string memory _name, address initAdmin) internal onlyInitializing {
     __DocumentStoreAccessControl_init(initAdmin);
-    name = _name;
+    _getStorage().name = _name;
+  }
+
+  function name() external view returns (string memory) {
+    return _getStorage().name;
   }
 
   /**
@@ -130,7 +138,7 @@ abstract contract BaseDocumentStore is
       revert DocumentExists(documentRoot);
     }
 
-    documentIssued[documentRoot] = block.number;
+    _setDocumentIssued(documentRoot, block.number);
 
     emit DocumentIssued(documentRoot);
   }
@@ -140,22 +148,44 @@ abstract contract BaseDocumentStore is
     if (!active) {
       revert InactiveDocument(documentRoot, document);
     }
-    documentRevoked[document] = block.number;
+    _setDocumentRevoked(document, block.number);
     emit DocumentRevoked(documentRoot, document);
   }
 
   function _isIssued(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
     if (documentRoot == document && proof.length == 0) {
-      return documentIssued[document] != 0;
+      return _getDocumentIssued(document) != 0;
     }
-    return documentIssued[documentRoot] != 0;
+    return _getDocumentIssued(documentRoot) != 0;
   }
 
   function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
     if (documentRoot == document && proof.length == 0) {
-      return documentRevoked[document] != 0;
+      return _getDocumentRevoked(document) != 0;
     }
-    return documentRevoked[documentRoot] != 0 || documentRevoked[document] != 0;
+    return _getDocumentRevoked(documentRoot) != 0 || _getDocumentRevoked(document) != 0;
+  }
+
+  function _getStorage() internal pure returns (DocumentStoreStorage storage $) {
+    assembly {
+      $.slot := _DocumentStoreStorageSlot
+    }
+  }
+
+  function _getDocumentIssued(bytes32 document) internal view returns (uint256) {
+    return _getStorage().documentIssued[document];
+  }
+
+  function _setDocumentIssued(bytes32 document, uint256 blockNumber) internal {
+    _getStorage().documentIssued[document] = blockNumber;
+  }
+
+  function _getDocumentRevoked(bytes32 document) internal view returns (uint256) {
+    return _getStorage().documentRevoked[document];
+  }
+
+  function _setDocumentRevoked(bytes32 document, uint256 blockNumber) internal {
+    _getStorage().documentRevoked[document] = blockNumber;
   }
 
   modifier onlyValidDocument(

@@ -11,11 +11,11 @@ import "./base/BaseDocumentStore.sol";
 contract DocumentStore is BaseDocumentStore {
   /**
    * @notice Initialises the contract with a name and initial admin
-   * @param _name The name of the contract
+   * @param name The name of the contract
    * @param initAdmin The initial admin of the contract
    */
-  constructor(string memory _name, address initAdmin) {
-    initialize(_name, initAdmin);
+  constructor(string memory name, address initAdmin) {
+    initialize(name, initAdmin);
   }
 
   /**
