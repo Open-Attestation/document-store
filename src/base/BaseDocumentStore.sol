@@ -16,8 +16,8 @@ import "./DocumentStoreAccessControl.sol";
 abstract contract BaseDocumentStore is
   Initializable,
   MulticallUpgradeable,
-  IDocumentStoreBatchable,
-  DocumentStoreAccessControl
+  DocumentStoreAccessControl,
+  IDocumentStoreBatchable
 {
   using MerkleProof for bytes32[];
 
