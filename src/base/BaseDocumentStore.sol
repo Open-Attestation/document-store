@@ -49,7 +49,9 @@ abstract contract BaseDocumentStore is
    * @notice Issues a document
    * @param documentRoot The hash of the document to issue
    */
-  function issue(bytes32 documentRoot) external onlyRole(ISSUER_ROLE) {
+  function issue(
+    bytes32 documentRoot
+  ) external onlyValidDocument(documentRoot, documentRoot, new bytes32[](0)) onlyRole(ISSUER_ROLE) {
     _issue(documentRoot);
   }
 
@@ -70,10 +72,7 @@ abstract contract BaseDocumentStore is
     bytes32 document,
     bytes32[] memory proof
   ) public view onlyValidDocument(documentRoot, document, proof) returns (bool) {
-    if (documentRoot == document && proof.length == 0) {
-      return documentIssued[document] != 0;
-    }
-    return documentIssued[documentRoot] != 0;
+    return _isIssued(documentRoot, document, proof);
   }
 
   function isIssued(bytes32 documentRoot) public view returns (bool) {
@@ -85,7 +84,7 @@ abstract contract BaseDocumentStore is
     bytes32 document,
     bytes32[] memory proof
   ) public view onlyValidDocument(documentRoot, document, proof) returns (bool) {
-    if (!isIssued(documentRoot, document, proof)) {
+    if (!_isIssued(documentRoot, document, proof)) {
       revert DocumentNotIssued(documentRoot, document);
     }
     return _isRevoked(documentRoot, document, proof);
@@ -100,8 +99,12 @@ abstract contract BaseDocumentStore is
     return isRevoked(documentRoot, documentRoot, new bytes32[](0));
   }
 
-  function isActive(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) public view returns (bool) {
-    if (!isIssued(documentRoot, document, proof)) {
+  function isActive(
+    bytes32 documentRoot,
+    bytes32 document,
+    bytes32[] memory proof
+  ) public view onlyValidDocument(documentRoot, document, proof) returns (bool) {
+    if (!_isIssued(documentRoot, document, proof)) {
       revert DocumentNotIssued(documentRoot, document);
     }
     return !_isRevoked(documentRoot, document, proof);
@@ -123,7 +126,7 @@ abstract contract BaseDocumentStore is
    * @param documentRoot The hash of the document to issue
    */
   function _issue(bytes32 documentRoot) internal {
-    if (isIssued(documentRoot)) {
+    if (_isIssued(documentRoot, documentRoot, new bytes32[](0))) {
       revert DocumentExists(documentRoot);
     }
 
@@ -139,6 +142,13 @@ abstract contract BaseDocumentStore is
     }
     documentRevoked[document] = block.number;
     emit DocumentRevoked(documentRoot, document);
+  }
+
+  function _isIssued(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
+    if (documentRoot == document && proof.length == 0) {
+      return documentIssued[document] != 0;
+    }
+    return documentIssued[documentRoot] != 0;
   }
 
   function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {

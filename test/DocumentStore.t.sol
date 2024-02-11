@@ -102,6 +102,20 @@ contract DocumentStore_issue_Test is CommonTest {
     vm.stopPrank();
   }
 
+  function testIssueRevokedDocumentRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
+
+    vm.startPrank(owner);
+    documentStore.issue(docHash);
+    documentStore.revoke(docHash);
+    vm.stopPrank();
+
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHash)));
+
+    vm.prank(issuer);
+    documentStore.issue(docHash);
+  }
+
   function testIssueZeroDocument() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 

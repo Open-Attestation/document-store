@@ -12,6 +12,8 @@ interface IDocumentStore {
 
   error DocumentNotIssued(bytes32 documentRoot, bytes32 document);
 
+  error DocumentIsRevoked(bytes32 documentRoot, bytes32 document);
+
   /**
    * @notice Emitted when a document is issued
    * @param document The hash of the issued document
