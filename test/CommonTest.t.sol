@@ -13,9 +13,15 @@ abstract contract CommonTest is Test {
   address public issuer = vm.addr(2);
   address public revoker = vm.addr(3);
 
+  function setUp() public virtual {}
+}
+
+abstract contract DocumentStoreCommonTest is CommonTest {
   DocumentStore public documentStore;
 
-  function setUp() public virtual {
+  function setUp() public virtual override {
+    super.setUp();
+
     vm.startPrank(owner);
 
     documentStore = new DocumentStore(storeName, owner);
@@ -26,7 +32,7 @@ abstract contract CommonTest is Test {
   }
 }
 
-abstract contract DocumentStore_Initializer is CommonTest {
+abstract contract DocumentStore_Initializer is DocumentStoreCommonTest {
   bytes32[] public documents;
 
   DocumentStoreFixture private _fixture;
@@ -48,7 +54,7 @@ abstract contract DocumentStore_Initializer is CommonTest {
   }
 }
 
-abstract contract DocumentStoreBatchable_Initializer is CommonTest {
+abstract contract DocumentStoreBatchable_Initializer is DocumentStoreCommonTest {
   bytes32 public docRoot;
   bytes32[] public documents = new bytes32[](3);
   bytes32[][] public proofs = new bytes32[][](3);
@@ -71,7 +77,7 @@ abstract contract DocumentStoreBatchable_Initializer is CommonTest {
   }
 }
 
-abstract contract DocumentStore_multicall_revoke_Base is CommonTest {
+abstract contract DocumentStore_multicall_revoke_Base is DocumentStoreCommonTest {
   bytes[] public bulkRevokeData;
 
   function docRoots() public view virtual returns (bytes32[] memory);

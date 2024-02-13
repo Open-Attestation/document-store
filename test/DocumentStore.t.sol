@@ -10,7 +10,7 @@ import "../src/interfaces/IDocumentStore.sol";
 import "../src/interfaces/IDocumentStoreBatchable.sol";
 import "./CommonTest.t.sol";
 
-contract DocumentStore_init_Test is CommonTest {
+contract DocumentStore_init_Test is DocumentStoreCommonTest {
   function testDocumentName() public {
     assertEq(documentStore.name(), storeName);
   }
@@ -32,7 +32,7 @@ contract DocumentStore_init_Test is CommonTest {
   }
 }
 
-contract DocumentStore_issue_Test is CommonTest {
+contract DocumentStore_issue_Test is DocumentStoreCommonTest {
   function setUp() public override {
     super.setUp();
   }
@@ -124,7 +124,7 @@ contract DocumentStore_issue_Test is CommonTest {
   }
 }
 
-contract DocumentStore_multicall_Issue_Test is CommonTest {
+contract DocumentStore_multicall_Issue_Test is DocumentStoreCommonTest {
   bytes32[] public docHashes;
 
   bytes[] public bulkIssueData;
@@ -382,7 +382,7 @@ contract DocumentStore_isActive_Test is DocumentStore_Initializer {
   }
 }
 
-contract DocumentStore_supportsInterface_Test is CommonTest {
+contract DocumentStore_supportsInterface_Test is DocumentStoreCommonTest {
   function testSupportsInterface() public {
     assertTrue(documentStore.supportsInterface(type(IDocumentStore).interfaceId));
     assertTrue(documentStore.supportsInterface(type(IDocumentStoreBatchable).interfaceId));
