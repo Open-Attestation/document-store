@@ -2,8 +2,6 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 interface IDocumentStore {
-
-
   /**
    * @notice Emitted when a document is issued
    * @param document The hash of the issued document

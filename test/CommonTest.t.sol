@@ -152,7 +152,9 @@ abstract contract DocumentStore_multicall_revoke_Base is DocumentStoreCommonTest
     bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoots()[0], documents()[0], proofs()[0]));
 
     // It should revert that document0 is already inactive
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.InactiveDocument.selector, docRoots()[0], documents()[0]));
+    vm.expectRevert(
+      abi.encodeWithSelector(IDocumentStoreErrors.InactiveDocument.selector, docRoots()[0], documents()[0])
+    );
 
     vm.prank(revoker);
     documentStore.multicall(bulkRevokeData);
@@ -239,8 +241,6 @@ abstract contract OwnableDocumentStoreCommonTest is CommonTest {
   string public storeName = "OwnableDocumentStore Test";
   string public storeSymbol = "XYZ";
 
-  address public recipient = vm.addr(4);
-
   function setUp() public virtual override {
     super.setUp();
 
@@ -250,6 +250,28 @@ abstract contract OwnableDocumentStoreCommonTest is CommonTest {
     documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
     documentStore.grantRole(documentStore.REVOKER_ROLE(), revoker);
 
+    vm.stopPrank();
+  }
+}
+
+abstract contract OwnableDocumentStore_Initializer is OwnableDocumentStoreCommonTest {
+  bytes32[] public documents;
+  address[] public recipients;
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    documents = new bytes32[](2);
+    documents[0] = "0x1111";
+    documents[1] = "0x2222";
+
+    recipients = new address[](2);
+    recipients[0] = vm.addr(4);
+    recipients[1] = vm.addr(5);
+
+    vm.startPrank(issuer);
+    documentStore.issue(recipients[0], documents[0]);
+    documentStore.issue(recipients[1], documents[1]);
     vm.stopPrank();
   }
 }
