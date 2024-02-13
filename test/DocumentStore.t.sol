@@ -137,8 +137,8 @@ contract DocumentStore_multicall_Issue_Test is DocumentStoreCommonTest {
     docHashes[1] = "0x5678";
 
     bulkIssueData = new bytes[](2);
-    bulkIssueData[0] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
-    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[1]));
+    bulkIssueData[0] = abi.encodeCall(IDocumentStoreBatchable.issue, (docHashes[0]));
+    bulkIssueData[1] = abi.encodeCall(IDocumentStoreBatchable.issue, (docHashes[1]));
   }
 
   function testBulkIssueByIssuer() public {
@@ -171,7 +171,7 @@ contract DocumentStore_multicall_Issue_Test is DocumentStoreCommonTest {
 
   function testBulkIssueWithDuplicatesRevert() public {
     docHashes[1] = docHashes[0];
-    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
+    bulkIssueData[1] = abi.encodeCall(IDocumentStoreBatchable.issue, (docHashes[0]));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHashes[1])));
 

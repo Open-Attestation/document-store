@@ -28,8 +28,6 @@ interface IDocumentStore {
 
   function name() external view returns (string memory);
 
-  function issue(bytes32 documentRoot) external;
-
   function revoke(bytes32 documentRoot) external;
 
   function isIssued(bytes32 documentRoot) external view returns (bool);
