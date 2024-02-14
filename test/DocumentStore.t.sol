@@ -96,7 +96,7 @@ contract DocumentStore_issue_Test is DocumentStoreCommonTest {
     vm.startPrank(issuer);
     documentStore.issue(docHash);
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHash)));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.DocumentExists.selector, bytes32(docHash)));
 
     documentStore.issue(docHash);
     vm.stopPrank();
@@ -110,14 +110,14 @@ contract DocumentStore_issue_Test is DocumentStoreCommonTest {
     documentStore.revoke(docHash);
     vm.stopPrank();
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHash)));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.DocumentExists.selector, bytes32(docHash)));
 
     vm.prank(issuer);
     documentStore.issue(docHash);
   }
 
   function testIssueZeroDocument() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
 
     vm.prank(issuer);
     documentStore.issue(0x0);
@@ -173,7 +173,7 @@ contract DocumentStore_multicall_Issue_Test is DocumentStoreCommonTest {
     docHashes[1] = docHashes[0];
     bulkIssueData[1] = abi.encodeCall(IDocumentStoreBatchable.issue, (docHashes[0]));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHashes[1])));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.DocumentExists.selector, bytes32(docHashes[1])));
 
     vm.prank(issuer);
     documentStore.multicall(bulkIssueData);
@@ -186,7 +186,7 @@ contract DocumentStore_isIssued_Test is DocumentStoreBatchable_Initializer {
   }
 
   function testIsRootIssuedWithZeroRoot() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.isIssued(0x0);
   }
@@ -202,22 +202,22 @@ contract DocumentStore_isIssued_Test is DocumentStoreBatchable_Initializer {
   }
 
   function testIsIssuedWithInvalidProof() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[1]));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.InvalidDocument.selector, docRoot, documents[1]));
 
     documentStore.isIssued(docRoot, documents[1], proofs[0]);
   }
 
   function testIsIssuedWithInvalidEmptyProof() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[1]));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.InvalidDocument.selector, docRoot, documents[1]));
 
     documentStore.isIssued(docRoot, documents[1], new bytes32[](0));
   }
 
   function testIsIssuedWithZeroDocument() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
     documentStore.isIssued(0x0, documents[0], proofs[0]);
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
     documentStore.isIssued(docRoot, 0x0, proofs[0]);
   }
 }
@@ -280,7 +280,7 @@ contract DocumentStore_revoke_Test is DocumentStore_Initializer {
   }
 
   function testRevokeWithZeroRoot() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
 
     vm.prank(revoker);
     documentStore.revoke(0x0);
@@ -290,7 +290,7 @@ contract DocumentStore_revoke_Test is DocumentStore_Initializer {
     vm.startPrank(revoker);
     documentStore.revoke(targetDoc);
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, targetDoc, targetDoc));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.InactiveDocument.selector, targetDoc, targetDoc));
 
     documentStore.revoke(targetDoc);
     vm.stopPrank();
@@ -299,7 +299,9 @@ contract DocumentStore_revoke_Test is DocumentStore_Initializer {
   function testRevokeNotIssuedRootRevert() public {
     bytes32 nonIssuedRoot = "0x1234";
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot));
+    vm.expectRevert(
+      abi.encodeWithSelector(IDocumentStoreErrors.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot)
+    );
 
     vm.prank(revoker);
     documentStore.revoke(nonIssuedRoot);
@@ -338,7 +340,7 @@ contract DocumentStore_isRevoked_Test is DocumentStore_Initializer {
   }
 
   function testIsRevokedWithZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.isRevoked(0x0);
   }
@@ -346,7 +348,9 @@ contract DocumentStore_isRevoked_Test is DocumentStore_Initializer {
   function testIsRevokedWithNotIssuedDocumentRevert() public {
     bytes32 notIssuedRoot = "0x1234";
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedRoot, notIssuedRoot));
+    vm.expectRevert(
+      abi.encodeWithSelector(IDocumentStoreErrors.DocumentNotIssued.selector, notIssuedRoot, notIssuedRoot)
+    );
 
     documentStore.isRevoked(notIssuedRoot);
   }
@@ -369,14 +373,16 @@ contract DocumentStore_isActive_Test is DocumentStore_Initializer {
   }
 
   function testIsActiveWithZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.ZeroDocument.selector));
     documentStore.isActive(0x0);
   }
 
   function testIsActiveWithNotIssuedDocumentRevert() public {
     bytes32 notIssuedDoc = "0x1234";
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedDoc, notIssuedDoc));
+    vm.expectRevert(
+      abi.encodeWithSelector(IDocumentStoreErrors.DocumentNotIssued.selector, notIssuedDoc, notIssuedDoc)
+    );
 
     documentStore.isActive(notIssuedDoc);
   }

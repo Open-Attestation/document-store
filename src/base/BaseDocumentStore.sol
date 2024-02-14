@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/MulticallUpgradeable.sol";
 
 import "../interfaces/IDocumentStoreBatchable.sol";
 import "./DocumentStoreAccessControl.sol";
+import "../interfaces/IDocumentStoreErrors.sol";
 
 /**
  * @title BaseDocumentStore
@@ -17,6 +18,7 @@ abstract contract BaseDocumentStore is
   Initializable,
   MulticallUpgradeable,
   DocumentStoreAccessControl,
+  IDocumentStoreErrors,
   IDocumentStoreBatchable
 {
   using MerkleProof for bytes32[];
