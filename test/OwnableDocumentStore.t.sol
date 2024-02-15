@@ -3,6 +3,7 @@ pragma solidity >=0.8.23 <0.9.0;
 
 import "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "./CommonTest.t.sol";
 
@@ -439,6 +440,44 @@ contract OwnableDocumentStore_locked_Test is OwnableDocumentStoreCommonTest {
     vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.locked(uint256(bytes32(0)));
+  }
+}
+
+contract OwnableDocumentStore_setBaseURI_Test is OwnableDocumentStore_Initializer {
+  using Strings for uint256;
+
+  string public baseURI = "https://example.com/";
+
+  function testSetBaseURI() public {
+    vm.prank(owner);
+    documentStore.setBaseURI(baseURI);
+
+    string memory tokenURI = documentStore.tokenURI(uint256(documents[0]));
+
+    assertEq(abi.encodePacked(tokenURI), abi.encodePacked(string.concat(baseURI, uint256(documents[0]).toHexString())));
+  }
+
+  function testSetBaseURIEmptyString() public {
+    vm.prank(owner);
+    documentStore.setBaseURI("");
+
+    string memory tokenUri = documentStore.tokenURI(uint256(documents[0]));
+    assertEq(abi.encodePacked(tokenUri), abi.encodePacked(""));
+  }
+
+  function testSetBaseURIAsNonAdminRevert() public {
+    address nonAdmin = vm.addr(69);
+
+    vm.expectRevert(
+      abi.encodeWithSelector(
+        IAccessControl.AccessControlUnauthorizedAccount.selector,
+        nonAdmin,
+        documentStore.DEFAULT_ADMIN_ROLE()
+      )
+    );
+
+    vm.prank(nonAdmin);
+    documentStore.setBaseURI(baseURI);
   }
 }
 
