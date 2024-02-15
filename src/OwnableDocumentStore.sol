@@ -4,9 +4,8 @@ pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
-import {IDocumentStore} from "./interfaces/IDocumentStore.sol";
 import "./base/DocumentStoreAccessControl.sol";
-import "./interfaces/IOwnableDocumentStoere.sol";
+import "./interfaces/IOwnableDocumentStore.sol";
 import "./interfaces/IOwnableDocumentStoreErrors.sol";
 import "./interfaces/IERC5192.sol";
 
@@ -17,8 +16,15 @@ contract OwnableDocumentStore is
   IOwnableDocumentStoreErrors,
   IOwnableDocumentStore
 {
-  mapping(uint256 => bool) private _revoked;
-  mapping(uint256 => bool) private _locked;
+  /// @custom:storage-location erc7201:openattestation.storage.OwnableDocumentStore
+  struct DocumentStoreStorage {
+    mapping(uint256 => bool) revoked;
+    mapping(uint256 => bool) locked;
+  }
+
+  // keccak256(abi.encode(uint256(keccak256("openattestation.storage.OwnableDocumentStore")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant _DocumentStoreStorageSlot =
+    0x5b868bb5de5c3e5f8f786d02cbc568987b1921539a10331babbe7311c24de500;
 
   constructor(string memory name_, string memory symbol_, address initAdmin) {
     initialize(name_, symbol_, initAdmin);
@@ -58,7 +64,7 @@ contract OwnableDocumentStore is
     if (!_isRevoked(tokenId)) {
       _mint(to, tokenId);
       if (lock) {
-        _locked[tokenId] = true;
+        _getStorage().locked[tokenId] = true;
         emit Locked(tokenId);
       } else {
         emit Unlocked(tokenId);
@@ -71,7 +77,7 @@ contract OwnableDocumentStore is
   function revoke(bytes32 document) public onlyRole(REVOKER_ROLE) {
     uint256 tokenId = uint256(document);
     _burn(tokenId);
-    _revoked[tokenId] = true;
+    _getStorage().revoked[tokenId] = true;
   }
 
   function isIssued(bytes32 document) public view nonZeroDocument(document) returns (bool) {
@@ -113,11 +119,11 @@ contract OwnableDocumentStore is
   }
 
   function _isRevoked(uint256 tokenId) internal view returns (bool) {
-    return _revoked[tokenId];
+    return _getStorage().revoked[tokenId];
   }
 
   function _isLocked(uint256 tokenId) internal view returns (bool) {
-    return _locked[tokenId];
+    return _getStorage().locked[tokenId];
   }
 
   function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
@@ -126,6 +132,12 @@ contract OwnableDocumentStore is
       revert DocumentLocked(bytes32(tokenId));
     }
     return from;
+  }
+
+  function _getStorage() private pure returns (DocumentStoreStorage storage $) {
+    assembly {
+      $.slot := _DocumentStoreStorageSlot
+    }
   }
 
   modifier nonZeroDocument(bytes32 document) {
