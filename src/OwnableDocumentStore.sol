@@ -8,14 +8,17 @@ import {IDocumentStore} from "./interfaces/IDocumentStore.sol";
 import "./base/DocumentStoreAccessControl.sol";
 import "./interfaces/IOwnableDocumentStoere.sol";
 import "./interfaces/IOwnableDocumentStoreErrors.sol";
+import "./interfaces/IERC5192.sol";
 
 contract OwnableDocumentStore is
   DocumentStoreAccessControl,
   ERC721Upgradeable,
+  IERC5192,
   IOwnableDocumentStoreErrors,
   IOwnableDocumentStore
 {
   mapping(uint256 => bool) private _revoked;
+  mapping(uint256 => bool) private _locked;
 
   constructor(string memory name_, string memory symbol_, address initAdmin) {
     initialize(name_, symbol_, initAdmin);
@@ -38,10 +41,6 @@ contract OwnableDocumentStore is
     return super.name();
   }
 
-  function _isRevoked(uint256 tokenId) internal view returns (bool) {
-    return _revoked[tokenId];
-  }
-
   function isActive(bytes32 document) public view nonZeroDocument(document) returns (bool) {
     uint256 tokenId = uint256(document);
     address owner = _ownerOf(tokenId);
@@ -54,10 +53,16 @@ contract OwnableDocumentStore is
     revert ERC721NonexistentToken(tokenId);
   }
 
-  function issue(address to, bytes32 document) public nonZeroDocument(document) onlyRole(ISSUER_ROLE) {
+  function issue(address to, bytes32 document, bool lock) public nonZeroDocument(document) onlyRole(ISSUER_ROLE) {
     uint256 tokenId = uint256(document);
     if (!_isRevoked(tokenId)) {
       _mint(to, tokenId);
+      if (lock) {
+        _locked[tokenId] = true;
+        emit Locked(tokenId);
+      } else {
+        emit Unlocked(tokenId);
+      }
     } else {
       revert DocumentIsRevoked(document);
     }
@@ -96,7 +101,31 @@ contract OwnableDocumentStore is
     return
       interfaceId == type(IDocumentStore).interfaceId ||
       interfaceId == type(IOwnableDocumentStore).interfaceId ||
+      interfaceId == type(IERC5192).interfaceId ||
       super.supportsInterface(interfaceId);
+  }
+
+  function locked(uint256 tokenId) public view returns (bool) {
+    if (tokenId == 0) {
+      revert ZeroDocument();
+    }
+    return _isLocked(tokenId);
+  }
+
+  function _isRevoked(uint256 tokenId) internal view returns (bool) {
+    return _revoked[tokenId];
+  }
+
+  function _isLocked(uint256 tokenId) internal view returns (bool) {
+    return _locked[tokenId];
+  }
+
+  function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
+    address from = super._update(to, tokenId, auth);
+    if (_isLocked(tokenId) && (from != address(0) && to != address(0))) {
+      revert DocumentLocked(bytes32(tokenId));
+    }
+    return from;
   }
 
   modifier nonZeroDocument(bytes32 document) {
