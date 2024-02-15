@@ -245,11 +245,9 @@ abstract contract OwnableDocumentStoreCommonTest is CommonTest {
     super.setUp();
 
     vm.startPrank(owner);
-
     documentStore = new OwnableDocumentStore(storeName, storeSymbol, owner);
     documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
     documentStore.grantRole(documentStore.REVOKER_ROLE(), revoker);
-
     vm.stopPrank();
   }
 }
@@ -270,8 +268,8 @@ abstract contract OwnableDocumentStore_Initializer is OwnableDocumentStoreCommon
     recipients[1] = vm.addr(5);
 
     vm.startPrank(issuer);
-    documentStore.issue(recipients[0], documents[0]);
-    documentStore.issue(recipients[1], documents[1]);
+    documentStore.issue(recipients[0], documents[0], false);
+    documentStore.issue(recipients[1], documents[1], true);
     vm.stopPrank();
   }
 }

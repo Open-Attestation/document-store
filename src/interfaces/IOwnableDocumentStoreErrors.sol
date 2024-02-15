@@ -9,4 +9,6 @@ interface IOwnableDocumentStoreErrors {
   error ZeroDocument();
 
   error DocumentIsRevoked(bytes32 document);
+
+  error DocumentLocked(bytes32 document);
 }
