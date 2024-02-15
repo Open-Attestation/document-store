@@ -260,8 +260,8 @@ abstract contract OwnableDocumentStore_Initializer is OwnableDocumentStoreCommon
     super.setUp();
 
     documents = new bytes32[](2);
-    documents[0] = "0x1111";
-    documents[1] = "0x2222";
+    documents[0] = 0x795bb6abe4c5bb81e397821324d44bf7a94785587d0c88c621f57268c8aef4cb;
+    documents[1] = 0x9bc394ef702b639adb913242a472e883f4834b4f38ed38f046bec8fcc1104fa3;
 
     recipients = new address[](2);
     recipients[0] = vm.addr(4);

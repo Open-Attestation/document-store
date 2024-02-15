@@ -3,6 +3,7 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "./base/DocumentStoreAccessControl.sol";
 import "./interfaces/IOwnableDocumentStore.sol";
@@ -16,8 +17,11 @@ contract OwnableDocumentStore is
   IOwnableDocumentStoreErrors,
   IOwnableDocumentStore
 {
+  using Strings for uint256;
+
   /// @custom:storage-location erc7201:openattestation.storage.OwnableDocumentStore
   struct DocumentStoreStorage {
+    string baseURI;
     mapping(uint256 => bool) revoked;
     mapping(uint256 => bool) locked;
   }
@@ -101,6 +105,15 @@ contract OwnableDocumentStore is
     return false;
   }
 
+  function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    _requireOwned(tokenId);
+
+    string memory tokenIdHexStr = tokenId.toHexString();
+
+    string memory baseURI = _baseURI();
+    return bytes(baseURI).length > 0 ? string.concat(baseURI, tokenIdHexStr) : "";
+  }
+
   function supportsInterface(
     bytes4 interfaceId
   ) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
@@ -118,6 +131,10 @@ contract OwnableDocumentStore is
     return _isLocked(tokenId);
   }
 
+  function setBaseURI(string memory baseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _getStorage().baseURI = baseURI;
+  }
+
   function _isRevoked(uint256 tokenId) internal view returns (bool) {
     return _getStorage().revoked[tokenId];
   }
@@ -132,6 +149,10 @@ contract OwnableDocumentStore is
       revert DocumentLocked(bytes32(tokenId));
     }
     return from;
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+    return _getStorage().baseURI;
   }
 
   function _getStorage() private pure returns (DocumentStoreStorage storage $) {
