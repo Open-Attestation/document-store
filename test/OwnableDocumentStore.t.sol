@@ -190,8 +190,8 @@ contract OwnableDocumentStore_revoke_Test is OwnableDocumentStore_Initializer {
   function setUp() public override {
     super.setUp();
 
-    unlockedDocument = documents[0];
-    lockedDocument = documents[1];
+    unlockedDocument = documents()[0];
+    lockedDocument = documents()[1];
   }
 
   function testRevokeUnlockedDocumentAsRevokerSuccess() public {
@@ -276,7 +276,7 @@ contract OwnableDocumentStore_revoke_Test is OwnableDocumentStore_Initializer {
 
 contract OwnableDocumentStore_isIssued_Test is OwnableDocumentStore_Initializer {
   function testIsIssued() public {
-    assertTrue(documentStore.isIssued(documents[0]), "Document should be issued");
+    assertTrue(documentStore.isIssued(documents()[0]), "Document should be issued");
   }
 
   function testIsIssuedNotIssuedDocument() public {
@@ -286,10 +286,12 @@ contract OwnableDocumentStore_isIssued_Test is OwnableDocumentStore_Initializer 
   }
 
   function testIsIssuedRevokedDocument() public {
-    vm.prank(revoker);
-    documentStore.revoke(documents[0]);
+    bytes32 targetDoc = documents()[0];
 
-    assertTrue(documentStore.isIssued(documents[0]), "Document should be issued");
+    vm.prank(revoker);
+    documentStore.revoke(targetDoc);
+
+    assertTrue(documentStore.isIssued(targetDoc), "Document should be issued");
   }
 
   function testIsIssuedZeroDocumentRevert() public {
@@ -303,16 +305,17 @@ contract OwnableDocumentStore_isRevoked_Test is OwnableDocumentStore_Initializer
   function setUp() public override {
     super.setUp();
 
-    vm.prank(revoker);
-    documentStore.revoke(documents[0]);
+    vm.startPrank(revoker);
+    documentStore.revoke(documents()[0]);
+    vm.stopPrank();
   }
 
   function testIsRevoked() public {
-    assertTrue(documentStore.isRevoked(documents[0]), "Document should be revoked");
+    assertTrue(documentStore.isRevoked(documents()[0]), "Document should be revoked");
   }
 
   function testIsRevokedNotRevokedDocument() public {
-    assertFalse(documentStore.isRevoked(documents[1]), "Document should not be revoked");
+    assertFalse(documentStore.isRevoked(documents()[1]), "Document should not be revoked");
   }
 
   function testIsRevokedNotIssuedDocumentRevert() public {
@@ -332,18 +335,18 @@ contract OwnableDocumentStore_isRevoked_Test is OwnableDocumentStore_Initializer
 
 contract OwnableDocumentStore_isActive_Test is OwnableDocumentStore_Initializer {
   function testIsActive() public {
-    assertTrue(documentStore.isActive(documents[0]), "Document should be active");
-    assertTrue(documentStore.isActive(documents[1]), "Document should be active");
+    assertTrue(documentStore.isActive(documents()[0]), "Document should be active");
+    assertTrue(documentStore.isActive(documents()[1]), "Document should be active");
   }
 
   function testIsActiveRevertedDocument() public {
     vm.startPrank(revoker);
-    documentStore.revoke(documents[0]);
-    documentStore.revoke(documents[1]);
+    documentStore.revoke(documents()[0]);
+    documentStore.revoke(documents()[1]);
     vm.stopPrank();
 
-    assertFalse(documentStore.isActive(documents[0]), "Document should not be active");
-    assertFalse(documentStore.isActive(documents[1]), "Document should not be active");
+    assertFalse(documentStore.isActive(documents()[0]), "Document should not be active");
+    assertFalse(documentStore.isActive(documents()[1]), "Document should not be active");
   }
 
   function testIsActiveNotIssuedDocumentRevert() public {
@@ -368,8 +371,8 @@ contract OwnableDocumentStore_transfer_Test is OwnableDocumentStore_Initializer 
   function setUp() public override {
     super.setUp();
 
-    unlockedDocument = documents[0];
-    lockedDocument = documents[1];
+    unlockedDocument = documents()[0];
+    lockedDocument = documents()[1];
   }
 
   function testTransferFromUnlockedDocumentToNewRecipient() public {
@@ -452,16 +455,19 @@ contract OwnableDocumentStore_setBaseURI_Test is OwnableDocumentStore_Initialize
     vm.prank(owner);
     documentStore.setBaseURI(baseURI);
 
-    string memory tokenURI = documentStore.tokenURI(uint256(documents[0]));
+    string memory tokenURI = documentStore.tokenURI(uint256(documents()[0]));
 
-    assertEq(abi.encodePacked(tokenURI), abi.encodePacked(string.concat(baseURI, uint256(documents[0]).toHexString())));
+    assertEq(
+      abi.encodePacked(tokenURI),
+      abi.encodePacked(string.concat(baseURI, uint256(documents()[0]).toHexString()))
+    );
   }
 
   function testSetBaseURIEmptyString() public {
     vm.prank(owner);
     documentStore.setBaseURI("");
 
-    string memory tokenUri = documentStore.tokenURI(uint256(documents[0]));
+    string memory tokenUri = documentStore.tokenURI(uint256(documents()[0]));
     assertEq(abi.encodePacked(tokenUri), abi.encodePacked(""));
   }
 
