@@ -2,31 +2,28 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {CommonTest} from "./CommonTest.t.sol";
+
 import "../src/upgradeables/DocumentStoreUpgradeable.sol";
+import {CommonTest} from "./CommonTest.t.sol";
+import {DeployUtils} from "../src/utils/DeployUtils.sol";
 
 contract DocumentStoreUpgradeable_Test is CommonTest {
   DocumentStoreUpgradeable public dsProxy;
   DocumentStoreUpgradeable public documentStore;
-
-  string public implName = "ImplDocumentStore";
-  address public implOwner = vm.addr(99);
 
   string public initialName = "DocumentStore";
 
   function setUp() public override {
     super.setUp();
 
-    bytes memory initData = abi.encodeCall(DocumentStoreUpgradeable.initialize, (initialName, owner));
-
-    documentStore = new DocumentStoreUpgradeable(implName, implOwner);
-    ERC1967Proxy proxy = new ERC1967Proxy(address(documentStore), initData);
-    dsProxy = DocumentStoreUpgradeable(address(proxy));
+    (address proxyAddr, address dsAddr) = DeployUtils.deployDocumentStoreUpgradeable(initialName, owner);
+    dsProxy = DocumentStoreUpgradeable(proxyAddr);
+    documentStore = DocumentStoreUpgradeable(dsAddr);
   }
 
   function testImplInitializedValues() public {
-    assertEq(documentStore.name(), implName);
-    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), implOwner));
+    assertEq(documentStore.name(), initialName);
+    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
   }
 
   function testImplReinitialiseFail() public {

@@ -2,16 +2,14 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {CommonTest} from "./CommonTest.t.sol";
+
 import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
+import {CommonTest} from "./CommonTest.t.sol";
+import {DeployUtils} from "../src/utils/DeployUtils.sol";
 
 contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   OwnableDocumentStoreUpgradeable public dsProxy;
   OwnableDocumentStoreUpgradeable public documentStore;
-
-  string public implName = "ImplOwnableDocumentStore";
-  string public implSymbol = "ImplTEST";
-  address public implOwner = vm.addr(99);
 
   string public initialName = "OwnableDocumentStore";
   string public initialSymbol = "TEST";
@@ -19,20 +17,19 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   function setUp() public override {
     super.setUp();
 
-    bytes memory initData = abi.encodeCall(
-      OwnableDocumentStoreUpgradeable.initialize,
-      (initialName, initialSymbol, owner)
+    (address proxyAddr, address dsAddr) = DeployUtils.deployOwnableDocumentStoreUpgradeable(
+      initialName,
+      initialSymbol,
+      owner
     );
-
-    documentStore = new OwnableDocumentStoreUpgradeable(implName, implSymbol, implOwner);
-    ERC1967Proxy proxy = new ERC1967Proxy(address(documentStore), initData);
-    dsProxy = OwnableDocumentStoreUpgradeable(address(proxy));
+    dsProxy = OwnableDocumentStoreUpgradeable(proxyAddr);
+    documentStore = OwnableDocumentStoreUpgradeable(dsAddr);
   }
 
   function testImplInitializedValues() public {
-    assertEq(documentStore.name(), implName);
-    assertEq(documentStore.symbol(), implSymbol);
-    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), implOwner));
+    assertEq(documentStore.name(), initialName);
+    assertEq(documentStore.symbol(), initialSymbol);
+    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
   }
 
   function testImplReinitialiseFail() public {
@@ -68,7 +65,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallAsAdmin() public {
-    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", implSymbol, owner));
+    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", initialSymbol, owner));
 
     vm.prank(owner);
     dsProxy.upgradeToAndCall(newImplementation, "");
@@ -79,7 +76,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallReinitialiseFail() public {
-    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", implSymbol, owner));
+    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", initialSymbol, owner));
     bytes memory initData = abi.encodeCall(
       OwnableDocumentStoreUpgradeable.initialize,
       (initialName, initialSymbol, owner)
