@@ -22,8 +22,8 @@ contract DocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testImplInitializedValues() public {
-    assertEq(documentStore.name(), initialName);
-    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
+    assertEq(documentStore.name(), "");
+    assertFalse(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
   }
 
   function testImplReinitialiseFail() public {
@@ -43,7 +43,7 @@ contract DocumentStoreUpgradeable_Test is CommonTest {
 
   function testUpgradeToAndCallAsNonAdmin() public {
     address nonAdmin = vm.addr(69);
-    address newImplementation = address(new DocumentStoreUpgradeable("NewImplDocumentStore", owner));
+    address newImplementation = address(new DocumentStoreUpgradeable());
 
     vm.expectRevert(
       abi.encodeWithSelector(
@@ -58,7 +58,7 @@ contract DocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallAsAdmin() public {
-    address newImplementation = address(new DocumentStoreUpgradeable("TestName", owner));
+    address newImplementation = address(new DocumentStoreUpgradeable());
 
     vm.prank(owner);
     dsProxy.upgradeToAndCall(newImplementation, "");
@@ -69,7 +69,7 @@ contract DocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallReinitialiseFail() public {
-    address newImplementation = address(new DocumentStoreUpgradeable("TestName", owner));
+    address newImplementation = address(new DocumentStoreUpgradeable());
     bytes memory initData = abi.encodeCall(DocumentStoreUpgradeable.initialize, (initialName, owner));
 
     vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
