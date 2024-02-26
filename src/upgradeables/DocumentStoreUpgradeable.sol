@@ -12,12 +12,8 @@ import "../base/BaseDocumentStore.sol";
 contract DocumentStoreUpgradeable is UUPSUpgradeable, BaseDocumentStore {
   /**
    * @notice Initialises the contract with a name and initial admin
-   * @param name The name of the contract
-   * @param initAdmin The initial admin of the contract
    */
-  constructor(string memory name, address initAdmin) {
-    initialize(name, initAdmin);
-  }
+  constructor() initializer {}
 
   /**
    * @notice Internally initialises the contract with a name and owner

@@ -10,7 +10,7 @@ library DeployUtils {
   function deployDocumentStoreUpgradeable(string memory name, address initAdmin) internal returns (address, address) {
     bytes memory initData = abi.encodeCall(DocumentStoreUpgradeable.initialize, (name, initAdmin));
 
-    DocumentStoreUpgradeable documentStore = new DocumentStoreUpgradeable(name, initAdmin);
+    DocumentStoreUpgradeable documentStore = new DocumentStoreUpgradeable();
     address dsAddr = address(documentStore);
 
     ERC1967Proxy proxy = new ERC1967Proxy(dsAddr, initData);
@@ -25,7 +25,7 @@ library DeployUtils {
   ) internal returns (address, address) {
     bytes memory initData = abi.encodeCall(OwnableDocumentStoreUpgradeable.initialize, (name, symbol, initAdmin));
 
-    OwnableDocumentStoreUpgradeable documentStore = new OwnableDocumentStoreUpgradeable(name, symbol, initAdmin);
+    OwnableDocumentStoreUpgradeable documentStore = new OwnableDocumentStoreUpgradeable();
     address dsAddr = address(documentStore);
 
     ERC1967Proxy proxy = new ERC1967Proxy(dsAddr, initData);

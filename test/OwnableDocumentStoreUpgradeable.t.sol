@@ -27,9 +27,9 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testImplInitializedValues() public {
-    assertEq(documentStore.name(), initialName);
-    assertEq(documentStore.symbol(), initialSymbol);
-    assertTrue(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
+    assertEq(documentStore.name(), "");
+    assertEq(documentStore.symbol(), "");
+    assertFalse(documentStore.hasRole(documentStore.DEFAULT_ADMIN_ROLE(), owner));
   }
 
   function testImplReinitialiseFail() public {
@@ -50,7 +50,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
 
   function testUpgradeToAndCallAsNonAdmin() public {
     address nonAdmin = vm.addr(69);
-    address newImplementation = address(new OwnableDocumentStoreUpgradeable("NewImplDocumentStore", "TEST2", owner));
+    address newImplementation = address(new OwnableDocumentStoreUpgradeable());
 
     vm.expectRevert(
       abi.encodeWithSelector(
@@ -65,7 +65,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallAsAdmin() public {
-    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", initialSymbol, owner));
+    address newImplementation = address(new OwnableDocumentStoreUpgradeable());
 
     vm.prank(owner);
     dsProxy.upgradeToAndCall(newImplementation, "");
@@ -76,7 +76,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   }
 
   function testUpgradeToAndCallReinitialiseFail() public {
-    address newImplementation = address(new OwnableDocumentStoreUpgradeable("TestName", initialSymbol, owner));
+    address newImplementation = address(new OwnableDocumentStoreUpgradeable());
     bytes memory initData = abi.encodeCall(
       OwnableDocumentStoreUpgradeable.initialize,
       (initialName, initialSymbol, owner)
