@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../src/upgradeables/DocumentStoreUpgradeable.sol";
 import {CommonTest} from "./CommonTest.t.sol";
-import {DeployUtils} from "../src/utils/DeployUtils.sol";
+import {DeployUtils} from "../src/libraries/DeployUtils.sol";
 
 contract DocumentStoreUpgradeable_Test is CommonTest {
   DocumentStoreUpgradeable public dsProxy;
@@ -70,7 +70,7 @@ contract DocumentStoreUpgradeable_Test is CommonTest {
 
   function testUpgradeToAndCallReinitialiseFail() public {
     address newImplementation = address(new DocumentStoreUpgradeable());
-    bytes memory initData = abi.encodeCall(DocumentStoreUpgradeable.initialize, (initialName, owner));
+    bytes memory initData = abi.encodeCall(DocumentStoreInitializable.initialize, (initialName, owner));
 
     vm.expectRevert(abi.encodeWithSelector(Initializable.InvalidInitialization.selector));
 

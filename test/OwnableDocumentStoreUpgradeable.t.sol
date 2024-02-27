@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
 import {CommonTest} from "./CommonTest.t.sol";
-import {DeployUtils} from "../src/utils/DeployUtils.sol";
+import {DeployUtils} from "../src/libraries/DeployUtils.sol";
 
 contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   OwnableDocumentStoreUpgradeable public dsProxy;
@@ -78,7 +78,7 @@ contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   function testUpgradeToAndCallReinitialiseFail() public {
     address newImplementation = address(new OwnableDocumentStoreUpgradeable());
     bytes memory initData = abi.encodeCall(
-      OwnableDocumentStoreUpgradeable.initialize,
+      OwnableDocumentStoreInitializable.initialize,
       (initialName, initialSymbol, owner)
     );
 

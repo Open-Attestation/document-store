@@ -19,7 +19,7 @@ contract DocumentStoreInitializable is BaseDocumentStore {
    * @param _name The name of the contract
    * @param initAdmin The owner of the contract
    */
-  function initialize(string memory _name, address initAdmin) public initializer {
+  function initialize(string memory _name, address initAdmin) external initializer {
     __BaseDocumentStore_init(_name, initAdmin);
   }
 }
