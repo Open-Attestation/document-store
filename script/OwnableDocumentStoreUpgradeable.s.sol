@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import "./DeployBase.s.sol";
-import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
-import {DeployUtils} from "../src/libraries/DeployUtils.sol";
+import {console2} from "forge-std/console2.sol";
 
-contract OwnableDocumentStoreUpgradeableScript is DeployBaseScript {
+import {OwnableDocumentStoreDeployScript} from "./DeployBase.s.sol";
+import {DeployUtils} from "../src/libraries/DeployUtils.sol";
+import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
+
+contract OwnableDocumentStoreUpgradeableScript is OwnableDocumentStoreDeployScript {
   function run(
     string memory name,
     string memory symbol,
@@ -20,11 +22,5 @@ contract OwnableDocumentStoreUpgradeableScript is DeployBaseScript {
     vm.broadcast();
     (address pAddr, ) = DeployUtils.deployOwnableDocumentStoreUpgradeable(name, symbol, admin);
     ds = OwnableDocumentStoreUpgradeable(pAddr);
-  }
-
-  function _requireParams(string memory name, string memory symbol, address admin) private pure {
-    require(bytes(name).length > 0, "Name is required");
-    require(bytes(symbol).length > 0, "Symbol is required");
-    require(admin != address(0), "Admin address is required");
   }
 }

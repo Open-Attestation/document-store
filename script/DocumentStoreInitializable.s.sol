@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import "./DeployBase.s.sol";
+import {DocumentStoreDeployScript} from "./DeployBase.s.sol";
 import "../src/initializables/DocumentStoreInitializable.sol";
 
-contract DocumentStoreInitializableScript is DeployBaseScript {
+contract DocumentStoreInitializableScript is DocumentStoreDeployScript {
   function run() public returns (DocumentStoreInitializable documentStore) {
     require(!dsImplExists(), "DocumentStoreInitializable already exists");
 
