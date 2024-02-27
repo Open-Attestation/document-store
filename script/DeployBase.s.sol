@@ -92,3 +92,18 @@ abstract contract DeployBaseScript is Script {
     return size > 0;
   }
 }
+
+abstract contract DocumentStoreDeployScript is DeployBaseScript {
+  function _requireParams(string memory name, address admin) internal pure {
+    require(bytes(name).length > 0, "Name is required");
+    require(admin != address(0), "Admin address is required");
+  }
+}
+
+abstract contract OwnableDocumentStoreDeployScript is DeployBaseScript {
+  function _requireParams(string memory name, string memory symbol, address admin) internal pure {
+    require(bytes(name).length > 0, "Name is required");
+    require(bytes(symbol).length > 0, "Symbol is required");
+    require(admin != address(0), "Admin address is required");
+  }
+}
