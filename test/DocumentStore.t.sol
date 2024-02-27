@@ -197,6 +197,16 @@ contract DocumentStore_isIssued_Test is DocumentStoreBatchable_Initializer {
     assertTrue(documentStore.isIssued(docRoot, docRoot, new bytes32[](0)));
   }
 
+  function testIsIssuedWithUnissuedDocument() public {
+    bytes32 unissuedRoot = 0x8e94948620212823846519f55db91fadecc19eba7758111c3f21da761c4baf7c;
+    bytes32 unissuedDoc = 0x82932945e5d2a2e496b2211962030e89dc082561093412adf5379966bac877ff;
+    bytes32[] memory unissuedProof = new bytes32[](2);
+    unissuedProof[0] = 0xda062ef17e68fe4c3ae489ad5642b272bc0f66c0a048e71dff5546af54499dfa;
+    unissuedProof[1] = 0x23b46799e8a2dd41e579d83a4b18fc830f951c2ef150c95cebab47980376bfa4;
+
+    assertFalse(documentStore.isIssued(unissuedRoot, unissuedDoc, unissuedProof));
+  }
+
   function testIsIssuedWithValidProof() public {
     assertTrue(documentStore.isIssued(docRoot, documents[0], proofs[0]));
     assertTrue(documentStore.isIssued(docRoot, documents[1], proofs[1]));
