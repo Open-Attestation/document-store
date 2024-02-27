@@ -8,7 +8,7 @@ import "../upgradeables/OwnableDocumentStoreUpgradeable.sol";
 
 library DeployUtils {
   function deployDocumentStoreUpgradeable(string memory name, address initAdmin) internal returns (address, address) {
-    bytes memory initData = abi.encodeCall(DocumentStoreUpgradeable.initialize, (name, initAdmin));
+    bytes memory initData = abi.encodeCall(DocumentStoreInitializable.initialize, (name, initAdmin));
 
     DocumentStoreUpgradeable documentStore = new DocumentStoreUpgradeable();
     address dsAddr = address(documentStore);
@@ -23,7 +23,7 @@ library DeployUtils {
     string memory symbol,
     address initAdmin
   ) internal returns (address, address) {
-    bytes memory initData = abi.encodeCall(OwnableDocumentStoreUpgradeable.initialize, (name, symbol, initAdmin));
+    bytes memory initData = abi.encodeCall(OwnableDocumentStoreInitializable.initialize, (name, symbol, initAdmin));
 
     OwnableDocumentStoreUpgradeable documentStore = new OwnableDocumentStoreUpgradeable();
     address dsAddr = address(documentStore);
