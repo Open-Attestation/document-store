@@ -9,16 +9,19 @@ require("@typechain/hardhat");
 
 module.exports = {
   solidity: {
-    version: "0.8.2",
+    version: "0.8.23",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
-      },
-    },
+        runs: 200
+      }
+    }
+  },
+  paths: {
+    sources: "./src"
   },
   typechain: {
-    outDir: "src/contracts",
-    dontOverrideCompile: false,
-  },
+    outDir: "types",
+    dontOverrideCompile: false
+  }
 };
