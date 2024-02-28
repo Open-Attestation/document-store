@@ -1,0 +1,114 @@
+on:
+  workflow_call:
+
+name: "Publish"
+
+jobs:
+  prepare-build:
+    name: Prepare Build
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.check-targets.outputs.MATRIX }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Install Dependencies
+        run: npm ci --no-fund --no-audit --ignore-scripts
+
+      - name: Compile contracts
+        run: npm run build:hh
+
+      - name: Upload contract artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-artefacts
+          path: |
+            artifacts/src
+
+      - name: Check targets
+        id: check-targets
+        run: |
+          echo "Checking targets..."
+          TARGETS_JSON=$(echo "${{ vars.TYPE_TARGETS }}" | jq -c --raw-input 'split(",")')
+          echo "MATRIX=$TARGETS_JSON" >> $GITHUB_OUTPUT
+          echo "Generated matrix: $TARGETS_JSON"
+
+  build-targets:
+    name: Build Targets
+    needs: prepare-build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        targets: ${{fromJson(needs.prepare-build.outputs.matrix)}}
+    env:
+      MATRIX_TARGET: ${{ matrix.targets }}
+    steps:
+      - name: Print the matrix output from prepare-matrix
+        run: |
+          echo "Matrix JSON: $MATRIX_JSON"
+        env:
+          MATRIX_JSON: ${{ needs.prepare-build.outputs.matrix }}
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v4
+        with:
+          name: contract-artefacts
+          path: artifacts/src
+
+      - name: Check contract artefacts
+        run: |
+          if [ ! -d "artifacts/src" ]; then
+            echo "Contract artefacts not found." && exit 1
+          fi
+
+      - name: Build types for ${{ env.MATRIX_TARGET }}
+        run: |
+          echo "Generating types for ${{ env.MATRIX_TARGET }}"
+          ./build.sh typechain ${{ env.MATRIX_TARGET }}
+
+      - name: Upload type targets
+        uses: actions/upload-artifact@v4
+        with:
+          name: types-${{ env.MATRIX_TARGET }}
+          path: |
+            .build/types-${{ env.MATRIX_TARGET }}
+            !.build/types-${{ env.MATRIX_TARGET }}/node_modules
+
+  publish:
+    name: Publish to NPM
+    needs: build-targets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        run: npm ci --no-fund --no-audit --ignore-scripts
+
+      - name: Download type targets
+        uses: actions/download-artifact@v4
+        with:
+          path: .build
+          pattern: types-*
+
+      - name: Publish to NPM
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing packages to NPM"
+          npm run semantic-release

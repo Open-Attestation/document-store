@@ -1,9 +1,9 @@
 on:
   pull_request:
-    types: [ opened, reopened, synchronize ]
+    types: [opened, reopened, synchronize]
 
 env:
-  NODE_ENV: ci
+  RELEASE_DRY_RUN: 1
 
 name: "Pull Requests"
 
@@ -27,3 +27,7 @@ jobs:
       - uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  release-check:
+    name: Release Check
+    uses: ./.github/workflows/publish.yml
