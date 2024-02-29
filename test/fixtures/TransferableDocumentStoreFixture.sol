@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-contract OwnableDocumentStoreFixture {
+contract TransferableDocumentStoreFixture {
   bytes32[] internal _documents;
 
   constructor() {

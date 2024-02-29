@@ -5,8 +5,8 @@ import "forge-std/Test.sol";
 
 import "../src/DocumentStore.sol";
 import "./fixtures/DocumentStoreFixture.sol";
-import "../src/OwnableDocumentStore.sol";
-import "./fixtures/OwnableDocumentStoreFixture.sol";
+import "../src/TransferableDocumentStore.sol";
+import "./fixtures/TransferableDocumentStoreFixture.sol";
 
 abstract contract CommonTest is Test {
   address public owner = vm.addr(1);
@@ -236,31 +236,31 @@ abstract contract DocumentStore_multicall_revoke_Initializer is DocumentStore_mu
   }
 }
 
-abstract contract OwnableDocumentStoreCommonTest is CommonTest {
-  OwnableDocumentStore public documentStore;
+abstract contract TranferableDocumentStoreCommonTest is CommonTest {
+  TransferableDocumentStore public documentStore;
 
-  string public storeName = "OwnableDocumentStore Test";
+  string public storeName = "TransferableDocumentStore Test";
   string public storeSymbol = "XYZ";
 
   function setUp() public virtual override {
     super.setUp();
 
     vm.startPrank(owner);
-    documentStore = new OwnableDocumentStore(storeName, storeSymbol, owner);
+    documentStore = new TransferableDocumentStore(storeName, storeSymbol, owner);
     documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
     documentStore.grantRole(documentStore.REVOKER_ROLE(), revoker);
     vm.stopPrank();
   }
 }
 
-abstract contract OwnableDocumentStore_Initializer is OwnableDocumentStoreCommonTest {
-  OwnableDocumentStoreFixture private _fixture;
+abstract contract TransferableDocumentStore_Initializer is TranferableDocumentStoreCommonTest {
+  TransferableDocumentStoreFixture private _fixture;
   address[] public recipients;
 
   function setUp() public virtual override {
     super.setUp();
 
-    _fixture = new OwnableDocumentStoreFixture();
+    _fixture = new TransferableDocumentStoreFixture();
 
     recipients = new address[](2);
     recipients[0] = vm.addr(4);

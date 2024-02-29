@@ -6,31 +6,32 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "../base/DocumentStoreAccessControl.sol";
-import "../interfaces/IOwnableDocumentStore.sol";
-import "../interfaces/IOwnableDocumentStoreErrors.sol";
+import "../interfaces/ITransferableDocumentStore.sol";
+import "../interfaces/ITransferableDocumentStoreErrors.sol";
 import "../interfaces/IERC5192.sol";
 
-abstract contract BaseOwnableDocumentStore is
+abstract contract BaseTransferableDocumentStore is
   DocumentStoreAccessControl,
   ERC721Upgradeable,
   IERC5192,
-  IOwnableDocumentStoreErrors,
-  IOwnableDocumentStore
+  ITransferableDocumentStoreErrors,
+  ITransferableDocumentStore
 {
   using Strings for uint256;
 
-  /// @custom:storage-location erc7201:openattestation.storage.OwnableDocumentStore
+  /// @custom:storage-location erc7201:openattestation.storage.TransferableDocumentStore
   struct DocumentStoreStorage {
     string baseURI;
     mapping(uint256 => bool) revoked;
     mapping(uint256 => bool) locked;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("openattestation.storage.OwnableDocumentStore")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("openattestation.storage.TransferableDocumentStore")) - 1)) &
+  // ~bytes32(uint256(0xff))
   bytes32 private constant _DocumentStoreStorageSlot =
-    0x5b868bb5de5c3e5f8f786d02cbc568987b1921539a10331babbe7311c24de500;
+    0xe00db8ee8fc09b2a809fe10830715c77ed23b7661f93309e127fb70c1f33ef00;
 
-  function __OwnableDocumentStore_init(
+  function __TransferableDocumentStore_init(
     string memory name_,
     string memory symbol_,
     address initAdmin
@@ -111,7 +112,7 @@ abstract contract BaseOwnableDocumentStore is
   ) public view virtual override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool) {
     return
       interfaceId == type(IDocumentStore).interfaceId ||
-      interfaceId == type(IOwnableDocumentStore).interfaceId ||
+      interfaceId == type(ITransferableDocumentStore).interfaceId ||
       interfaceId == type(IERC5192).interfaceId ||
       super.supportsInterface(interfaceId);
   }
