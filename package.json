@@ -33,9 +33,9 @@
     "clean": "rm -rf cache out",
     "build": "forge build",
     "lint": "npm run lint:sol && npm run prettier:check",
-    "lint:sol": "forge fmt --check && npx solhint {script,src,test}/**/*.sol",
-    "prettier:check": "npx prettier --check **/*.{json,md,yml} --ignore-path=.prettierignore",
-    "prettier:write": "npx prettier --write **/*.{json,md,yml} --ignore-path=.prettierignore",
+    "lint:sol": "npx solhint {script,src,test}/**/*.sol",
+    "prettier:check": "npx prettier --check \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
+    "prettier:write": "npx prettier --write \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
     "test": "forge test",
     "test:coverage": "rimraf coverage && mkdir coverage && forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
     "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
