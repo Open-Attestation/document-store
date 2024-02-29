@@ -1,10 +1,17 @@
 {
   "extends": ["solhint:recommended"],
-  "plugins": ["prettier"],
   "rules": {
-    "compiler-version": ["error", "^0.8.0"],
+    "code-complexity": ["error", 8],
+    "compiler-version": ["error", ">=0.8.23"],
     "func-name-mixedcase": "off",
+    "func-visibility": ["error", { "ignoreConstructors": true }],
+    "max-line-length": ["warn", 120],
+    "named-parameters-mapping": "warn",
+    "no-console": "off",
     "no-empty-blocks": "off",
+    "no-global-import": "off",
+    "not-rely-on-time": "off",
+    "one-contract-per-file": "off",
     "reason-string": ["warn", { "maxLength": 256 }]
   }
 }
