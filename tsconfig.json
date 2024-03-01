@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist/types",
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "jsx": "react",
     "strict": true,
@@ -16,6 +16,6 @@
     "stripInternal": true,
     "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./types/**/*"]
+  "files": ["./hardhat.config.ts"],
+  "exclude": ["./.build/**/*"]
 }
