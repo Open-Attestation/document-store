@@ -1,20 +1,20 @@
-node_modules
-set_config_folder_dir
-yarn-error.log
-.env
-*.iml
+# directories
+.build
+.vscode
 .idea
-/.vscode
-/src/contracts
-/dist
-/build
-/types
-.DS_STORE
-/cache
-/artifacts
-/coverage
-/out
-lcov.info
+.openzeppelin
+cache
+coverage
+node_modules
+out
+artifacts
+broadcast
 
-/.build
-/broadcast
+# files
+*.env
+*.log
+.DS_Store
+.pnp.*
+lcov.info
+yarn-error.log
+npm-debug.log
