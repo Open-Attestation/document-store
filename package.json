@@ -18,8 +18,7 @@
     "prettier:check": "npx prettier --check \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
     "prettier:write": "npx prettier --write \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
     "test": "forge test",
-    "test:coverage": "rm -rf coverage && mkdir coverage && forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
-    "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
+    "test:coverage": "npm run clean && ./coverage.sh",
     "deploy": "./deploy.sh $npm_config_network $npm_config_sender $npm_config_verify",
     "deploy:ds": "npm run -s deploy script/DocumentStore.s.sol:DocumentStoreScript \"run(string,address)\" \"$npm_config_name\" \"$npm_config_admin\"",
     "deploy:ds:impl": "npm run -s deploy script/DocumentStoreInitializable.s.sol:DocumentStoreInitializableScript",
@@ -40,7 +39,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-solidity": "^1.3.1",
     "semantic-release": "^23.0.2",
-    "solhint": "^3.3.4",
+    "solhint": "^4.1.1",
     "typescript": "^5.3.3"
   }
 }
