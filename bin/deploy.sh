@@ -1,24 +1,25 @@
 #!/bin/bash
 
-if [ "$#" -lt 4 ]; then
-    echo "Usage: $0 network sender verify script_name [sig] [sig_params...]"
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 network verify script_name [sig] [sig_params...]"
     exit 1
 fi
 
-NETWORK=$1
-SENDER=$2
-VERIFY=$3
-SCRIPT=$4
+source .env
 
-# Check if the SIG which is $5 is provided and if it is then include SIG_PARAMS too
-if [[ "$5" != "" && "$5" != -* ]]; then
-  SIG=$5
-  shift 5
+NETWORK=$1
+VERIFY=$2
+SCRIPT=$3
+
+# Check if the SIG which is $4 is provided and if it is then include SIG_PARAMS too
+if [[ "$4" != "" && "$5" != -* ]]; then
+  SIG=$4
+  shift 4
   SIG_PARAMS=("$@")
 fi
 
 # forge command
-COMMAND="forge script \"$SCRIPT\" --broadcast -i 1 -f \"$NETWORK\" --sender \"$SENDER\""
+COMMAND="forge script \"$SCRIPT\" --broadcast -i 1 -f \"$NETWORK\" --sender \"$DEPLOYER_ADDRESS\""
 
 if [ "$VERIFY" -eq 1 ]; then
     COMMAND="$COMMAND --verify"
