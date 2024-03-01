@@ -15,8 +15,9 @@ jobs:
         with:
           node-version: 20.x
       - uses: foundry-rs/foundry-toolchain@v1
+      - run: sudo apt-get install -y lcov
       - run: npm ci --no-fund --no-audit
-      - run: npm run test
+      - run: npm run test:coverage
 
   test-build:
     name: Test Build
