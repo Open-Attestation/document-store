@@ -71,7 +71,7 @@ jobs:
       - name: Build types for ${{ env.MATRIX_TARGET }}
         run: |
           echo "Generating types for ${{ env.MATRIX_TARGET }}"
-          ./build.sh typechain ${{ env.MATRIX_TARGET }}
+          ./bin/build.sh typechain ${{ env.MATRIX_TARGET }}
 
       - name: Upload type targets
         uses: actions/upload-artifact@v4

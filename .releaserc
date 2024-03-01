@@ -19,7 +19,7 @@
       [
         "@semantic-release/exec",
         {
-          "publishCmd": "sh ./build.sh publish ${nextRelease.version}"
+          "publishCmd": "sh ./bin/build.sh publish ${nextRelease.version}"
         }
       ],
       "@semantic-release/github"
