@@ -19,7 +19,7 @@
     "prettier:write": "npx prettier --write \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
     "test": "forge test",
     "test:coverage": "npm run clean && ./bin/coverage.sh",
-    "deploy": "./bin/deploy.sh $npm_config_network $npm_config_sender $npm_config_verify",
+    "deploy": "./bin/deploy.sh $npm_config_network $npm_config_verify",
     "deploy:ds": "npm run -s deploy script/DocumentStore.s.sol:DocumentStoreScript \"run(string,address)\" \"$npm_config_name\" \"$npm_config_admin\"",
     "deploy:ds:impl": "npm run -s deploy script/DocumentStoreInitializable.s.sol:DocumentStoreInitializableScript",
     "deploy:ds:upgradeable": "npm run -s deploy script/DocumentStoreUpgradeable.s.sol:DocumentStoreUpgradeableScript \"run(string,address)\" \"$npm_config_name\" \"$npm_config_admin\"",
