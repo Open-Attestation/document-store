@@ -28,8 +28,10 @@ contract TransferableDocumentStore_init_Test is TranferableDocumentStoreCommonTe
     assert(documentStore.hasRole(documentStore.REVOKER_ROLE(), owner));
   }
 
-  function testFailZeroOwner() public {
-    documentStore = new TransferableDocumentStore(storeName, storeSymbol, vm.addr(0));
+  function testZeroOwnerRevert() public {
+    vm.expectRevert(abi.encodeWithSelector(DocumentStoreAccessControl.ZeroOwner.selector));
+
+    documentStore = new TransferableDocumentStore(storeName, storeSymbol, address(0));
   }
 }
 
