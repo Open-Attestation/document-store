@@ -27,8 +27,10 @@ contract DocumentStore_init_Test is DocumentStoreCommonTest {
     assert(documentStore.hasRole(documentStore.REVOKER_ROLE(), owner));
   }
 
-  function testFailZeroOwner() public {
-    documentStore = new DocumentStore(storeName, vm.addr(0));
+  function testZeroOwnerRevert() public {
+    vm.expectRevert(abi.encodeWithSelector(DocumentStoreAccessControl.ZeroOwner.selector));
+
+    documentStore = new DocumentStore(storeName, address(0));
   }
 }
 
