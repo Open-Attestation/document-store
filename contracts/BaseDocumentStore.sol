@@ -35,7 +35,7 @@ contract BaseDocumentStore is Initializable {
    * @notice Emitted when a document is revoked
    * @param document The hash of the revoked document
    */
-  event DocumentRevoked(bytes32 indexed document);
+  event DocumentRevoked(bytes32 indexed documentRoot, bytes32 indexed document);
 
   /**
    * @notice Initialises the contract with a name
@@ -49,9 +49,9 @@ contract BaseDocumentStore is Initializable {
    * @notice Issues a document
    * @param document The hash of the document to issue
    */
-  function _issue(bytes32 document) internal onlyNotIssued(document) {
+  function _issue(bytes32 document) internal {
     documentIssued[document] = block.number;
-    emit DocumentIssued(document);
+    // emit DocumentIssued(document);
   }
 
   /**
@@ -97,11 +97,8 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to revoke
    * @return A boolean indicating whether the document was successfully revoked
    */
-  function _revoke(bytes32 document) internal onlyNotRevoked(document) returns (bool) {
+  function _revoke(bytes32 document) internal {
     documentRevoked[document] = block.number;
-    emit DocumentRevoked(document);
-
-    return true;
   }
 
   function _bulkRevoke(bytes32[] memory documents) internal {
@@ -115,7 +112,7 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to check
    * @return A boolean indicating whether the document has been revoked
    */
-  function isRevoked(bytes32 document) public view returns (bool) {
+  function _isRevoked(bytes32 document) internal view returns (bool) {
     return documentRevoked[document] != 0;
   }
 
@@ -143,6 +140,7 @@ contract BaseDocumentStore is Initializable {
    * @param document The hash of the document to check
    */
   modifier onlyNotIssued(bytes32 document) {
+    // TODO: TO BE REMOVED
     require(!isIssued(document), "Error: Only hashes that have not been issued can be issued");
     _;
   }
@@ -152,7 +150,8 @@ contract BaseDocumentStore is Initializable {
    * @param claim The hash of the document to check
    */
   modifier onlyNotRevoked(bytes32 claim) {
-    require(!isRevoked(claim), "Error: Hash has been revoked previously");
+    // TODO: TO BE REMOVED
+    require(!_isRevoked(claim), "Error: Hash has been revoked previously");
     _;
   }
 }
