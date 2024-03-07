@@ -498,3 +498,103 @@ contract TransferableDocumentStore_supportsInterface_Test is TranferableDocument
     assertTrue(documentStore.supportsInterface(type(IAccessControl).interfaceId));
   }
 }
+
+contract TransferableDocumentStore_Pause_Test is TranferableDocumentStoreCommonTest {
+  function testPause() public {
+    vm.prank(owner);
+    documentStore.pause();
+
+    assertTrue(documentStore.paused(), "Document store should be paused");
+  }
+
+  function testUnpause() public {
+    vm.prank(owner);
+    documentStore.pause();
+    vm.prank(owner);
+    documentStore.unpause();
+
+    assertFalse(documentStore.paused(), "Document store should not be paused");
+  }
+
+  function testPauseAsNonAdminRevert() public {
+    address nonAdmin = vm.addr(69);
+
+    vm.expectRevert(
+      abi.encodeWithSelector(
+        IAccessControl.AccessControlUnauthorizedAccount.selector,
+        nonAdmin,
+        documentStore.DEFAULT_ADMIN_ROLE()
+      )
+    );
+
+    vm.prank(nonAdmin);
+    documentStore.pause();
+  }
+
+  function testUnpauseAsNonAdminRevert() public {
+    address nonAdmin = vm.addr(69);
+
+    vm.expectRevert(
+      abi.encodeWithSelector(
+        IAccessControl.AccessControlUnauthorizedAccount.selector,
+        nonAdmin,
+        documentStore.DEFAULT_ADMIN_ROLE()
+      )
+    );
+
+    vm.prank(nonAdmin);
+    documentStore.unpause();
+  }
+}
+
+contract TransferableDocumentStore_Pausable_Test is TransferableDocumentStore_Initializer {
+  function setUp() public override {
+    super.setUp();
+
+    vm.prank(owner);
+    documentStore.pause();
+  }
+
+  function testIssueWhenPausedRevert() public {
+    bytes32 fakeDoc = "0x1234";
+
+    vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+
+    vm.prank(issuer);
+    documentStore.issue(recipients[0], fakeDoc, false);
+  }
+
+  function testRevokeWhenPausedRevert() public {
+    bytes32 revokeDoc = documents()[0];
+
+    vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+
+    vm.prank(revoker);
+    documentStore.revoke(revokeDoc);
+  }
+
+  function testNonlockedDocTransferFromWhenPausedRevert() public {
+    bytes32 transferNonLockedDoc = documents()[0];
+
+    vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+
+    vm.prank(recipients[0]);
+    documentStore.transferFrom(recipients[0], recipients[1], uint256(transferNonLockedDoc));
+  }
+
+  function testLockedDocTransferFromWhenPausedRevert() public {
+    bytes32 transferLockedDoc = documents()[1];
+
+    vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+
+    vm.prank(recipients[0]);
+    documentStore.transferFrom(recipients[1], recipients[0], uint256(transferLockedDoc));
+  }
+
+  function testSetBaseURIWhenPausedRevert() public {
+    vm.expectRevert(abi.encodeWithSelector(PausableUpgradeable.EnforcedPause.selector));
+
+    vm.prank(owner);
+    documentStore.setBaseURI("https://example.com/");
+  }
+}
