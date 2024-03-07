@@ -12,6 +12,10 @@ describe("DocumentStore", async () => {
   const issuerRole = ethers.utils.id("ISSUER_ROLE");
   const revokerRole = ethers.utils.id("REVOKER_ROLE");
 
+  const wrongVar = { name: "hello"}
+  const {name } = wrongVar;
+
+
   beforeEach("", async () => {
     Accounts = await ethers.getSigners();
     DocumentStore = await ethers.getContractFactory("DocumentStore");
