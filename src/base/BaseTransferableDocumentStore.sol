@@ -3,6 +3,7 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "../base/DocumentStoreAccessControl.sol";
@@ -13,6 +14,7 @@ import "../interfaces/IERC5192.sol";
 abstract contract BaseTransferableDocumentStore is
   DocumentStoreAccessControl,
   ERC721Upgradeable,
+  PausableUpgradeable,
   IERC5192,
   ITransferableDocumentStoreErrors,
   ITransferableDocumentStore
@@ -26,8 +28,7 @@ abstract contract BaseTransferableDocumentStore is
     mapping(uint256 => bool) locked;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("openattestation.storage.TransferableDocumentStore")) - 1)) &
-  // ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("openattestation.storage.TransferableDocumentStore")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant _DocumentStoreStorageSlot =
     0xe00db8ee8fc09b2a809fe10830715c77ed23b7661f93309e127fb70c1f33ef00;
 
@@ -124,8 +125,24 @@ abstract contract BaseTransferableDocumentStore is
     return _isLocked(tokenId);
   }
 
-  function setBaseURI(string memory baseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseURI) public whenNotPaused onlyRole(DEFAULT_ADMIN_ROLE) {
     _getStorage().baseURI = baseURI;
+  }
+
+  /**
+   * @dev Pauses all token transfers.
+   * @notice Requires the caller to be admin.
+   */
+  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @dev Unpauses all token transfers.
+   * @notice Requires the caller to be admin.
+   */
+  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
   }
 
   function _isRevoked(uint256 tokenId) internal view returns (bool) {
@@ -136,7 +153,11 @@ abstract contract BaseTransferableDocumentStore is
     return _getStorage().locked[tokenId];
   }
 
-  function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
+  function _update(
+    address to,
+    uint256 tokenId,
+    address auth
+  ) internal virtual override whenNotPaused returns (address) {
     address from = super._update(to, tokenId, auth);
     if (_isLocked(tokenId) && (from != address(0) && to != address(0))) {
       revert DocumentLocked(bytes32(tokenId));
