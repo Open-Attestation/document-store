@@ -2,10 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
 import "./BaseDocumentStore.sol";
 import "./base/DocumentStoreAccessControl.sol";
 
@@ -40,7 +37,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    * @param documentRoot The hash of the document to issue
    */
   function issue(bytes32 documentRoot) public onlyRole(ISSUER_ROLE) {
-    if (isRootIssued(documentRoot)) {
+    if (isIssued(documentRoot)) {
       revert DocumentExists(documentRoot);
     }
 
@@ -63,7 +60,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    * @notice Revokes a document
    * @param documentRoot The hash of the document to revoke
    */
-  function revokeRoot(bytes32 documentRoot) public onlyRole(REVOKER_ROLE) {
+  function revoke(bytes32 documentRoot) public onlyRole(REVOKER_ROLE) {
     revoke(documentRoot, documentRoot, new bytes32[](0));
   }
 
@@ -101,7 +98,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     return _isIssued(documentRoot);
   }
 
-  function isRootIssued(bytes32 documentRoot) public view returns (bool) {
+  function isIssued(bytes32 documentRoot) public view returns (bool) {
     return isIssued(documentRoot, documentRoot, new bytes32[](0));
   }
 
@@ -113,14 +110,10 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     if (!isIssued(documentRoot, document, proof)) {
       revert InvalidDocument(documentRoot, document);
     }
-    return _isRevokedInternal(documentRoot, document, proof);
+    return _isRevoked(documentRoot, document, proof);
   }
 
-  function _isRevokedInternal(
-    bytes32 documentRoot,
-    bytes32 document,
-    bytes32[] memory proof
-  ) internal view returns (bool) {
+  function _isRevoked(bytes32 documentRoot, bytes32 document, bytes32[] memory proof) internal view returns (bool) {
     if (documentRoot == document && proof.length == 0) {
       return _isRevoked(document);
     }
@@ -132,7 +125,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
    * @param documentRoot The hash of the document to check
    * @return A boolean indicating whether the document has been revoked
    */
-  function isRootRevoked(bytes32 documentRoot) public view returns (bool) {
+  function isRevoked(bytes32 documentRoot) public view returns (bool) {
     return isRevoked(documentRoot, documentRoot, new bytes32[](0));
   }
 
@@ -140,7 +133,7 @@ contract DocumentStore is DocumentStoreAccessControl, BaseDocumentStore {
     if (!isIssued(documentRoot, document, proof)) {
       revert InvalidDocument(documentRoot, document);
     }
-    return !_isRevokedInternal(documentRoot, document, proof);
+    return !_isRevoked(documentRoot, document, proof);
   }
 
   modifier onlyValidDocument(

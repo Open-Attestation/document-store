@@ -65,7 +65,7 @@ contract DocumentStore_issue_Test is CommonTest {
     vm.prank(owner);
     documentStore.issue(docHash);
 
-    assert(documentStore.isRootIssued(docHash));
+    assert(documentStore.isIssued(docHash));
   }
 
   function testIssueByIssuer() public {
@@ -76,7 +76,7 @@ contract DocumentStore_issue_Test is CommonTest {
     vm.prank(issuer);
     documentStore.issue(docHash);
 
-    assert(documentStore.isRootIssued(docHash));
+    assert(documentStore.isIssued(docHash));
   }
 
   function testIssueByRevokerRevert() public {
@@ -149,8 +149,8 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
     vm.prank(issuer);
     documentStore.bulkIssue(docHashes);
 
-    assert(documentStore.isRootIssued(docHashes[0]));
-    assert(documentStore.isRootIssued(docHashes[1]));
+    assert(documentStore.isIssued(docHashes[0]));
+    assert(documentStore.isIssued(docHashes[1]));
   }
 
   function testBulkIssueByRevokerRevert() public {
@@ -230,13 +230,13 @@ contract DocumentStore_isIssued_Test is DocumentStoreWithFakeDocuments_Base {
   }
 
   function testIsRootIssuedWithRoot() public {
-    assertTrue(documentStore.isRootIssued(docRoot));
+    assertTrue(documentStore.isIssued(docRoot));
   }
 
   function testIsRootIssuedWithZeroRoot() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 
-    documentStore.isRootIssued(0x0);
+    documentStore.isIssued(0x0);
   }
 
   function testIsIssuedWithRoot() public {
@@ -283,9 +283,9 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     emit IDocumentStore.DocumentRevoked(docRoot, docRoot);
 
     vm.prank(owner);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
 
-    assertTrue(documentStore.isRootRevoked(docRoot));
+    assertTrue(documentStore.isRevoked(docRoot));
   }
 
   function testRevokeRootByRevoker() public {
@@ -293,9 +293,9 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     emit IDocumentStore.DocumentRevoked(docRoot, docRoot);
 
     vm.prank(revoker);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
 
-    assertTrue(documentStore.isRootRevoked(docRoot));
+    assertTrue(documentStore.isRevoked(docRoot));
   }
 
   function testRevokeRootByIssuerRevert() public {
@@ -308,7 +308,7 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(issuer);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
   }
 
   function testRevokeRootByNonRevokerRevert() public {
@@ -323,23 +323,23 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(notRevoker);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
   }
 
   function testRevokeRootWithZeroRoot() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 
     vm.prank(revoker);
-    documentStore.revokeRoot(0x0);
+    documentStore.revoke(0x0);
   }
 
   function testRevokeRootAlreadyRevokedRevert() public {
     vm.startPrank(revoker);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoot, docRoot));
 
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
     vm.stopPrank();
   }
 
@@ -349,7 +349,7 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
     vm.prank(revoker);
-    documentStore.revokeRoot(nonIssuedRoot);
+    documentStore.revoke(nonIssuedRoot);
   }
 }
 
@@ -453,7 +453,7 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
     vm.prank(revoker);
-    documentStore.revokeRoot(nonIssuedRoot);
+    documentStore.revoke(nonIssuedRoot);
   }
 }
 
@@ -559,7 +559,7 @@ contract DocumentStore_isRevoked_Test is DocumentStoreWithFakeDocuments_Base {
 
   function testIsRevokedWithRevokedRoot() public {
     vm.prank(revoker);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
 
     assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
   }
@@ -603,12 +603,12 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
 
     vm.startPrank(owner);
     documentStore.issue(docRoot);
-    documentStore.revokeRoot(docRoot);
+    documentStore.revoke(docRoot);
     vm.stopPrank();
   }
 
   function testIsRootRevokedWithRevokedRoot() public {
-    assertTrue(documentStore.isRootRevoked(docRoot));
+    assertTrue(documentStore.isRevoked(docRoot));
   }
 
   function testIsRootRevokedWithNotRevokedRoot() public {
@@ -617,13 +617,13 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
     vm.prank(issuer);
     documentStore.issue(notRevokedRoot);
 
-    assertFalse(documentStore.isRootRevoked(notRevokedRoot));
+    assertFalse(documentStore.isRevoked(notRevokedRoot));
   }
 
   function testIsRootRevokedWithZeroRootRevert() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 
-    documentStore.isRootRevoked(0x0);
+    documentStore.isRevoked(0x0);
   }
 
   function testIsRootRevokedWithNotIssuedRootRevert() public {
@@ -631,7 +631,7 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, notIssuedRoot, notIssuedRoot));
 
-    assertFalse(documentStore.isRootRevoked(notIssuedRoot));
+    assertFalse(documentStore.isRevoked(notIssuedRoot));
   }
 }
 
