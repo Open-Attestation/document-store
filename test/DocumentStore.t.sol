@@ -1,32 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import {console2} from "forge-std/console2.sol";
 import "forge-std/Test.sol";
-import "../src/DocumentStore.sol";
-import "../src/interfaces/IDocumentStore.sol";
-
+import {console2} from "forge-std/console2.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
-abstract contract CommonTest is Test {
-  string public storeName = "DocumentStore Test";
-
-  address public owner = vm.addr(1);
-  address public issuer = vm.addr(2);
-  address public revoker = vm.addr(3);
-
-  DocumentStore public documentStore;
-
-  function setUp() public virtual {
-    vm.startPrank(owner);
-
-    documentStore = new DocumentStore(storeName, owner);
-    documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
-    documentStore.grantRole(documentStore.REVOKER_ROLE(), revoker);
-
-    vm.stopPrank();
-  }
-}
+import "../src/DocumentStore.sol";
+import "../src/interfaces/IDocumentStore.sol";
+import "./CommonTest.t.sol";
 
 contract DocumentStore_init_Test is CommonTest {
   function testDocumentName() public {
@@ -51,13 +32,12 @@ contract DocumentStore_init_Test is CommonTest {
 }
 
 contract DocumentStore_issue_Test is CommonTest {
-  bytes32 public docHash = "0x1234";
-
   function setUp() public override {
     super.setUp();
   }
 
-  function testIssueByOwner() public {
+  function testIssueByOwner(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectEmit(true, true, true, true);
 
     emit IDocumentStore.DocumentIssued(docHash);
@@ -68,7 +48,8 @@ contract DocumentStore_issue_Test is CommonTest {
     assert(documentStore.isIssued(docHash));
   }
 
-  function testIssueByIssuer() public {
+  function testIssueByIssuer(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectEmit(true, true, true, true);
 
     emit IDocumentStore.DocumentIssued(docHash);
@@ -79,7 +60,8 @@ contract DocumentStore_issue_Test is CommonTest {
     assert(documentStore.isIssued(docHash));
   }
 
-  function testIssueByRevokerRevert() public {
+  function testIssueByRevokerRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.expectRevert(
       abi.encodeWithSelector(
         IAccessControl.AccessControlUnauthorizedAccount.selector,
@@ -92,7 +74,8 @@ contract DocumentStore_issue_Test is CommonTest {
     documentStore.issue(docHash);
   }
 
-  function testIssueByNonIssuerRevert() public {
+  function testIssueByNonIssuerRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     address notIssuer = vm.addr(69);
 
     vm.expectRevert(
@@ -107,7 +90,8 @@ contract DocumentStore_issue_Test is CommonTest {
     documentStore.issue(docHash);
   }
 
-  function testIssueAlreadyIssuedRevert() public {
+  function testIssueAlreadyIssuedRevert(bytes32 docHash) public {
+    vm.assume(docHash != bytes32(0));
     vm.startPrank(issuer);
     documentStore.issue(docHash);
 
@@ -188,36 +172,6 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
 
     vm.prank(issuer);
     documentStore.bulkIssue(docHashes);
-  }
-}
-
-abstract contract DocumentStoreWithFakeDocuments_Base is CommonTest {
-  bytes32 public docRoot;
-  bytes32[] public documents = new bytes32[](3);
-  bytes32[][] public proofs = new bytes32[][](3);
-
-  function setUp() public virtual override {
-    super.setUp();
-
-    docRoot = 0x5f0ed7e331c430ce34bcb45e2ddbff2b56a0f5971a226eee85f7ed6cc85e8e27;
-
-    documents = [
-      bytes32(0x795bb6abe4c5bb81e397821324d44bf7a94785587d0c88c621f57268c8aef4cb),
-      bytes32(0x9bc394ef702b639adb913242a472e883f4834b4f38ed38f046bec8fcc1104fa3),
-      bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-    ];
-
-    proofs = [
-      [
-        bytes32(0x9bc394ef702b639adb913242a472e883f4834b4f38ed38f046bec8fcc1104fa3),
-        bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-      ],
-      [
-        bytes32(0x795bb6abe4c5bb81e397821324d44bf7a94785587d0c88c621f57268c8aef4cb),
-        bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-      ]
-    ];
-    proofs.push([bytes32(0x3763f4f892fb4c2ff4d76c4b9d391985568f8940f93f71283a84ff73277fb81e)]);
   }
 }
 
@@ -343,8 +297,8 @@ contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
     vm.stopPrank();
   }
 
-  function testRevokeRootNonIssuedRootRevert() public {
-    bytes32 nonIssuedRoot = "0x1234";
+  function testRevokeRootNonIssuedRootRevert(bytes32 nonIssuedRoot) public {
+    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -447,8 +401,8 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     vm.stopPrank();
   }
 
-  function testRevokeNonIssuedDocumentRevert() public {
-    bytes32 nonIssuedRoot = "0x1234";
+  function testRevokeNonIssuedDocumentRevert(bytes32 nonIssuedRoot) public {
+    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -611,8 +565,8 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
     assertTrue(documentStore.isRevoked(docRoot));
   }
 
-  function testIsRootRevokedWithNotRevokedRoot() public {
-    bytes32 notRevokedRoot = "0x1234";
+  function testIsRootRevokedWithNotRevokedRoot(bytes32 notRevokedRoot) public {
+    vm.assume(notRevokedRoot != docRoot && notRevokedRoot != bytes32(0));
 
     vm.prank(issuer);
     documentStore.issue(notRevokedRoot);
@@ -626,8 +580,8 @@ contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
     documentStore.isRevoked(0x0);
   }
 
-  function testIsRootRevokedWithNotIssuedRootRevert() public {
-    bytes32 notIssuedRoot = "0x1234";
+  function testIsRootRevokedWithNotIssuedRootRevert(bytes32 notIssuedRoot) public {
+    vm.assume(notIssuedRoot != docRoot && notIssuedRoot != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, notIssuedRoot, notIssuedRoot));
 
@@ -673,8 +627,8 @@ contract DocumentStore_isActive_Test is DocumentStoreWithFakeDocuments_Base {
     documentStore.isActive(0x0, documents[0], proofs[0]);
   }
 
-  function testIsActiveWithNotIssuedDocumentRevert() public {
-    bytes32 notIssuedDoc = "0x1234";
+  function testIsActiveWithNotIssuedDocumentRevert(bytes32 notIssuedDoc) public {
+    vm.assume(notIssuedDoc != docRoot && notIssuedDoc != bytes32(0));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, notIssuedDoc));
 
