@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 import "../src/DocumentStore.sol";
 import "../src/interfaces/IDocumentStore.sol";
+import "../src/interfaces/IDocumentStoreBatchable.sol";
 import "./CommonTest.t.sol";
 
 contract DocumentStore_init_Test is CommonTest {
@@ -109,19 +110,21 @@ contract DocumentStore_issue_Test is CommonTest {
   }
 }
 
-contract DocumentStore_bulkIssue_Test is CommonTest {
+contract DocumentStore_multicall_Issue_Test is CommonTest {
   bytes32[] public docHashes;
+
+  bytes[] public bulkIssueData;
 
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
-    vm.stopPrank();
-
     docHashes = new bytes32[](2);
     docHashes[0] = "0x1234";
     docHashes[1] = "0x5678";
+
+    bulkIssueData = new bytes[](2);
+    bulkIssueData[0] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
+    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[1]));
   }
 
   function testBulkIssueByIssuer() public {
@@ -131,23 +134,10 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
     emit IDocumentStore.DocumentIssued(docHashes[1]);
 
     vm.prank(issuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
 
     assert(documentStore.isIssued(docHashes[0]));
     assert(documentStore.isIssued(docHashes[1]));
-  }
-
-  function testBulkIssueByRevokerRevert() public {
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        revoker,
-        documentStore.ISSUER_ROLE()
-      )
-    );
-
-    vm.prank(revoker);
-    documentStore.bulkIssue(docHashes);
   }
 
   function testBulkIssueByNonIssuerRevert() public {
@@ -162,27 +152,21 @@ contract DocumentStore_bulkIssue_Test is CommonTest {
     );
 
     vm.prank(notIssuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
   }
 
   function testBulkIssueWithDuplicatesRevert() public {
     docHashes[1] = docHashes[0];
+    bulkIssueData[1] = abi.encodeCall(IDocumentStore.issue, (docHashes[0]));
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentExists.selector, bytes32(docHashes[1])));
 
     vm.prank(issuer);
-    documentStore.bulkIssue(docHashes);
+    documentStore.multicall(bulkIssueData);
   }
 }
 
-contract DocumentStore_isIssued_Test is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
+contract DocumentStore_isIssued_Test is DocumentStoreBatchable_Initializer {
   function testIsRootIssuedWithRoot() public {
     assertTrue(documentStore.isIssued(docRoot));
   }
@@ -224,115 +208,33 @@ contract DocumentStore_isIssued_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_revokeRoot_Test is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStore_revoke_Test is DocumentStore_Initializer {
+  bytes32 internal targetDoc;
+
   function setUp() public override {
     super.setUp();
 
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
-  function testRevokeRootByOwner() public {
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, docRoot);
-
-    vm.prank(owner);
-    documentStore.revoke(docRoot);
-
-    assertTrue(documentStore.isRevoked(docRoot));
-  }
-
-  function testRevokeRootByRevoker() public {
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, docRoot);
-
-    vm.prank(revoker);
-    documentStore.revoke(docRoot);
-
-    assertTrue(documentStore.isRevoked(docRoot));
-  }
-
-  function testRevokeRootByIssuerRevert() public {
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        issuer,
-        documentStore.REVOKER_ROLE()
-      )
-    );
-
-    vm.prank(issuer);
-    documentStore.revoke(docRoot);
-  }
-
-  function testRevokeRootByNonRevokerRevert() public {
-    address notRevoker = vm.addr(69);
-
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        notRevoker,
-        documentStore.REVOKER_ROLE()
-      )
-    );
-
-    vm.prank(notRevoker);
-    documentStore.revoke(docRoot);
-  }
-
-  function testRevokeRootWithZeroRoot() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-
-    vm.prank(revoker);
-    documentStore.revoke(0x0);
-  }
-
-  function testRevokeRootAlreadyRevokedRevert() public {
-    vm.startPrank(revoker);
-    documentStore.revoke(docRoot);
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoot, docRoot));
-
-    documentStore.revoke(docRoot);
-    vm.stopPrank();
-  }
-
-  function testRevokeRootNonIssuedRootRevert(bytes32 nonIssuedRoot) public {
-    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot));
-
-    vm.prank(revoker);
-    documentStore.revoke(nonIssuedRoot);
-  }
-}
-
-contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
+    targetDoc = documents[0];
   }
 
   function testRevokeByOwner() public {
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
+    emit IDocumentStore.DocumentRevoked(targetDoc, targetDoc);
 
     vm.prank(owner);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    documentStore.revoke(targetDoc);
 
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
+    assertTrue(documentStore.isRevoked(targetDoc));
   }
 
   function testRevokeByRevoker() public {
     vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
+    emit IDocumentStore.DocumentRevoked(targetDoc, targetDoc);
 
     vm.prank(revoker);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    documentStore.revoke(targetDoc);
 
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
+    assertTrue(documentStore.isRevoked(targetDoc));
   }
 
   function testRevokeByIssuerRevert() public {
@@ -345,7 +247,7 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(issuer);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    documentStore.revoke(targetDoc);
   }
 
   function testRevokeByNonRevokerRevert() public {
@@ -360,49 +262,28 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
     );
 
     vm.prank(notRevoker);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    documentStore.revoke(targetDoc);
   }
 
-  function testRevokeWithInvalidProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
+  function testRevokeWithZeroRoot() public {
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 
     vm.prank(revoker);
-    documentStore.revoke(docRoot, documents[0], proofs[1]);
-  }
-
-  function testRevokeWithEmptyProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
-
-    vm.prank(revoker);
-    documentStore.revoke(docRoot, documents[0], new bytes32[](0));
-  }
-
-  function testRevokeWithZeroDocument() public {
-    vm.startPrank(revoker);
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.revoke(0x0, documents[0], proofs[0]);
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.revoke(docRoot, 0x0, proofs[0]);
-
-    vm.stopPrank();
+    documentStore.revoke(0x0);
   }
 
   function testRevokeAlreadyRevokedRevert() public {
     vm.startPrank(revoker);
+    documentStore.revoke(targetDoc);
 
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, targetDoc, targetDoc));
 
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoot, documents[0]));
-
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
-
+    documentStore.revoke(targetDoc);
     vm.stopPrank();
   }
 
-  function testRevokeNonIssuedDocumentRevert(bytes32 nonIssuedRoot) public {
-    vm.assume(nonIssuedRoot != docRoot && nonIssuedRoot != bytes32(0));
+  function testRevokeNotIssuedRootRevert() public {
+    bytes32 nonIssuedRoot = "0x1234";
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, nonIssuedRoot, nonIssuedRoot));
 
@@ -411,239 +292,86 @@ contract DocumentStore_revoke_Test is DocumentStoreWithFakeDocuments_Base {
   }
 }
 
-contract DocumentStore_bulkRevoke_Test is DocumentStoreWithFakeDocuments_Base {
-  bytes32[] public docRoots = new bytes32[](3);
-
+contract DocumentStore_multicall_revoke_Test is DocumentStore_multicall_revoke_Initializer {
   function setUp() public override {
     super.setUp();
 
-    docRoots[0] = docRoot;
-    docRoots[1] = docRoot;
-    docRoots[2] = docRoot;
-
-    vm.prank(issuer);
-    documentStore.issue(docRoot);
-  }
-
-  function testBulkRevokeByOwner() public {
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[1]);
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[2]);
-
-    vm.prank(owner);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
-
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[2], proofs[2]));
-  }
-
-  function testBulkRevokeByRevoker() public {
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[0]);
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[1]);
-    vm.expectEmit(true, true, false, true);
-    emit IDocumentStore.DocumentRevoked(docRoot, documents[2]);
-
-    vm.prank(revoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
-
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
-    assertTrue(documentStore.isRevoked(docRoot, documents[2], proofs[2]));
-  }
-
-  function testBulkRevokeByIssuerRevert() public {
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        issuer,
-        documentStore.REVOKER_ROLE()
-      )
-    );
-
-    vm.prank(issuer);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
-  }
-
-  function testBulkRevokeByNonRevokerRevert() public {
-    address notRevoker = vm.addr(69);
-
-    vm.expectRevert(
-      abi.encodeWithSelector(
-        IAccessControl.AccessControlUnauthorizedAccount.selector,
-        notRevoker,
-        documentStore.REVOKER_ROLE()
-      )
-    );
-
-    vm.prank(notRevoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
-  }
-
-  function testBulkRevokeWithDuplicatesRevert() public {
-    docRoots[1] = docRoots[0];
-    documents[1] = documents[0];
-    proofs[1] = proofs[0];
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoots[1], documents[1]));
-
-    vm.prank(revoker);
-    documentStore.bulkRevoke(docRoots, documents, proofs);
+    bulkRevokeData = new bytes[](3);
+    bulkRevokeData[0] = abi.encodeCall(IDocumentStore.revoke, (documents()[0]));
+    bulkRevokeData[1] = abi.encodeCall(IDocumentStore.revoke, (documents()[1]));
+    bulkRevokeData[2] = abi.encodeCall(IDocumentStore.revoke, (documents()[2]));
   }
 }
 
-contract DocumentStore_isRevoked_Test is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStore_isRevoked_Test is DocumentStore_Initializer {
+  bytes32 public targetDocument;
+
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
-    vm.stopPrank();
+    targetDocument = documents[0];
+
+    vm.prank(revoker);
+    documentStore.revoke(targetDocument);
   }
 
   function testIsRevokedWithRevokedDocument() public {
-    assertTrue(documentStore.isRevoked(docRoot, documents[0], proofs[0]));
-  }
-
-  function testIsRevokedWithRevokedRoot() public {
-    vm.prank(revoker);
-    documentStore.revoke(docRoot);
-
-    assertTrue(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
+    assertTrue(documentStore.isRevoked(targetDocument));
   }
 
   function testIsRevokedWithNotRevokedDocument() public {
-    assertFalse(documentStore.isRevoked(docRoot, documents[1], proofs[1]));
-  }
-
-  function testIsRevokedWithInvalidProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
-
-    documentStore.isRevoked(docRoot, documents[0], proofs[1]);
-  }
-
-  function testIsRevokedWithEmptyProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
-
-    documentStore.isRevoked(docRoot, documents[0], new bytes32[](0));
+    assertFalse(documentStore.isRevoked(documents[2]));
   }
 
   function testIsRevokedWithZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.isRevoked(docRoot, 0x0, proofs[0]);
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.isRevoked(0x0, documents[0], proofs[0]);
-  }
-
-  function testIsRevokedWithNotIssuedDocumentRevert() public {
-    bytes32 notIssuedDoc = "0x1234";
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, notIssuedDoc));
-
-    documentStore.isRevoked(docRoot, notIssuedDoc, proofs[0]);
-  }
-}
-
-contract DocumentStore_isRootRevoked is DocumentStoreWithFakeDocuments_Base {
-  function setUp() public override {
-    super.setUp();
-
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
-    documentStore.revoke(docRoot);
-    vm.stopPrank();
-  }
-
-  function testIsRootRevokedWithRevokedRoot() public {
-    assertTrue(documentStore.isRevoked(docRoot));
-  }
-
-  function testIsRootRevokedWithNotRevokedRoot(bytes32 notRevokedRoot) public {
-    vm.assume(notRevokedRoot != docRoot && notRevokedRoot != bytes32(0));
-
-    vm.prank(issuer);
-    documentStore.issue(notRevokedRoot);
-
-    assertFalse(documentStore.isRevoked(notRevokedRoot));
-  }
-
-  function testIsRootRevokedWithZeroRootRevert() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
 
     documentStore.isRevoked(0x0);
   }
 
-  function testIsRootRevokedWithNotIssuedRootRevert(bytes32 notIssuedRoot) public {
-    vm.assume(notIssuedRoot != docRoot && notIssuedRoot != bytes32(0));
+  function testIsRevokedWithNotIssuedDocumentRevert() public {
+    bytes32 notIssuedRoot = "0x1234";
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedRoot, notIssuedRoot));
 
-    assertFalse(documentStore.isRevoked(notIssuedRoot));
+    documentStore.isRevoked(notIssuedRoot);
   }
 }
 
-contract DocumentStore_isActive_Test is DocumentStoreWithFakeDocuments_Base {
+contract DocumentStore_isActive_Test is DocumentStore_Initializer {
   function setUp() public override {
     super.setUp();
 
-    vm.startPrank(owner);
-    documentStore.issue(docRoot);
-    documentStore.revoke(docRoot, documents[0], proofs[0]);
-    vm.stopPrank();
+    vm.prank(revoker);
+    documentStore.revoke(documents[0]);
   }
 
   function testIsActiveWithActiveDocument() public {
-    assertTrue(documentStore.isActive(docRoot, documents[1], proofs[1]));
+    assertTrue(documentStore.isActive(documents[1]));
   }
 
   function testIsActiveWithRevokedDocument() public {
-    assertFalse(documentStore.isActive(docRoot, documents[0], proofs[0]));
-  }
-
-  function testIsActiveWithInvalidProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
-
-    documentStore.isActive(docRoot, documents[0], proofs[1]);
-  }
-
-  function testIsActiveWithEmptyProofRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InvalidDocument.selector, docRoot, documents[0]));
-
-    documentStore.isActive(docRoot, documents[0], new bytes32[](0));
+    assertFalse(documentStore.isActive(documents[0]));
   }
 
   function testIsActiveWithZeroDocumentRevert() public {
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.isActive(docRoot, 0x0, proofs[0]);
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.ZeroDocument.selector));
-    documentStore.isActive(0x0, documents[0], proofs[0]);
+    documentStore.isActive(0x0);
   }
 
-  function testIsActiveWithNotIssuedDocumentRevert(bytes32 notIssuedDoc) public {
-    vm.assume(notIssuedDoc != docRoot && notIssuedDoc != bytes32(0));
+  function testIsActiveWithNotIssuedDocumentRevert() public {
+    bytes32 notIssuedDoc = "0x1234";
 
     vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedDoc, notIssuedDoc));
 
-    documentStore.isActive(notIssuedDoc, notIssuedDoc, new bytes32[](0));
+    documentStore.isActive(notIssuedDoc);
   }
+}
 
-  function testIsActiveWithNotIssuedRootRevert() public {
-    bytes32 notIssuedRoot = 0xb841229d504c5c9bcb8132078db8c4a483825ad811078144c6f9aec84213d798;
-    bytes32 notIssuedDoc = 0xd56c26db0fde817dcd82269d0f9a3f50ea256ee0c870e43c3ec2ebdd655e3f37;
-
-    bytes32[] memory proofs = new bytes32[](1);
-    proofs[0] = 0x9800b3feae3c44fe4263f6cbb2d8dd529c26c3a1c3ca7208a30cfa5efbc362e7;
-
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.DocumentNotIssued.selector, notIssuedRoot, notIssuedDoc));
-
-    documentStore.isActive(notIssuedRoot, notIssuedDoc, proofs);
+contract DocumentStore_supportsInterface_Test is CommonTest {
+  function testSupportsInterface() public {
+    assertTrue(documentStore.supportsInterface(type(IDocumentStore).interfaceId));
+    assertTrue(documentStore.supportsInterface(type(IDocumentStoreBatchable).interfaceId));
+    assertTrue(documentStore.supportsInterface(type(IAccessControl).interfaceId));
   }
 }

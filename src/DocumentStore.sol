@@ -2,11 +2,7 @@
 
 pragma solidity >=0.8.23 <0.9.0;
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
 import "./BaseDocumentStore.sol";
-import "./base/DocumentStoreAccessControl.sol";
-import "./interfaces/IDocumentStoreBatchable.sol";
 
 /**
  * @title DocumentStore

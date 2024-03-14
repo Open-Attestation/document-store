@@ -4,6 +4,7 @@ pragma solidity >=0.8.23 <0.9.0;
 import "forge-std/Test.sol";
 
 import "../src/DocumentStore.sol";
+import "./fixtures/DocumentStoreFixture.sol";
 
 abstract contract CommonTest is Test {
   string public storeName = "DocumentStore Test";
@@ -25,32 +26,202 @@ abstract contract CommonTest is Test {
   }
 }
 
-abstract contract DocumentStoreWithFakeDocuments_Base is CommonTest {
-  bytes32 public docRoot;
-  bytes32[] public documents = new bytes32[](3);
-  bytes32[][] public proofs = new bytes32[][](3);
+abstract contract DocumentStore_Initializer is CommonTest {
+  bytes32[] public documents;
+
+  DocumentStoreFixture private _fixture;
 
   function setUp() public virtual override {
     super.setUp();
 
-    docRoot = 0x5f0ed7e331c430ce34bcb45e2ddbff2b56a0f5971a226eee85f7ed6cc85e8e27;
+    _fixture = new DocumentStoreFixture();
 
-    documents = [
-      bytes32(0x795bb6abe4c5bb81e397821324d44bf7a94785587d0c88c621f57268c8aef4cb),
-      bytes32(0x9bc394ef702b639adb913242a472e883f4834b4f38ed38f046bec8fcc1104fa3),
-      bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-    ];
+    documents = _fixture.documents();
 
-    proofs = [
-      [
-        bytes32(0x9bc394ef702b639adb913242a472e883f4834b4f38ed38f046bec8fcc1104fa3),
-        bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-      ],
-      [
-        bytes32(0x795bb6abe4c5bb81e397821324d44bf7a94785587d0c88c621f57268c8aef4cb),
-        bytes32(0x4aac698f1a67c980d0a52901fe4805775cc31beae66fb33bbb9dd89d30de81bd)
-      ]
-    ];
-    proofs.push([bytes32(0x3763f4f892fb4c2ff4d76c4b9d391985568f8940f93f71283a84ff73277fb81e)]);
+    bytes[] memory issueData = new bytes[](3);
+    issueData[0] = abi.encodeCall(documentStore.issue, (documents[0]));
+    issueData[1] = abi.encodeCall(documentStore.issue, (documents[1]));
+    issueData[2] = abi.encodeCall(documentStore.issue, (documents[2]));
+
+    vm.prank(issuer);
+    documentStore.multicall(issueData);
+  }
+}
+
+abstract contract DocumentStoreBatchable_Initializer is CommonTest {
+  bytes32 public docRoot;
+  bytes32[] public documents = new bytes32[](3);
+  bytes32[][] public proofs = new bytes32[][](3);
+
+  DocumentStoreBatchableFixture private _fixture;
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    _fixture = new DocumentStoreBatchableFixture();
+
+    docRoot = _fixture.docRoot();
+
+    documents = _fixture.documents();
+
+    proofs = _fixture.proofs();
+
+    vm.prank(issuer);
+    documentStore.issue(docRoot);
+  }
+}
+
+abstract contract DocumentStore_multicall_revoke_Base is CommonTest {
+  bytes[] public bulkRevokeData;
+
+  function docRoots() public view virtual returns (bytes32[] memory);
+
+  function documents() public view virtual returns (bytes32[] memory);
+
+  function proofs() public view virtual returns (bytes32[][] memory);
+
+  function testMulticallRevokeByOwner() public {
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[0], documents()[0]);
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[1], documents()[1]);
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[2], documents()[2]);
+
+    vm.prank(owner);
+    documentStore.multicall(bulkRevokeData);
+
+    assertTrue(documentStore.isRevoked(docRoots()[0], documents()[0], proofs()[0]));
+    assertTrue(documentStore.isRevoked(docRoots()[1], documents()[1], proofs()[1]));
+    assertTrue(documentStore.isRevoked(docRoots()[2], documents()[2], proofs()[2]));
+  }
+
+  function testMulticallRevokeByRevoker() public {
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[0], documents()[0]);
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[1], documents()[1]);
+    vm.expectEmit(true, true, false, true);
+    emit IDocumentStore.DocumentRevoked(docRoots()[2], documents()[2]);
+
+    vm.prank(revoker);
+    documentStore.multicall(bulkRevokeData);
+
+    assertTrue(documentStore.isRevoked(docRoots()[0], documents()[0], proofs()[0]));
+    assertTrue(documentStore.isRevoked(docRoots()[1], documents()[1], proofs()[1]));
+    assertTrue(documentStore.isRevoked(docRoots()[2], documents()[2], proofs()[2]));
+  }
+
+  function testMulticallRevokeByIssuerRevert() public {
+    vm.expectRevert(
+      abi.encodeWithSelector(
+        IAccessControl.AccessControlUnauthorizedAccount.selector,
+        issuer,
+        documentStore.REVOKER_ROLE()
+      )
+    );
+
+    vm.prank(issuer);
+    documentStore.multicall(bulkRevokeData);
+  }
+
+  function testMulticallRevokeByNonRevokerRevert() public {
+    address notRevoker = vm.addr(69);
+
+    vm.expectRevert(
+      abi.encodeWithSelector(
+        IAccessControl.AccessControlUnauthorizedAccount.selector,
+        notRevoker,
+        documentStore.REVOKER_ROLE()
+      )
+    );
+
+    vm.prank(notRevoker);
+    documentStore.multicall(bulkRevokeData);
+  }
+
+  function testMulticallRevokeWithDuplicatesRevert() public {
+    // Make document1 same as document0
+    bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoots()[0], documents()[0], proofs()[0]));
+
+    // It should revert that document0 is already inactive
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoots()[0], documents()[0]));
+
+    vm.prank(revoker);
+    documentStore.multicall(bulkRevokeData);
+  }
+}
+
+abstract contract DocumentStoreBatchable_multicall_revoke_Initializer is DocumentStore_multicall_revoke_Base {
+  DocumentStoreBatchableFixture private _fixture;
+
+  function docRoot() public view virtual returns (bytes32) {
+    return _fixture.docRoot();
+  }
+
+  function docRoots() public view virtual override returns (bytes32[] memory) {
+    bytes32[] memory roots = new bytes32[](3);
+    roots[0] = _fixture.docRoot();
+    roots[1] = _fixture.docRoot();
+    roots[2] = _fixture.docRoot();
+    return roots;
+  }
+
+  function documents() public view virtual override returns (bytes32[] memory) {
+    return _fixture.documents();
+  }
+
+  function proofs() public view virtual override returns (bytes32[][] memory) {
+    return _fixture.proofs();
+  }
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    _fixture = new DocumentStoreBatchableFixture();
+
+    vm.startPrank(issuer);
+    documentStore.issue(docRoot());
+    vm.stopPrank();
+  }
+}
+
+abstract contract DocumentStore_multicall_revoke_Initializer is DocumentStore_multicall_revoke_Base {
+  DocumentStoreFixture private _fixture;
+
+  function docRoots() public view virtual override returns (bytes32[] memory) {
+    // Set up the document fixtures to be independent documents
+    bytes32[] memory roots = new bytes32[](3);
+    roots[0] = _fixture.documents()[0];
+    roots[1] = _fixture.documents()[1];
+    roots[2] = _fixture.documents()[2];
+    return roots;
+  }
+
+  function documents() public view virtual override returns (bytes32[] memory) {
+    return _fixture.documents();
+  }
+
+  function proofs() public view virtual override returns (bytes32[][] memory) {
+    // We want the documents to be independent, thus no need proofs
+    bytes32[][] memory _proofs = new bytes32[][](3);
+    _proofs[0] = new bytes32[](0);
+    _proofs[1] = new bytes32[](0);
+    _proofs[2] = new bytes32[](0);
+    return _proofs;
+  }
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    _fixture = new DocumentStoreFixture();
+
+    bytes[] memory issueData = new bytes[](3);
+    issueData[0] = abi.encodeCall(documentStore.issue, (documents()[0]));
+    issueData[1] = abi.encodeCall(documentStore.issue, (documents()[1]));
+    issueData[2] = abi.encodeCall(documentStore.issue, (documents()[2]));
+
+    vm.prank(issuer);
+    documentStore.multicall(issueData);
   }
 }
