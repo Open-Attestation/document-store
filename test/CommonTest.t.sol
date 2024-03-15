@@ -5,17 +5,24 @@ import "forge-std/Test.sol";
 
 import "../src/DocumentStore.sol";
 import "./fixtures/DocumentStoreFixture.sol";
+import "../src/OwnableDocumentStore.sol";
 
 abstract contract CommonTest is Test {
-  string public storeName = "DocumentStore Test";
-
   address public owner = vm.addr(1);
   address public issuer = vm.addr(2);
   address public revoker = vm.addr(3);
 
+  function setUp() public virtual {}
+}
+
+abstract contract DocumentStoreCommonTest is CommonTest {
   DocumentStore public documentStore;
 
-  function setUp() public virtual {
+  string public storeName = "DocumentStore Test";
+
+  function setUp() public virtual override {
+    super.setUp();
+
     vm.startPrank(owner);
 
     documentStore = new DocumentStore(storeName, owner);
@@ -26,7 +33,7 @@ abstract contract CommonTest is Test {
   }
 }
 
-abstract contract DocumentStore_Initializer is CommonTest {
+abstract contract DocumentStore_Initializer is DocumentStoreCommonTest {
   bytes32[] public documents;
 
   DocumentStoreFixture private _fixture;
@@ -48,7 +55,7 @@ abstract contract DocumentStore_Initializer is CommonTest {
   }
 }
 
-abstract contract DocumentStoreBatchable_Initializer is CommonTest {
+abstract contract DocumentStoreBatchable_Initializer is DocumentStoreCommonTest {
   bytes32 public docRoot;
   bytes32[] public documents = new bytes32[](3);
   bytes32[][] public proofs = new bytes32[][](3);
@@ -71,7 +78,7 @@ abstract contract DocumentStoreBatchable_Initializer is CommonTest {
   }
 }
 
-abstract contract DocumentStore_multicall_revoke_Base is CommonTest {
+abstract contract DocumentStore_multicall_revoke_Base is DocumentStoreCommonTest {
   bytes[] public bulkRevokeData;
 
   function docRoots() public view virtual returns (bytes32[] memory);
@@ -145,7 +152,7 @@ abstract contract DocumentStore_multicall_revoke_Base is CommonTest {
     bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoots()[0], documents()[0], proofs()[0]));
 
     // It should revert that document0 is already inactive
-    vm.expectRevert(abi.encodeWithSelector(IDocumentStore.InactiveDocument.selector, docRoots()[0], documents()[0]));
+    vm.expectRevert(abi.encodeWithSelector(IDocumentStoreErrors.InactiveDocument.selector, docRoots()[0], documents()[0]));
 
     vm.prank(revoker);
     documentStore.multicall(bulkRevokeData);
@@ -223,5 +230,26 @@ abstract contract DocumentStore_multicall_revoke_Initializer is DocumentStore_mu
 
     vm.prank(issuer);
     documentStore.multicall(issueData);
+  }
+}
+
+abstract contract OwnableDocumentStoreCommonTest is CommonTest {
+  OwnableDocumentStore public documentStore;
+
+  string public storeName = "OwnableDocumentStore Test";
+  string public storeSymbol = "XYZ";
+
+  address public recipient = vm.addr(4);
+
+  function setUp() public virtual override {
+    super.setUp();
+
+    vm.startPrank(owner);
+
+    documentStore = new OwnableDocumentStore(storeName, storeSymbol, owner);
+    documentStore.grantRole(documentStore.ISSUER_ROLE(), issuer);
+    documentStore.grantRole(documentStore.REVOKER_ROLE(), revoker);
+
+    vm.stopPrank();
   }
 }

@@ -125,3 +125,4 @@ npm run benchmark
 ## Additional information
 
 If you are using Visual Studio Code, you may need to link the OpenZeppelin libraries. Refer to [here](https://github.com/juanfranblanco/vscode-solidity#openzeppelin) for more information.
+Install lcov for test coverage report.

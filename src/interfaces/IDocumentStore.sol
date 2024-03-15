@@ -2,15 +2,7 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 interface IDocumentStore {
-  error InactiveDocument(bytes32 documentRoot, bytes32 document);
 
-  error DocumentExists(bytes32 document);
-
-  error ZeroDocument();
-
-  error InvalidDocument(bytes32 documentRoot, bytes32 document);
-
-  error DocumentNotIssued(bytes32 documentRoot, bytes32 document);
 
   /**
    * @notice Emitted when a document is issued
@@ -25,8 +17,6 @@ interface IDocumentStore {
   event DocumentRevoked(bytes32 indexed documentRoot, bytes32 indexed document);
 
   function name() external view returns (string memory);
-
-  function issue(bytes32 documentRoot) external;
 
   function revoke(bytes32 documentRoot) external;
 

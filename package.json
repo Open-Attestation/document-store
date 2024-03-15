@@ -42,7 +42,7 @@
     "prettier:check": "prettier --check **/*.{json,md,yml} --ignore-path=.prettierignore",
     "prettier:write": "prettier --write **/*.{json,md,yml} --ignore-path=.prettierignore",
     "test": "forge test",
-    "test:coverage": "forge coverage",
+    "test:coverage": "rimraf coverage && mkdir coverage && forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
     "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
   },
   "jest": {
@@ -98,6 +98,7 @@
     "lodash": "^4.17.21",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.17",
+    "rimraf": "^5.0.5",
     "semantic-release": "^17.4.2",
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
