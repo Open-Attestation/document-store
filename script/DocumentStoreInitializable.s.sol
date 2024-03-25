@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import {DocumentStoreDeployScript} from "./DeployBase.s.sol";
+import { DocumentStoreDeployScript } from "./DeployBase.s.sol";
 import "../src/initializables/DocumentStoreInitializable.sol";
 
 contract DocumentStoreInitializableScript is DocumentStoreDeployScript {

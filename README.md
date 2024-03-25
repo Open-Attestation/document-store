@@ -1,9 +1,9 @@
 # Document Store
 
-The [Document Store](https://github.com/Open-Attestation/document-store) repository contains the following: 
+The [Document Store](https://github.com/Open-Attestation/document-store) repository contains the following:
 
-* The smart contract code for document store in the `/contracts` folder
-* The node package for using this library in the `/src` folder
+- The smart contract code for document store in the `/contracts` folder
+- The node package for using this library in the `/src` folder
 
 ## Installation
 
@@ -19,9 +19,9 @@ npm i @govtechsg/document-store
 
 Provide one of the following depending on your needs:
 
-* To use the package, provide your own Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/).
+- To use the package, provide your own Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/).
 
-* To write to the blockchain, provide the [signer](https://docs.ethers.io/v5/api/signer/#Wallet) instead.
+- To write to the blockchain, provide the [signer](https://docs.ethers.io/v5/api/signer/#Wallet) instead.
 
 ### Deploying a new document store
 

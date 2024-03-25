@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import {Script} from "forge-std/Script.sol";
-import {console2} from "forge-std/console2.sol";
+import { Script } from "forge-std/Script.sol";
+import { console2 } from "forge-std/console2.sol";
 
 abstract contract DeployBaseScript is Script {
   address internal constant FACTORY = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
@@ -14,7 +14,7 @@ abstract contract DeployBaseScript is Script {
   }
 
   function getSaltEntropy(string memory entropyName) internal view returns (bytes11) {
-    bytes11 entropy = bytes11(vm.envOr({name: entropyName, defaultValue: bytes("")}));
+    bytes11 entropy = bytes11(vm.envOr({ name: entropyName, defaultValue: bytes("") }));
     require(entropy != bytes11(0), "Salt entropy not set");
 
     return entropy;
@@ -23,7 +23,7 @@ abstract contract DeployBaseScript is Script {
   function getSalt(bytes11 entropy) internal view returns (bytes32 salt) {
     require(entropy != bytes11(0), "Salt entropy not be zero");
 
-    address deployer = vm.envOr({name: "DEPLOYER_ADDRESS", defaultValue: address(0)});
+    address deployer = vm.envOr({ name: "DEPLOYER_ADDRESS", defaultValue: address(0) });
     require(deployer != address(0), "Deployer address not set");
 
     bytes20 deployerBytes = bytes20(deployer);

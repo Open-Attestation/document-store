@@ -2,8 +2,8 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "forge-std/Test.sol";
-import {console2} from "forge-std/console2.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import { console2 } from "forge-std/console2.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "./CommonTest.t.sol";
 

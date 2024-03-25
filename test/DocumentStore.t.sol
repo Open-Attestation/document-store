@@ -2,7 +2,7 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "forge-std/Test.sol";
-import {console2} from "forge-std/console2.sol";
+import { console2 } from "forge-std/console2.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 import "../src/DocumentStore.sol";

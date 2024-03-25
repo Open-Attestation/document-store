@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import {console2} from "forge-std/console2.sol";
+import { console2 } from "forge-std/console2.sol";
 
-import {OwnableDocumentStoreDeployScript} from "./DeployBase.s.sol";
-import {DeployUtils} from "../src/libraries/DeployUtils.sol";
+import { OwnableDocumentStoreDeployScript } from "./DeployBase.s.sol";
+import { DeployUtils } from "../src/libraries/DeployUtils.sol";
 import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
 
 contract OwnableDocumentStoreUpgradeableScript is OwnableDocumentStoreDeployScript {
