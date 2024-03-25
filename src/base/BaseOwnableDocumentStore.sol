@@ -3,7 +3,7 @@
 pragma solidity >=0.8.23 <0.9.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "../base/DocumentStoreAccessControl.sol";
 import "../interfaces/IOwnableDocumentStore.sol";

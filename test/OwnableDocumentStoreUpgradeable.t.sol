@@ -4,8 +4,8 @@ pragma solidity >=0.8.23 <0.9.0;
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../src/upgradeables/OwnableDocumentStoreUpgradeable.sol";
-import {CommonTest} from "./CommonTest.t.sol";
-import {DeployUtils} from "../src/libraries/DeployUtils.sol";
+import { CommonTest } from "./CommonTest.t.sol";
+import { DeployUtils } from "../src/libraries/DeployUtils.sol";
 
 contract OwnableDocumentStoreUpgradeable_Test is CommonTest {
   OwnableDocumentStoreUpgradeable public dsProxy;

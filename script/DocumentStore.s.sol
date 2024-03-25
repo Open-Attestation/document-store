@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.23 <0.9.0;
 
-import {console2} from "forge-std/console2.sol";
+import { console2 } from "forge-std/console2.sol";
 
-import {DocumentStoreDeployScript} from "./DeployBase.s.sol";
+import { DocumentStoreDeployScript } from "./DeployBase.s.sol";
 import "../src/DocumentStore.sol";
 
 contract DocumentStoreScript is DocumentStoreDeployScript {
