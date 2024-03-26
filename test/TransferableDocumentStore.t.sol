@@ -7,7 +7,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import "./CommonTest.t.sol";
 
-contract OwnableDocumentStore_init_Test is OwnableDocumentStoreCommonTest {
+contract TransferableDocumentStore_init_Test is TranferableDocumentStoreCommonTest {
   function testDocumentStoreName() public {
     assertEq(documentStore.name(), storeName);
   }
@@ -29,11 +29,11 @@ contract OwnableDocumentStore_init_Test is OwnableDocumentStoreCommonTest {
   }
 
   function testFailZeroOwner() public {
-    documentStore = new OwnableDocumentStore(storeName, storeSymbol, vm.addr(0));
+    documentStore = new TransferableDocumentStore(storeName, storeSymbol, vm.addr(0));
   }
 }
 
-contract OwnableDocumentStore_issue_Test is OwnableDocumentStoreCommonTest {
+contract TransferableDocumentStore_issue_Test is TranferableDocumentStoreCommonTest {
   address public recipient;
 
   function setUp() public override {
@@ -128,7 +128,7 @@ contract OwnableDocumentStore_issue_Test is OwnableDocumentStoreCommonTest {
   }
 
   function testIssueToZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.ZeroDocument.selector));
 
     vm.prank(issuer);
     documentStore.issue(recipient, bytes32(0), false);
@@ -163,7 +163,7 @@ contract OwnableDocumentStore_issue_Test is OwnableDocumentStoreCommonTest {
     documentStore.revoke(document);
     vm.stopPrank();
 
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.DocumentIsRevoked.selector, document));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.DocumentIsRevoked.selector, document));
 
     vm.prank(issuer);
     documentStore.issue(recipient, document, false);
@@ -176,14 +176,14 @@ contract OwnableDocumentStore_issue_Test is OwnableDocumentStoreCommonTest {
     documentStore.revoke(document);
     vm.stopPrank();
 
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.DocumentIsRevoked.selector, document));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.DocumentIsRevoked.selector, document));
 
     vm.prank(issuer);
     documentStore.issue(vm.addr(69), document, false);
   }
 }
 
-contract OwnableDocumentStore_revoke_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_revoke_Test is TransferableDocumentStore_Initializer {
   bytes32 public unlockedDocument;
   bytes32 public lockedDocument;
 
@@ -274,7 +274,7 @@ contract OwnableDocumentStore_revoke_Test is OwnableDocumentStore_Initializer {
   }
 }
 
-contract OwnableDocumentStore_isIssued_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_isIssued_Test is TransferableDocumentStore_Initializer {
   function testIsIssued() public {
     assertTrue(documentStore.isIssued(documents()[0]), "Document should be issued");
   }
@@ -295,13 +295,13 @@ contract OwnableDocumentStore_isIssued_Test is OwnableDocumentStore_Initializer 
   }
 
   function testIsIssuedZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.isIssued(bytes32(0));
   }
 }
 
-contract OwnableDocumentStore_isRevoked_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_isRevoked_Test is TransferableDocumentStore_Initializer {
   function setUp() public override {
     super.setUp();
 
@@ -327,13 +327,13 @@ contract OwnableDocumentStore_isRevoked_Test is OwnableDocumentStore_Initializer
   }
 
   function testIsRevokedZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.isRevoked(bytes32(0));
   }
 }
 
-contract OwnableDocumentStore_isActive_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_isActive_Test is TransferableDocumentStore_Initializer {
   function testIsActive() public {
     assertTrue(documentStore.isActive(documents()[0]), "Document should be active");
     assertTrue(documentStore.isActive(documents()[1]), "Document should be active");
@@ -358,13 +358,13 @@ contract OwnableDocumentStore_isActive_Test is OwnableDocumentStore_Initializer 
   }
 
   function testIsActiveZeroDocumentRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.isActive(bytes32(0));
   }
 }
 
-contract OwnableDocumentStore_transfer_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_transfer_Test is TransferableDocumentStore_Initializer {
   bytes32 public unlockedDocument;
   bytes32 public lockedDocument;
 
@@ -389,7 +389,7 @@ contract OwnableDocumentStore_transfer_Test is OwnableDocumentStore_Initializer 
   }
 
   function testTransferFromLockedDocumentToNewRecipientRevert() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.DocumentLocked.selector, lockedDocument));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.DocumentLocked.selector, lockedDocument));
 
     vm.prank(recipients[1]);
     documentStore.transferFrom(recipients[1], recipients[0], uint256(lockedDocument));
@@ -410,7 +410,7 @@ contract OwnableDocumentStore_transfer_Test is OwnableDocumentStore_Initializer 
   }
 }
 
-contract OwnableDocumentStore_locked_Test is OwnableDocumentStoreCommonTest {
+contract TransferableDocumentStore_locked_Test is TranferableDocumentStoreCommonTest {
   address public recipient;
 
   function setUp() public override {
@@ -440,13 +440,13 @@ contract OwnableDocumentStore_locked_Test is OwnableDocumentStoreCommonTest {
   }
 
   function testLockedWithZeroDocument() public {
-    vm.expectRevert(abi.encodeWithSelector(IOwnableDocumentStoreErrors.ZeroDocument.selector));
+    vm.expectRevert(abi.encodeWithSelector(ITransferableDocumentStoreErrors.ZeroDocument.selector));
 
     documentStore.locked(uint256(bytes32(0)));
   }
 }
 
-contract OwnableDocumentStore_setBaseURI_Test is OwnableDocumentStore_Initializer {
+contract TransferableDocumentStore_setBaseURI_Test is TransferableDocumentStore_Initializer {
   using Strings for uint256;
 
   string public baseURI = "https://example.com/";
@@ -487,9 +487,9 @@ contract OwnableDocumentStore_setBaseURI_Test is OwnableDocumentStore_Initialize
   }
 }
 
-contract OwnableDocumentStore_supportsInterface_Test is OwnableDocumentStoreCommonTest {
+contract TransferableDocumentStore_supportsInterface_Test is TranferableDocumentStoreCommonTest {
   function testSupportsInterface() public {
-    assertTrue(documentStore.supportsInterface(type(IOwnableDocumentStore).interfaceId));
+    assertTrue(documentStore.supportsInterface(type(ITransferableDocumentStore).interfaceId));
     assertTrue(documentStore.supportsInterface(type(IDocumentStore).interfaceId));
     assertTrue(documentStore.supportsInterface(type(IERC5192).interfaceId));
     assertTrue(documentStore.supportsInterface(type(IERC721Metadata).interfaceId));

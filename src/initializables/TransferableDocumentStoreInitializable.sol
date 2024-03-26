@@ -2,12 +2,12 @@
 
 pragma solidity >=0.8.23 <0.9.0;
 
-import "../base/BaseOwnableDocumentStore.sol";
+import "../base/BaseTransferableDocumentStore.sol";
 
-contract OwnableDocumentStoreInitializable is BaseOwnableDocumentStore {
+contract TransferableDocumentStoreInitializable is BaseTransferableDocumentStore {
   constructor() initializer {}
 
   function initialize(string memory name_, string memory symbol_, address initAdmin) external initializer {
-    __OwnableDocumentStore_init(name_, symbol_, initAdmin);
+    __TransferableDocumentStore_init(name_, symbol_, initAdmin);
   }
 }

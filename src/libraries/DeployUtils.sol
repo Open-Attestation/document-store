@@ -4,7 +4,7 @@ pragma solidity >=0.8.23 <0.9.0;
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../upgradeables/DocumentStoreUpgradeable.sol";
-import "../upgradeables/OwnableDocumentStoreUpgradeable.sol";
+import "../upgradeables/TransferableDocumentStoreUpgradeable.sol";
 
 library DeployUtils {
   function deployDocumentStoreUpgradeable(string memory name, address initAdmin) internal returns (address, address) {
@@ -18,14 +18,17 @@ library DeployUtils {
     return (address(proxy), dsAddr);
   }
 
-  function deployOwnableDocumentStoreUpgradeable(
+  function deployTransferableDocumentStoreUpgradeable(
     string memory name,
     string memory symbol,
     address initAdmin
   ) internal returns (address, address) {
-    bytes memory initData = abi.encodeCall(OwnableDocumentStoreInitializable.initialize, (name, symbol, initAdmin));
+    bytes memory initData = abi.encodeCall(
+      TransferableDocumentStoreInitializable.initialize,
+      (name, symbol, initAdmin)
+    );
 
-    OwnableDocumentStoreUpgradeable documentStore = new OwnableDocumentStoreUpgradeable();
+    TransferableDocumentStoreUpgradeable documentStore = new TransferableDocumentStoreUpgradeable();
     address dsAddr = address(documentStore);
 
     ERC1967Proxy proxy = new ERC1967Proxy(dsAddr, initData);

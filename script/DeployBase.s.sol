@@ -100,7 +100,7 @@ abstract contract DocumentStoreDeployScript is DeployBaseScript {
   }
 }
 
-abstract contract OwnableDocumentStoreDeployScript is DeployBaseScript {
+abstract contract TransferableDocumentStoreDeployScript is DeployBaseScript {
   function _requireParams(string memory name, string memory symbol, address admin) internal pure {
     require(bytes(name).length > 0, "Name is required");
     require(bytes(symbol).length > 0, "Symbol is required");

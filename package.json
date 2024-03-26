@@ -38,7 +38,14 @@
     "prettier:write": "npx prettier --write \"**/*.{json,md,yml,sol}\" \"!broadcast/**/*\" --ignore-path=.prettierignore",
     "test": "forge test",
     "test:coverage": "rimraf coverage && mkdir coverage && forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
-    "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
+    "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
+    "deploy": "./deploy.sh $npm_config_network $npm_config_sender $npm_config_verify",
+    "deploy:ds": "npm run -s deploy script/DocumentStore.s.sol:DocumentStoreScript \"run(string,address)\" \"$npm_config_name\" \"$npm_config_admin\"",
+    "deploy:ds:impl": "npm run -s deploy script/DocumentStoreInitializable.s.sol:DocumentStoreInitializableScript",
+    "deploy:ds:upgradeable": "npm run -s deploy script/DocumentStoreUpgradeable.s.sol:DocumentStoreUpgradeableScript \"run(string,address)\" \"$npm_config_name\" \"$npm_config_admin\"",
+    "deploy:tds": "npm run -s deploy script/TransferableDocumentStore.s.sol:TransferableDocumentStoreScript \"run(string,string,address)\" \"$npm_config_name\" \"$npm_config_symbol\" \"$npm_config_admin\"",
+    "deploy:tds:impl": "npm run -s deploy script/TransferableDocumentStoreInitializable.s.sol:TransferableDocumentStoreInitializableScript",
+    "deploy:tds:upgradeable": "npm run -s deploy script/TransferableDocumentStoreUpgradeable.s.sol:TransferableDocumentStoreUpgradeableScript \"run(string,string,address)\" \"$npm_config_name\" \"$npm_config_symbol\" \"$npm_config_admin\""
   },
   "jest": {
     "globalSetup": "./jest/setup.ts",
