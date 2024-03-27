@@ -37,7 +37,7 @@ jobs:
 
   coverage:
     name: Test Coverage
-    needs: [ run-tests ]
+    needs: [run-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
