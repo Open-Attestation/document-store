@@ -11,7 +11,7 @@
   "scripts": {
     "build": "forge build",
     "build:hh": "hardhat clean && hardhat compile --no-typechain",
-    "clean": "rm -rf cache out .build coverage lcov.info artifacts",
+    "clean": "rm -rf cache out .build coverage artifacts",
     "semantic-release": "semantic-release",
     "lint": "npm run lint:sol && npm run prettier:check",
     "lint:sol": "npx solhint {script,src,test}/**/*.sol",
