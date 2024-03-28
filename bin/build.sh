@@ -43,7 +43,7 @@ EOF
 
   cp ../../README.md .
 
-  awk -v heading="# Document Store ($target)" 'BEGIN{replaced=0} /^# /{if(!replaced){print heading; replaced=1; next}} {print}' README.md > "README.md.tmp" && mv "README.md.tmp" README.md
+  sed -e 's|<p align="center">Document Store</p>|<p align="center">Document Store ('"$target"')</p>|' README.md > README.md.tmp && mv README.md.tmp README.md
 
   npm install "@typechain/$target" --save-dev --no-fund --no-audit
 
