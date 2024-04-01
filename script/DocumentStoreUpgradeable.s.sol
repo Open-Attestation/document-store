@@ -14,8 +14,12 @@ contract DocumentStoreUpgradeableScript is DocumentStoreDeployScript {
     console2.log("DocumentStore Name: ", name);
     console2.log("DocumentStore Admin: ", admin);
 
-    vm.broadcast();
+    vm.startBroadcast();
     (address pAddr, ) = DeployUtils.deployDocumentStoreUpgradeable(name, admin);
+    vm.stopBroadcast();
+
     ds = DocumentStoreUpgradeable(pAddr);
+
+    console2.log("Deployed Address: ", pAddr);
   }
 }

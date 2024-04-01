@@ -20,9 +20,11 @@ contract DocumentStoreScript is DocumentStoreDeployScript {
       address dsAddr = clone(DS_IMPL, initData);
 
       ds = DocumentStore(dsAddr);
+      console2.log("Deployed Address: ", dsAddr);
     } else {
       vm.broadcast();
       ds = new DocumentStore(name, admin);
+      console2.log("Deployed Address: ", address(ds));
     }
   }
 }

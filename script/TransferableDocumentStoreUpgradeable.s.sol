@@ -19,8 +19,12 @@ contract TransferableDocumentStoreUpgradeableScript is TransferableDocumentStore
     console2.log("TransferableDocumentStore Symbol: ", symbol);
     console2.log("TransferableDocumentStore Admin: ", admin);
 
-    vm.broadcast();
+    vm.startBroadcast();
     (address pAddr, ) = DeployUtils.deployTransferableDocumentStoreUpgradeable(name, symbol, admin);
+    vm.stopBroadcast();
+
     ds = TransferableDocumentStoreUpgradeable(pAddr);
+
+    console2.log("Deployed Address: ", pAddr);
   }
 }
