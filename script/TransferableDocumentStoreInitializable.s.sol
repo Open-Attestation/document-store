@@ -6,7 +6,7 @@ import "../src/initializables/TransferableDocumentStoreInitializable.sol";
 
 contract TransferableDocumentStoreInitializableScript is TransferableDocumentStoreDeployScript {
   function run() public returns (TransferableDocumentStoreInitializable documentStore) {
-    require(!dsImplExists(), "TransferableDocumentStoreInitializable already exists");
+    require(!tdsImplExists(), "TransferableDocumentStoreInitializable already exists");
 
     bytes memory initCode = abi.encodePacked(type(TransferableDocumentStoreInitializable).creationCode);
 
