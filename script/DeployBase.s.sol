@@ -6,8 +6,8 @@ import { console2 } from "forge-std/console2.sol";
 
 abstract contract DeployBaseScript is Script {
   address internal constant FACTORY = 0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed;
-  address internal constant DS_IMPL = 0xfC7C29C1f869C6DB5933235C8540Ff4526B26f69;
-  address internal constant TDS_IMPL = 0x8E9Eb7f019068f42E075f0a985D8A29596C82ED4;
+  address internal constant DS_IMPL = 0xdF6514554ffE0ccD1BeA3470e9F06B377101A3da;
+  address internal constant TDS_IMPL = 0xF8b2A0C86A945C618a771917Ea8B967464f461f5;
 
   constructor() {
     require(getDocumentStoreSalt() != getTransferableDocumentStoreSalt(), "Salts must be different");
