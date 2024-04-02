@@ -1,6 +1,6 @@
 <h1 align="center">
   <p align="center">Document Store</p>
-  <img src="https://github.com/Open-Attestation/document-store/blob/beta/docs/images/document-store-banner.png?raw=true" alt="OpenAttestation Document Store" />
+  <img src="https://github.com/Open-Attestation/document-store/blob/master/docs/images/document-store-banner.png?raw=true" alt="OpenAttestation Document Store" />
 </h1>
 
 <p align="center">
@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://github.com/Open-Attestation/document-store/actions" alt="Build Status"><img src="https://github.com/Open-Attestation/document-store/actions/workflows/release.yml/badge.svg" /></a>
-  <a href="https://codecov.io/gh/Open-Attestation/document-store" alt="Code Coverage"><img src="https://codecov.io/gh/Open-Attestation/document-store/branch/beta/graph/badge.svg?token=Y4R9SWXATG" /></a>
+  <a href="https://codecov.io/gh/Open-Attestation/document-store" alt="Code Coverage"><img src="https://codecov.io/gh/Open-Attestation/document-store/branch/master/graph/badge.svg?token=Y4R9SWXATG" /></a>
   <a href="https://github.com/Open-Attestation/document-store/blob/master/LICENSE" alt="License"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" /></a>
 </p>
 
