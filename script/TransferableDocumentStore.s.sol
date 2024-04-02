@@ -21,9 +21,13 @@ contract TransferableDocumentStoreScript is TransferableDocumentStoreDeployScrip
       address dsAddr = clone(TDS_IMPL, initData);
 
       ds = TransferableDocumentStore(dsAddr);
+
+      console2.log("Deployed Address: ", dsAddr);
     } else {
       vm.broadcast();
       ds = new TransferableDocumentStore(name, symbol, admin);
+
+      console2.log("Deployed Address: ", address(ds));
     }
   }
 }

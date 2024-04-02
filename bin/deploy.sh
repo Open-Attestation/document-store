@@ -19,10 +19,16 @@ if [[ "$4" != "" && "$5" != -* ]]; then
 fi
 
 # forge command
-COMMAND="forge script \"$SCRIPT\" --broadcast -i 1 -f \"$NETWORK\" --sender \"$DEPLOYER_ADDRESS\""
+COMMAND="forge script \"$SCRIPT\" --broadcast -f \"$NETWORK\" --sender \"$DEPLOYER_ADDRESS\""
 
 if [ "$VERIFY" -eq 1 ]; then
     COMMAND="$COMMAND --verify"
+fi
+
+if [ ! -z "$OA_LEDGER" ]; then
+    COMMAND="$COMMAND --ledger --hd-paths \"$OA_LEDGER\""
+else
+  COMMAND="$COMMAND -i 1"
 fi
 
 if [ ! -z "$SIG" ]; then
