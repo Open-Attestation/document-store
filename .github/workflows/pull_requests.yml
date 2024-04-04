@@ -2,9 +2,6 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
-env:
-  RELEASE_DRY_RUN: 1
-
 name: "Pull Requests"
 
 jobs:
