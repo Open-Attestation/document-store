@@ -46,11 +46,6 @@ jobs:
     env:
       MATRIX_TARGET: ${{ matrix.targets }}
     steps:
-      - name: Print the matrix output from prepare-matrix
-        run: |
-          echo "Matrix JSON: $MATRIX_JSON"
-        env:
-          MATRIX_JSON: ${{ needs.prepare-build.outputs.matrix }}
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
