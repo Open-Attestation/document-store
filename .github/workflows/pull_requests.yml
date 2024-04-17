@@ -8,6 +8,8 @@ jobs:
   tests:
     name: Tests
     uses: ./.github/workflows/tests.yml
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   linters:
     name: Linters
