@@ -196,7 +196,7 @@ Can only be called by default admin or role admin.
 
 ## Deployment
 
-In all the deployment commands, you can replace `network` argument to any of the [supported networks](#supported-networks). Optionally, you can also supply `--verify=1` if you wish to verify the contracts.
+In all the deployment commands, you can replace `network` argument to any of the [supported networks](#supported-networks). Optionally, you can also supply `--verify=1` if you wish to verify the contracts. During deployment, you will be prompted to supply your private key interactively.
 
 > [!IMPORTANT]
 > The `DEPLOYER_ADDRESS` in `.env` is required to be the address of the deployer. See [Configuration](#configuration) section.
