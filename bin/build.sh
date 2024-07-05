@@ -58,6 +58,8 @@ EOF
 
   echo "Typechain build completed."
 
+  npm install --no-save rollup-plugin-typescript2 @rollup/plugin-commonjs @rollup/plugin-node-resolve
+
   cp ../../rollup.config.mjs .
 
   npx --yes rollup -c
