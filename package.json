@@ -32,6 +32,8 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/contracts": "^5.0.1",
     "@openzeppelin/contracts-upgradeable": "^5.0.1",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@semantic-release/exec": "^6.0.3",
     "ds-test": "github:dapphub/ds-test#e282159d5170298eb2455a6c05280ab5a73a4ef0",
     "eslint": "^8.57.0",
@@ -39,6 +41,7 @@
     "hardhat": "^2.20.1",
     "prettier": "^3.2.5",
     "prettier-plugin-solidity": "^1.3.1",
+    "rollup-plugin-typescript2": "^0.36.0",
     "semantic-release": "^23.0.2",
     "solhint": "^4.1.1",
     "typescript": "^5.3.3"
