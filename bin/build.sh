@@ -30,7 +30,14 @@ build_types() {
     {
       "name": "@govtechsg/document-store",
       "version": "1.0.0",
-      "main": "index.ts",
+      "main": "index.js",
+      "module": "index.mjs",
+      "types": "./types/index.d.ts",
+      "exports": {
+        "types": "./types/index.d.ts",
+        "require": "./index.js",
+        "default": "./index.mjs"
+      },
       "repository": "git+https://github.com/Open-Attestation/document-store.git",
       "license": "Apache-2.0",
       "publishConfig": {
@@ -47,9 +54,23 @@ EOF
 
   npm install "@typechain/$target" --save-dev --no-fund --no-audit
 
-  npx typechain --target $target --out-dir . '../../artifacts/src/**/*[^dbg].json'
+  npx --yes typechain --target $target --out-dir ./output '../../artifacts/src/**/*[^dbg].json'
 
-  echo "✅ Completed building types for $target!"
+  echo "Typechain build completed."
+
+  npm install --no-save rollup-plugin-typescript2 @rollup/plugin-commonjs @rollup/plugin-node-resolve
+
+  cp ../../rollup.config.mjs .
+
+  npx --yes rollup -c
+
+  mkdir -p types && mv .build/types-$target/output/* types/
+
+  rm -rf .build output rollup.config.mjs
+
+  echo "Bundling completed."
+
+  echo "✅ Completed building for $target!"
 }
 
 publish_types() {
