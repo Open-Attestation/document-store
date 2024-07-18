@@ -263,7 +263,7 @@ Create a `.env` file based on [`.env.example`](https://github.com/Open-Attestati
 
 The `DEPLOYER_ADDRESS` is required to be the address of the deployer during deployment. The Etherscan API keys are only required if you plan to verify the contracts on their respective chains.
 
-# Development
+## Development
 
 This repository uses [Foundry](https://github.com/foundry-rs/foundry) for its development. To install Foundry, run the following commands:
 
