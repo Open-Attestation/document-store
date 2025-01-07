@@ -130,6 +130,22 @@ contract DocumentStoreBatchable_multicall_revoke_Test is DocumentStoreBatchable_
     bulkRevokeData[1] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoot(), documents()[1], proofs()[1]));
     bulkRevokeData[2] = abi.encodeCall(IDocumentStoreBatchable.revoke, (docRoot(), documents()[2], proofs()[2]));
   }
+
+  function testMulticallRevokeMixDocumentAndRoot() public {
+    bytes[] memory bulkRevokeDocAndRootData = new bytes[](2);
+    bulkRevokeDocAndRootData[0] = abi.encodeCall(
+      IDocumentStoreBatchable.revoke,
+      (docRoot(), documents()[1], proofs()[1])
+    );
+    bulkRevokeDocAndRootData[1] = abi.encodeCall(IDocumentStore.revoke, docRoot());
+
+    vm.prank(revoker);
+    documentStore.multicall(bulkRevokeDocAndRootData);
+
+    assertTrue(documentStore.isRevoked(docRoot(), documents()[0], proofs()[0]));
+    assertTrue(documentStore.isRevoked(docRoot(), documents()[1], proofs()[1]));
+    assertTrue(documentStore.isRevoked(docRoot(), documents()[2], proofs()[2]));
+  }
 }
 
 contract DocumentStoreBatchable_isRevoked_Test is DocumentStoreBatchable_Initializer {
