@@ -135,6 +135,18 @@ const tx = await documentStore["revoke"]("0xDocumentRoot", "0xTargetHash", ["0xP
 await tx.wait();
 ```
 
+#### Revoking multiple documents:
+
+```typescript
+const documentStore = DocumentStore__factory.connect(documentStoreAddress, signer);
+const bulkRevokations = [
+  documentStore.interface.encodeFunctionData("revoke", ["0xDocRoot1"]),
+  documentStore.interface.encodeFunctionData("revoke", ["0xDocRoot2"])
+];
+const tx = await documentStore.multicall(bulkRevokations);
+await tx.wait();
+```
+
 ### Transferable Document Store
 
 For a complete list of functions, refer to [ITransferableDocumentStore.sol](https://github.com/Open-Attestation/document-store/blob/master/src/interfaces/ITransferableDocumentStore.sol).
